@@ -11,83 +11,82 @@ declare(strict_types=1);
 namespace mineceit\network\requests;
 
 
-use mineceit\player\MineceitPlayer;
 use Closure;
+use Exception;
+use mineceit\player\MineceitPlayer;
 use pocketmine\utils\Binary;
 
-class Request
-{
+class Request{
 
-    const TYPE_PING = 0;
+	const TYPE_PING = 0;
 
-    /** @var string */
-    private $uuid;
+	/** @var string */
+	private $uuid;
 
-    /** @var int */
-    private $type;
+	/** @var int */
+	private $type;
 
-    /** @var string */
-    private $buffer;
+	/** @var string */
+	private $buffer;
 
-    /** @var Closure */
-    private $function;
+	/** @var Closure */
+	private $function;
 
-    /** @var int */
-    private $offset;
+	/** @var int */
+	private $offset;
 
-    /** @var string */
-    private $eventData;
+	/** @var string */
+	private $eventData;
 
-    /** @var array */
-    private $data;
+	/** @var array */
+	private $data;
 
-    public function __construct(int $type, string $buffer, MineceitPlayer $player, Closure $closure)
-    {
-        $this->uuid = $player->getUniqueId()->toString();
-        $this->type = $type;
-        $this->buffer = $buffer;
-        $this->function = $closure;
-        $this->eventData = "";
-        $this->offset = 0;
-        $this->data = [];
-    }
+	public function __construct(int $type, string $buffer, MineceitPlayer $player, Closure $closure){
+		$this->uuid = $player->getUniqueId()->toString();
+		$this->type = $type;
+		$this->buffer = $buffer;
+		$this->function = $closure;
+		$this->eventData = "";
+		$this->offset = 0;
+		$this->data = [];
+	}
 
-    /**
-     * @param string $eventData
-     *
-     * Updates the event data.
-     */
-    public function update(string $eventData) : void {
+	/**
+	 * @param string $eventData
+	 *
+	 * Updates the event data.
+	 */
+	public function update(string $eventData) : void{
 
-        $this->eventData = $eventData;
+		$this->eventData = $eventData;
 
-        switch($this->type) {
+		switch($this->type){
 
-            case self::TYPE_PING:
-                $this->data["ping"] = $this->readInt();
-                break;
-        }
+			case self::TYPE_PING:
+				$this->data["ping"] = $this->readInt();
+				break;
+		}
 
-        $function = $this->function;
-        $function($this->data, $this->uuid);
-    }
+		$function = $this->function;
+		$function($this->data, $this->uuid);
+	}
 
 
-    /**
-     *
-     * Reads an integer value.
-     *
-     * @return int|null
-     */
-    private function readInt() {
+	/**
+	 *
+	 * Reads an integer value.
+	 *
+	 * @return int|null
+	 */
+	private function readInt(){
 
-        $offset = $this->offset;
+		$offset = $this->offset;
 
-        try {
-            $this->offset += 4;
-            return Binary::readInt(substr($this->eventData, $offset, 4));
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
+		try{
+			$this->offset += 4;
+			return Binary::readInt(substr($this->eventData, $offset, 4));
+		}catch(Exception $e){
+			return null;
+		}
+	}
 }

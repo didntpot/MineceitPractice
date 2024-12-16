@@ -14,29 +14,26 @@ namespace mineceit\player\tasks;
 use mineceit\player\MineceitPlayer;
 use pocketmine\scheduler\Task;
 
-class OnDeathTask extends Task
-{
+class OnDeathTask extends Task{
 
-    /** @var MineceitPlayer $player */
-    private $player;
+	/** @var MineceitPlayer $player */
+	private $player;
 
-    public function __construct(MineceitPlayer $player)
-    {
-        $this->player = $player;
-    }
+	public function __construct(MineceitPlayer $player){
+		$this->player = $player;
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @param int $currentTick
-     *
-     * @return void
-     */
-    public function onRun(int $currentTick)
-    {
+	/**
+	 * Actions to execute when run
+	 *
+	 * @param int $currentTick
+	 *
+	 * @return void
+	 */
+	public function onRun(int $currentTick){
 
-        if($this->player !== null and $this->player->isOnline()) {
-            $this->player->respawn();
-        }
-    }
+		if($this->player !== null and $this->player->isOnline()){
+			$this->player->respawn();
+		}
+	}
 }

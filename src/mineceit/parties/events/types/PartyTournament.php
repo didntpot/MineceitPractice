@@ -20,215 +20,212 @@ use mineceit\parties\MineceitParty;
 use mineceit\player\MineceitPlayer;
 use pocketmine\level\Level;
 
-class PartyTournament extends PartyEvent
-{
+class PartyTournament extends PartyEvent{
 
-    /* @var MineceitPlayer[]|array */
-    private $players;
+	/* @var MineceitPlayer[]|array */
+	private $players;
 
-    /* @var string[]|array */
-    private $eliminated;
+	/* @var string[]|array */
+	private $eliminated;
 
-    /* @var MineceitParty */
-    private $party;
+	/* @var MineceitParty */
+	private $party;
 
-    /*
-     * PARTY TOURNAMENT STRUCTURE:
-     *
-     * BEFORE:
-     *  - Players will be teleported to the outside of a tournament arena.
-     *  - Delay will be 10 seconds before it starts.
-     *
-     * DURING:
-     *  - Two players will match up at random.
-     *  - Fight until one player loses.
-     *  - Once they lose, they advance.
-     *  - Two players out of who is left will match up at random and complete the same cycle.
-     *  - Does this until there is a winner.
-     *
-     * END:
-     *  - Everyone will be teleported back to hub.
-     */
+	/*
+	 * PARTY TOURNAMENT STRUCTURE:
+	 *
+	 * BEFORE:
+	 *  - Players will be teleported to the outside of a tournament arena.
+	 *  - Delay will be 10 seconds before it starts.
+	 *
+	 * DURING:
+	 *  - Two players will match up at random.
+	 *  - Fight until one player loses.
+	 *  - Once they lose, they advance.
+	 *  - Two players out of who is left will match up at random and complete the same cycle.
+	 *  - Does this until there is a winner.
+	 *
+	 * END:
+	 *  - Everyone will be teleported back to hub.
+	 */
 
-    /* @var string */
-    private $queue;
+	/* @var string */
+	private $queue;
 
-    /* @var AbstractKit */
-    private $kit;
+	/* @var AbstractKit */
+	private $kit;
 
-    /* @var Level */
-    private $level;
+	/* @var Level */
+	private $level;
 
-    /* @var TournamentMatch */
-    private $currentMatch;
+	/* @var TournamentMatch */
+	private $currentMatch;
 
-    /* @var int */
-    private $currentTick;
+	/* @var int */
+	private $currentTick;
 
-    /* @var int */
-    private $secondsAfterLastMatch;
+	/* @var int */
+	private $secondsAfterLastMatch;
 
-    /* @var bool */
-    private $ended;
+	/* @var bool */
+	private $ended;
 
-    /** @var bool */
-    private $started;
+	/** @var bool */
+	private $started;
 
-    /* @var MineceitPlayer|null */
-    private $winner;
+	/* @var MineceitPlayer|null */
+	private $winner;
 
-    public function __construct(MineceitParty $party, Level $level, string $queue)
-    {
+	public function __construct(MineceitParty $party, Level $level, string $queue){
 
-        parent::__construct(self::EVENT_TOURNAMENT);
+		parent::__construct(self::EVENT_TOURNAMENT);
 
-        $this->players = [];
+		$this->players = [];
 
-        $this->currentMatch = null;
+		$this->currentMatch = null;
 
-        $this->ended = false;
-        $this->started = false;
+		$this->ended = false;
+		$this->started = false;
 
-        $this->secondsAfterLastMatch = 0;
+		$this->secondsAfterLastMatch = 0;
 
-        $this->winner = null;
+		$this->winner = null;
 
-        $this->queue = $queue;
-        $this->kit = MineceitCore::getKits()->getKit($queue);
-        $this->party = $party;
+		$this->queue = $queue;
+		$this->kit = MineceitCore::getKits()->getKit($queue);
+		$this->party = $party;
 
-        $this->level = $level;
+		$this->level = $level;
 
-        $this->currentTick = 0;
-    }
+		$this->currentTick = 0;
+	}
 
-    /**
-     * @param MineceitPlayer $player
-     */
-    private function setPlayer(MineceitPlayer $player) : void {
-        $local = strtolower($player->getName());
-        $this->players[$local] = $player;
-        // TODO TELEPORT TO SPAWN POSITION OF THE LEVEL
-    }
+	/**
+	 * @param MineceitPlayer $player
+	 */
+	private function setPlayer(MineceitPlayer $player) : void{
+		$local = strtolower($player->getName());
+		$this->players[$local] = $player;
+		// TODO TELEPORT TO SPAWN POSITION OF THE LEVEL
+	}
 
-    /**
-     * Updates the party event each tick.
-     */
-    public function update(): void
-    {
+	/**
+	 * Updates the party event each tick.
+	 */
+	public function update() : void{
 
-        $this->currentTick++;
+		$this->currentTick++;
 
-        if(!$this->started) {
+		if(!$this->started){
 
-            //  TODO UPDATE
+			//  TODO UPDATE
 
-        } elseif (!$this->ended) {
+		}elseif(!$this->ended){
 
-            if ($this->currentMatch === null) {
+			if($this->currentMatch === null){
 
-                $playersLeft = $this->getPlayersLeft();
+				$playersLeft = $this->getPlayersLeft();
 
-                $size = count($playersLeft);
+				$size = count($playersLeft);
 
-                $keys = array_keys($playersLeft);
+				$keys = array_keys($playersLeft);
 
-                if($this->currentTick % 20 === 0)
-                    $this->secondsAfterLastMatch++;
+				if($this->currentTick % 20 === 0)
+					$this->secondsAfterLastMatch++;
 
-                if ($size === 1) {
+				if($size === 1){
 
-                    $index = $keys[0];
+					$index = $keys[0];
 
-                    $this->winner = $playersLeft[$index];
+					$this->winner = $playersLeft[$index];
 
-                    // TODO END
+					// TODO END
 
-                    $this->ended = true;
+					$this->ended = true;
 
-                } else if ($this->currentTick === MineceitUtil::secondsToTicks(10) or $this->secondsAfterLastMatch === 5) {
+				}else if($this->currentTick === MineceitUtil::secondsToTicks(10) or $this->secondsAfterLastMatch === 5){
 
-                    $max = count($keys) - 1;
+					$max = count($keys) - 1;
 
-                    $index1 = mt_rand(0, $max);
+					$index1 = mt_rand(0, $max);
 
-                    $index2 = mt_rand(0, $max);
-                    while ($index1 === $index2)
-                        $index2 = mt_rand(0, $max);
+					$index2 = mt_rand(0, $max);
+					while($index1 === $index2)
+						$index2 = mt_rand(0, $max);
 
-                    $player1 = $playersLeft[$keys[$index1]];
+					$player1 = $playersLeft[$keys[$index1]];
 
-                    $player2 = $playersLeft[$keys[$index2]];
+					$player2 = $playersLeft[$keys[$index2]];
 
-                    $this->currentMatch = new TournamentMatch($player1, $player2, $this);
-                }
+					$this->currentMatch = new TournamentMatch($player1, $player2, $this);
+				}
 
-            } else {
+			}else{
 
-                $this->currentMatch->update();
+				$this->currentMatch->update();
 
-                if($this->currentMatch->canClose()) {
-                    $this->currentMatch = null;
-                    $this->secondsAfterLastMatch = 0;
-                }
-            }
+				if($this->currentMatch->canClose()){
+					$this->currentMatch = null;
+					$this->secondsAfterLastMatch = 0;
+				}
+			}
 
-        } else {
+		}else{
 
-            // TODO
+			// TODO
 
-        }
-    }
+		}
+	}
 
-    /**
-     * @return array|MineceitPlayer[]
-     */
-    private function getPlayersLeft() {
+	/**
+	 * @return array|MineceitPlayer[]
+	 */
+	private function getPlayersLeft(){
 
-        $result = $this->players;
+		$result = $this->players;
 
-        foreach($this->eliminated as $eliminated) {
-            if(isset($result[$eliminated]))
-                unset($result[$eliminated]);
-        }
+		foreach($this->eliminated as $eliminated){
+			if(isset($result[$eliminated]))
+				unset($result[$eliminated]);
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * @return TournamentMatch|null
-     */
-    public function getCurrentMatch() {
-        return $this->currentMatch;
-    }
+	/**
+	 * @return TournamentMatch|null
+	 */
+	public function getCurrentMatch(){
+		return $this->currentMatch;
+	}
 
-    /**
-     * @param MineceitPlayer|string $player
-     */
-    public function setEliminated($player) : void {
-        $name = ($player instanceof MineceitPlayer) ? $player->getName() : $player;
-        $local = strtolower($name);
-        $this->eliminated[] = $local;
-    }
+	/**
+	 * @param MineceitPlayer|string $player
+	 */
+	public function setEliminated($player) : void{
+		$name = ($player instanceof MineceitPlayer) ? $player->getName() : $player;
+		$local = strtolower($name);
+		$this->eliminated[] = $local;
+	}
 
-    /**
-     * @param MineceitPlayer $player
-     */
-    public function removeFromEvent(MineceitPlayer $player) : void {
+	/**
+	 * @param MineceitPlayer $player
+	 */
+	public function removeFromEvent(MineceitPlayer $player) : void{
 
-        $name = $player->getName();
-        $local = strtolower($name);
+		$name = $player->getName();
+		$local = strtolower($name);
 
-        if($this->party->isOwner($player)) {
-            // TODO END THE TOURNAMENT & THE PARTY
-            return;
-        }
+		if($this->party->isOwner($player)){
+			// TODO END THE TOURNAMENT & THE PARTY
+			return;
+		}
 
-        if($this->currentMatch !== null and $this->currentMatch->isPlayer($name)) {
-            // TODO END THE MATCH AND SET AS CLOSED
-        }
+		if($this->currentMatch !== null and $this->currentMatch->isPlayer($name)){
+			// TODO END THE MATCH AND SET AS CLOSED
+		}
 
-        if(isset($this->players[$local]))
-            unset($this->players[$local]);
-    }
+		if(isset($this->players[$local]))
+			unset($this->players[$local]);
+	}
 }

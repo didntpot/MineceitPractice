@@ -11,250 +11,246 @@ declare(strict_types=1);
 namespace mineceit\game\leaderboard\tasks;
 
 
-use mineceit\data\mysql\MysqlRow;
 use mineceit\data\mysql\MysqlStream;
-use mineceit\data\mysql\MysqlTable;
 use mineceit\MineceitCore;
 use mineceit\player\MineceitPlayer;
+use mysqli;
+use mysqli_result;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
-class EloLeaderboardsTask extends AsyncTask
-{
+class EloLeaderboardsTask extends AsyncTask{
 
-    /* @var string */
-    private $directory;
+	/* @var string */
+	private $directory;
 
-    /* @var array|string[] */
-    private $eloKits;
+	/* @var array|string[] */
+	private $eloKits;
 
-    /* @var array */
-    private $leaderboardResult;
+	/* @var array */
+	private $leaderboardResult;
 
-    /** @var bool */
-    private $isMysql = MineceitCore::MYSQL_ENABLED;
+	/** @var bool */
+	private $isMysql = MineceitCore::MYSQL_ENABLED;
 
-    /** @var string */
-    private $username;
+	/** @var string */
+	private $username;
 
-    /** @var string -> The ip of the db */
-    private $host;
+	/** @var string -> The ip of the db */
+	private $host;
 
-    /** @var string */
-    private $password;
+	/** @var string */
+	private $password;
 
-    /** @var int */
-    private $port;
+	/** @var int */
+	private $port;
 
-    /** @var string */
-    private $database;
+	/** @var string */
+	private $database;
 
-    /** @var array */
-    private $mysqlStream;
+	/** @var array */
+	private $mysqlStream;
 
-    /** @var array */
-    private $onlinePlayers;
+	/** @var array */
+	private $onlinePlayers;
 
-    public function __construct(string $dir, array $eloKits)
-    {
-        $this->directory = $dir;
-        $this->eloKits = $eloKits;
-        $this->leaderboardResult = [];
+	public function __construct(string $dir, array $eloKits){
+		$this->directory = $dir;
+		$this->eloKits = $eloKits;
+		$this->leaderboardResult = [];
 
-        $stream = new MysqlStream();
-        $rows = [];
-        foreach($eloKits as $kit) {
-            $stream->selectTablesInOrder(["PlayerElo"], [$kit => true, "username" => false]);
-            $rows[$kit] = true;
-        }
+		$stream = new MysqlStream();
+		$rows = [];
+		foreach($eloKits as $kit){
+			$stream->selectTablesInOrder(["PlayerElo"], [$kit => true, "username" => false]);
+			$rows[$kit] = true;
+		}
 
-        $rows["username"] = false;
+		$rows["username"] = false;
 
-        // Global elo.
-        $stream->selectAverageRows("PlayerElo", $rows, true);
+		// Global elo.
+		$stream->selectAverageRows("PlayerElo", $rows, true);
 
-        $onlinePlayers = [];
+		$onlinePlayers = [];
 
-        $players = Server::getInstance()->getOnlinePlayers();
+		$players = Server::getInstance()->getOnlinePlayers();
 
-        foreach($players as $player) {
-            if($player instanceof MineceitPlayer) {
-                $global = $player->getElo('global');
-                if ($global !== null) {
-                    $onlinePlayers[$player->getName()] = ['elo' => $player->getElo(), 'global' => $global];
-                }
-            }
-        }
+		foreach($players as $player){
+			if($player instanceof MineceitPlayer){
+				$global = $player->getElo('global');
+				if($global !== null){
+					$onlinePlayers[$player->getName()] = ['elo' => $player->getElo(), 'global' => $global];
+				}
+			}
+		}
 
-        $this->onlinePlayers = $onlinePlayers;
+		$this->onlinePlayers = $onlinePlayers;
 
-        $this->username = $stream->username;
+		$this->username = $stream->username;
 
-        $this->database = $stream->database;
+		$this->database = $stream->database;
 
-        $this->password = $stream->password;
+		$this->password = $stream->password;
 
-        $this->port = $stream->port;
+		$this->port = $stream->port;
 
-        $this->host = $stream->host;
+		$this->host = $stream->host;
 
-        $this->mysqlStream = $stream->getStream();
-    }
+		$this->mysqlStream = $stream->getStream();
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @return void
-     */
-    public function onRun()
-    {
-        $elo = [];
+	/**
+	 * Actions to execute when run
+	 *
+	 * @return void
+	 */
+	public function onRun(){
+		$elo = [];
 
-        foreach($this->eloKits as $kit) {
-            $kit = strtolower($kit);
-            $elo[$kit] = [];
-        }
+		foreach($this->eloKits as $kit){
+			$kit = strtolower($kit);
+			$elo[$kit] = [];
+		}
 
-        $elo['global'] = [];
+		$elo['global'] = [];
 
-        $players = (array)$this->onlinePlayers;
+		$players = (array) $this->onlinePlayers;
 
-        if(!$this->isMysql) {
+		if(!$this->isMysql){
 
-            if (is_dir($this->directory)) {
-                $files = scandir($this->directory);
+			if(is_dir($this->directory)){
+				$files = scandir($this->directory);
 
-                foreach ($files as $file) {
+				foreach($files as $file){
 
-                    if (strpos($file, '.yml') !== false) {
+					if(strpos($file, '.yml') !== false){
 
-                        $name = str_replace('.yml', '', $file);
+						$name = str_replace('.yml', '', $file);
 
-                        $file = $this->directory . '/' . $file;
+						$file = $this->directory . '/' . $file;
 
-                        $data = yaml_parse_file($file, 0);
+						$data = yaml_parse_file($file, 0);
 
-                        if(isset($players[$name])) {
-                            $data = $players[$name];
-                        }
+						if(isset($players[$name])){
+							$data = $players[$name];
+						}
 
-                        if (isset($data['elo'])) {
+						if(isset($data['elo'])){
 
-                            $eloData = $data['elo'];
+							$eloData = $data['elo'];
 
-                            foreach ($this->eloKits as $kit) {
+							foreach($this->eloKits as $kit){
 
-                                $kit = strtolower($kit);
-                                $eloFromData = 1000;
+								$kit = strtolower($kit);
+								$eloFromData = 1000;
 
-                                if(isset($eloData[$kit])) {
-                                    $eloFromData = $eloData[$kit];
-                                }
+								if(isset($eloData[$kit])){
+									$eloFromData = $eloData[$kit];
+								}
 
-                                $elo[$kit][$name] = $eloFromData;
-                                if (!isset($elo['global'][$name]))
-                                    $elo['global'][$name] = $eloFromData;
-                                else {
-                                    $prevElo = $elo['global'][$name];
-                                    $elo['global'][$name] = $prevElo + $eloFromData;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+								$elo[$kit][$name] = $eloFromData;
+								if(!isset($elo['global'][$name]))
+									$elo['global'][$name] = $eloFromData;
+								else{
+									$prevElo = $elo['global'][$name];
+									$elo['global'][$name] = $prevElo + $eloFromData;
+								}
+							}
+						}
+					}
+				}
+			}
 
-            $keys = array_keys($elo);
+			$keys = array_keys($elo);
 
-            $numKits = count($this->eloKits);
+			$numKits = count($this->eloKits);
 
-            foreach ($keys as $key) {
-                $leaderboard = $elo[$key];
-                if ($key === 'global') {
-                    $names = array_keys($leaderboard);
-                    foreach ($names as $name) {
-                        $eloVal = $leaderboard[$name];
-                        $leaderboard[$name] = (int)($eloVal / $numKits);
-                    }
-                }
-                arsort($leaderboard);
-                $elo[$key] = $leaderboard;
-            }
-        } else {
+			foreach($keys as $key){
+				$leaderboard = $elo[$key];
+				if($key === 'global'){
+					$names = array_keys($leaderboard);
+					foreach($names as $name){
+						$eloVal = $leaderboard[$name];
+						$leaderboard[$name] = (int) ($eloVal / $numKits);
+					}
+				}
+				arsort($leaderboard);
+				$elo[$key] = $leaderboard;
+			}
+		}else{
 
-            $stream = (array)$this->mysqlStream;
+			$stream = (array) $this->mysqlStream;
 
-            $mysql = new \mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
+			$mysql = new mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
 
-            if ($mysql->connect_error) {
-                var_dump("Unable to connect");
-                // TODO
-                return;
-            }
+			if($mysql->connect_error){
+				var_dump("Unable to connect");
+				// TODO
+				return;
+			}
 
-            $index = 0;
+			$index = 0;
 
-            $kits = array_keys($elo);
+			$kits = array_keys($elo);
 
-            foreach($stream as $query) {
+			foreach($stream as $query){
 
-                $kit = $kits[$index];
-                $querySuccess = $mysql->query($query);
+				$kit = $kits[$index];
+				$querySuccess = $mysql->query($query);
 
-                if($querySuccess instanceof \mysqli_result) {
-                    $result = $querySuccess->fetch_all();
-                    $length = count($result);
-                    $count = 0;
-                    $leaderboardSet = [];
-                    $eloIndex = 0;
-                    $nameIndex = 1;
+				if($querySuccess instanceof mysqli_result){
+					$result = $querySuccess->fetch_all();
+					$length = count($result);
+					$count = 0;
+					$leaderboardSet = [];
+					$eloIndex = 0;
+					$nameIndex = 1;
 
-                    while ($count < $length) {
+					while($count < $length){
 
-                        $set = $result[$count];
-                        $playerElo = intval($set[$eloIndex]);
-                        $playerName = strval($set[$nameIndex]);
+						$set = $result[$count];
+						$playerElo = intval($set[$eloIndex]);
+						$playerName = strval($set[$nameIndex]);
 
-                        if(isset($players[$playerName])) {
+						if(isset($players[$playerName])){
 
-                            $data = $players[$playerName];
+							$data = $players[$playerName];
 
-                            if($kit === 'global') {
-                                $playerElo = intval($data[$kit]);
-                            } else {
-                                $playerElo = intval($data['elo'][$kit]);
-                            }
-                        }
+							if($kit === 'global'){
+								$playerElo = intval($data[$kit]);
+							}else{
+								$playerElo = intval($data['elo'][$kit]);
+							}
+						}
 
-                        $leaderboardSet[$playerName] = $playerElo;
-                        $count++;
-                    }
-                    arsort($leaderboardSet);
-                    $elo[$kit] = $leaderboardSet;
-                }
-                $index++;
-            }
+						$leaderboardSet[$playerName] = $playerElo;
+						$count++;
+					}
+					arsort($leaderboardSet);
+					$elo[$kit] = $leaderboardSet;
+				}
+				$index++;
+			}
 
-            $mysql->close();
-        }
+			$mysql->close();
+		}
 
-        $this->setResult($elo);
-    }
+		$this->setResult($elo);
+	}
 
-    public function onCompletion(Server $server)
-    {
-        $core = $server->getPluginManager()->getPlugin('Mineceit');
+	public function onCompletion(Server $server){
+		$core = $server->getPluginManager()->getPlugin('Mineceit');
 
-        if($core instanceof MineceitCore and $core->isEnabled()) {
+		if($core instanceof MineceitCore and $core->isEnabled()){
 
-            $leaderboards = MineceitCore::getLeaderboards();
+			$leaderboards = MineceitCore::getLeaderboards();
 
-            $result = $this->getResult();
+			$result = $this->getResult();
 
-            if($result !== null) {
+			if($result !== null){
 
-                $leaderboards->setEloLeaderboards($result);
-            }
-        }
-    }
+				$leaderboards->setEloLeaderboards($result);
+			}
+		}
+	}
 }

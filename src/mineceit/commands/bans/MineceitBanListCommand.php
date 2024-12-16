@@ -15,17 +15,15 @@ use mineceit\player\MineceitPlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\command\defaults\BanListCommand;
 
-class MineceitBanListCommand extends BanListCommand
-{
+class MineceitBanListCommand extends BanListCommand{
 
 
-    public function testPermission(CommandSender $target): bool
-    {
-        if($target instanceof MineceitPlayer and $target->hasModPermissions()) {
-            return true;
-        }
+	public function testPermission(CommandSender $target) : bool{
+		if($target instanceof MineceitPlayer and $target->hasModPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($target);
-    }
+		return parent::testPermission($target);
+	}
 
 }

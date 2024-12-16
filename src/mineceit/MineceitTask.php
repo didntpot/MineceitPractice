@@ -15,157 +15,154 @@ use mineceit\game\entities\ReplayHuman;
 use mineceit\player\MineceitPlayer;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
-use pocketmine\utils\TextFormat;
 
-class MineceitTask extends Task
-{
+class MineceitTask extends Task{
 
-    /* @var Server */
-    private $server;
+	/* @var Server */
+	private $server;
 
-    /* @var MineceitCore */
-    private $core;
+	/* @var MineceitCore */
+	private $core;
 
-    /** @var int */
-    private $currentTick;
+	/** @var int */
+	private $currentTick;
 
-    public function __construct(MineceitCore $core)
-    {
-        $this->core = $core;
-        $this->server = $core->getServer();
-        $this->currentTick = 0;
-    }
+	public function __construct(MineceitCore $core){
+		$this->core = $core;
+		$this->server = $core->getServer();
+		$this->currentTick = 0;
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @param int $currentTick
-     *
-     * @return void
-     */
-    public function onRun(int $currentTick) {
+	/**
+	 * Actions to execute when run
+	 *
+	 * @param int $currentTick
+	 *
+	 * @return void
+	 */
+	public function onRun(int $currentTick){
 
-        $fiveSecs = MineceitUtil::secondsToTicks(5);
-        $mins = MineceitUtil::minutesToTicks(15);
+		$fiveSecs = MineceitUtil::secondsToTicks(5);
+		$mins = MineceitUtil::minutesToTicks(15);
 
-        if($this->currentTick % $fiveSecs === 0 or $this->currentTick === 0) {
+		if($this->currentTick % $fiveSecs === 0 or $this->currentTick === 0){
 
-            $leaderboards = MineceitCore::getLeaderboards();
+			$leaderboards = MineceitCore::getLeaderboards();
 
-            $leaderboards->reloadEloLeaderboards();
-            $leaderboards->reloadStatsLeaderboards();
-        }
+			$leaderboards->reloadEloLeaderboards();
+			$leaderboards->reloadStatsLeaderboards();
+		}
 
-        $this->updatePlayers();
-        $this->updateEvents();
-        $this->updateDuels();
-        $this->updateReplays();
-        $this->updateParties();
+		$this->updatePlayers();
+		$this->updateEvents();
+		$this->updateDuels();
+		$this->updateReplays();
+		$this->updateParties();
 
-        if($this->currentTick % $mins === 0) {
-            $this->clearEntities();
-        }
+		if($this->currentTick % $mins === 0){
+			$this->clearEntities();
+		}
 
-        $this->currentTick++;
-    }
+		$this->currentTick++;
+	}
 
-    /**
-     * Updates all of the events in the server.
-     */
-    private function updateEvents() : void {
+	/**
+	 * Updates all of the events in the server.
+	 */
+	private function updateEvents() : void{
 
-        $events = MineceitCore::getEventManager();
-        $events = $events->getEvents();
+		$events = MineceitCore::getEventManager();
+		$events = $events->getEvents();
 
-        foreach($events as $event) {
-            $event->update();
-        }
-    }
+		foreach($events as $event){
+			$event->update();
+		}
+	}
 
-    /**
-     *
-     * Updates the players in the server.
-     */
-    private function updatePlayers() : void {
+	/**
+	 *
+	 * Updates the players in the server.
+	 */
+	private function updatePlayers() : void{
 
-        $players = $this->server->getOnlinePlayers();
+		$players = $this->server->getOnlinePlayers();
 
-        foreach($players as $player) {
+		foreach($players as $player){
 
-            if($player instanceof MineceitPlayer) {
+			if($player instanceof MineceitPlayer){
 
-                if ($this->currentTick % 20 === 0) {
-                    $player->update();
-                }
+				if($this->currentTick % 20 === 0){
+					$player->update();
+				}
 
-                if ($this->currentTick % 10 === 0) {
-                    $player->updateCPSTrackers($this->currentTick);
-                }
+				if($this->currentTick % 10 === 0){
+					$player->updateCPSTrackers($this->currentTick);
+				}
 
-                $player->updateCps();
-            }
-        }
-    }
+				$player->updateCps();
+			}
+		}
+	}
 
-    /**
-     * Updates the duels.
-     */
-    private function updateDuels() : void {
+	/**
+	 * Updates the duels.
+	 */
+	private function updateDuels() : void{
 
-        $duelHandler = MineceitCore::getDuelHandler();
+		$duelHandler = MineceitCore::getDuelHandler();
 
-        $duels = $duelHandler->getDuels();
+		$duels = $duelHandler->getDuels();
 
-        foreach($duels as $duel)
-            $duel->update();
-    }
+		foreach($duels as $duel)
+			$duel->update();
+	}
 
 
-    /**
-     * Updates the replays.
-     */
-    private function updateReplays() : void {
+	/**
+	 * Updates the replays.
+	 */
+	private function updateReplays() : void{
 
-        $replayHandler = MineceitCore::getReplayManager();
+		$replayHandler = MineceitCore::getReplayManager();
 
-        $replays = $replayHandler->getReplays();
+		$replays = $replayHandler->getReplays();
 
-        foreach($replays as $replay)
-            $replay->update();
-    }
+		foreach($replays as $replay)
+			$replay->update();
+	}
 
-    /**
-     * Clears the entities within a level.
-     */
-    private function clearEntities() : void {
+	/**
+	 * Clears the entities within a level.
+	 */
+	private function clearEntities() : void{
 
-        $levels = $this->server->getLevels();
+		$levels = $this->server->getLevels();
 
-        $defaultLevel = $this->server->getDefaultLevel();
+		$defaultLevel = $this->server->getDefaultLevel();
 
-        foreach($levels as $level) {
+		foreach($levels as $level){
 
-            // TODO DO MORE LEVELS
+			// TODO DO MORE LEVELS
 
-            if($defaultLevel !== null and $defaultLevel->getId() === $level->getId()) {
-                $entities = $level->getEntities();
-                foreach($entities as $entity) {
-                    if($entity instanceof ReplayHuman){
-                        $entity->close();
-                    }
-                }
-            }
-        }
-    }
+			if($defaultLevel !== null and $defaultLevel->getId() === $level->getId()){
+				$entities = $level->getEntities();
+				foreach($entities as $entity){
+					if($entity instanceof ReplayHuman){
+						$entity->close();
+					}
+				}
+			}
+		}
+	}
 
 
-    /**
-     * Updates the parties and party events.
-     */
-    private function updateParties() : void {
+	/**
+	 * Updates the parties and party events.
+	 */
+	private function updateParties() : void{
 
-        $partyManager = MineceitCore::getPartyManager();
+		$partyManager = MineceitCore::getPartyManager();
 
-        $partyManager->getEventManager()->updateEvents();
-    }
+		$partyManager->getEventManager()->updateEvents();
+	}
 }

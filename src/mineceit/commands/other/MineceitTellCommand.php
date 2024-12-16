@@ -20,50 +20,48 @@ use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\utils\TextFormat;
 
-class MineceitTellCommand extends TellCommand
-{
+class MineceitTellCommand extends TellCommand{
 
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        if(!$this->testPermission($sender)){
-            return true;
-        }
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		if(!$this->testPermission($sender)){
+			return true;
+		}
 
-        if(count($args) < 2){
-            throw new InvalidCommandSyntaxException();
-        }
+		if(count($args) < 2){
+			throw new InvalidCommandSyntaxException();
+		}
 
-        $player = $sender->getServer()->getPlayer(array_shift($args));
+		$player = $sender->getServer()->getPlayer(array_shift($args));
 
-        if($player === $sender){
-            $sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.message.sameTarget"));
-            return true;
-        }
+		if($player === $sender){
+			$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.message.sameTarget"));
+			return true;
+		}
 
-        if($player instanceof MineceitPlayer){
+		if($player instanceof MineceitPlayer){
 
-            $message = implode(" ", $args);
+			$message = implode(" ", $args);
 
-            $senderName = $sender instanceof MineceitPlayer ? $sender->getDisplayName() : $sender->getName();
-            $senderLanguage = $sender instanceof MineceitPlayer ? $sender->getLanguage() : MineceitCore::getPlayerHandler()->getLanguage();
+			$senderName = $sender instanceof MineceitPlayer ? $sender->getDisplayName() : $sender->getName();
+			$senderLanguage = $sender instanceof MineceitPlayer ? $sender->getLanguage() : MineceitCore::getPlayerHandler()->getLanguage();
 
-            $format = "[{$senderName} -> {$player->getDisplayName()}] ";
+			$format = "[{$senderName} -> {$player->getDisplayName()}] ";
 
-            $sender->sendMessage($format . $message);
+			$sender->sendMessage($format . $message);
 
-            if($player->doesTranslateMessages()) {
-                TranslateUtil::client5_translate($message, $player, $senderLanguage, $format);
-            } else {
-                $player->sendMessage($format . $message);
-            }
+			if($player->doesTranslateMessages()){
+				TranslateUtil::client5_translate($message, $player, $senderLanguage, $format);
+			}else{
+				$player->sendMessage($format . $message);
+			}
 
-        }else{
+		}else{
 
-            $sender->sendMessage(new TranslationContainer("commands.generic.player.notFound"));
+			$sender->sendMessage(new TranslationContainer("commands.generic.player.notFound"));
 
-        }
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 }

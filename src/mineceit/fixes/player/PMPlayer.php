@@ -22,116 +22,113 @@ use pocketmine\Player;
 use shoghicp\BigBrother\DesktopPlayer;
 
 
-class PMPlayer extends Player
-{
+class PMPlayer extends Player{
 
-    /** @var string */
-    protected $version = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
+	/** @var string */
+	protected $version = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
 
-    protected function broadcastMovement(bool $teleport = false): void
-    {
+	protected function broadcastMovement(bool $teleport = false) : void{
 
-        $pk = new MoveActorAbsolutePacket();
-        $pk->entityRuntimeId = $this->id;
-        $pk->position = $this->getOffsetPosition($this);
+		$pk = new MoveActorAbsolutePacket();
+		$pk->entityRuntimeId = $this->id;
+		$pk->position = $this->getOffsetPosition($this);
 
-        //this looks very odd but is correct as of 1.5.0.7
-        //for arrows this is actually x/y/z rotation
-        //for mobs x and z are used for pitch and yaw, and y is used for headyaw
-        $pk->xRot = $this->pitch;
-        $pk->yRot = $this->yaw;
-        $pk->zRot = $this->yaw;
+		//this looks very odd but is correct as of 1.5.0.7
+		//for arrows this is actually x/y/z rotation
+		//for mobs x and z are used for pitch and yaw, and y is used for headyaw
+		$pk->xRot = $this->pitch;
+		$pk->yRot = $this->yaw;
+		$pk->zRot = $this->yaw;
 
-        if($teleport){
-            $pk->flags |= MoveActorAbsolutePacket::FLAG_TELEPORT;
-        }
+		if($teleport){
+			$pk->flags |= MoveActorAbsolutePacket::FLAG_TELEPORT;
+		}
 
-        /** @var MineceitPlayer[] $viewers */
-        $viewers = $this->getViewers();
+		/** @var MineceitPlayer[] $viewers */
+		$viewers = $this->getViewers();
 
-        // Broadcasts the packet to 1.14.2 & below players.
-        MineceitUtil::broadcastDataPacket($this, $pk, function(MineceitPlayer $player) {
-            return strpos($player->getVersion(), "1.14.3") === false;
-        }, $viewers);
+		// Broadcasts the packet to 1.14.2 & below players.
+		MineceitUtil::broadcastDataPacket($this, $pk, function(MineceitPlayer $player){
+			return strpos($player->getVersion(), "1.14.3") === false;
+		}, $viewers);
 
-        /** @var MineceitPlayer[] $viewers */
-        $viewers = array_filter($viewers, function(MineceitPlayer $viewer) {
-            return strpos($viewer->getVersion(), "1.14.3") !== false;
-        });
+		/** @var MineceitPlayer[] $viewers */
+		$viewers = array_filter($viewers, function(MineceitPlayer $viewer){
+			return strpos($viewer->getVersion(), "1.14.3") !== false;
+		});
 
-        // For those who are 1.14.3 & above, broadcasts position to them.
-        $this->sendPosition($this->asVector3(), $this->yaw, $this->pitch, MovePlayerPacket::MODE_NORMAL, $viewers);
-    }
+		// For those who are 1.14.3 & above, broadcasts position to them.
+		$this->sendPosition($this->asVector3(), $this->yaw, $this->pitch, MovePlayerPacket::MODE_NORMAL, $viewers);
+	}
 
-    public function handleEntityEvent(ActorEventPacket $packet): bool
-    {
-        if (!$this->spawned or !$this->isAlive()) {
-            return true;
-        }
+	public function handleEntityEvent(ActorEventPacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
 
-        $this->doCloseInventory();
+		$this->doCloseInventory();
 
-        $itemID = $packet->data;
-        $entityID = $packet->entityRuntimeId;
+		$itemID = $packet->data;
+		$entityID = $packet->entityRuntimeId;
 
-        switch ($packet->event) {
+		switch($packet->event){
 
-            case ActorEventPacket::PLAYER_ADD_XP_LEVELS:
+			case ActorEventPacket::PLAYER_ADD_XP_LEVELS:
 
-                if ($itemID === 0) {
-                    return false;
-                }
-                $this->dataPacket($packet);
-                $this->server->broadcastPacket($this->getViewers(), $packet);
-                break;
+				if($itemID === 0){
+					return false;
+				}
+				$this->dataPacket($packet);
+				$this->server->broadcastPacket($this->getViewers(), $packet);
+				break;
 
-            case ActorEventPacket::EATING_ITEM:
+			case ActorEventPacket::EATING_ITEM:
 
-                if ($itemID === 0 or $entityID !== $this->getId()) {
-                    return false;
-                }
+				if($itemID === 0 or $entityID !== $this->getId()){
+					return false;
+				}
 
-                $itemInHand = $this->inventory->getItemInHand();
-                if ($itemInHand->getId() !== $itemID) {
-                    return false;
-                } elseif ($itemInHand->getId() === $itemID and !$this->isUsingItem()) {
-                    return false;
-                }
+				$itemInHand = $this->inventory->getItemInHand();
+				if($itemInHand->getId() !== $itemID){
+					return false;
+				}elseif($itemInHand->getId() === $itemID and !$this->isUsingItem()){
+					return false;
+				}
 
-                if ($itemInHand instanceof FoodSource and $itemInHand->requiresHunger() and !$this->isHungry()) {
-                    return false;
-                }
+				if($itemInHand instanceof FoodSource and $itemInHand->requiresHunger() and !$this->isHungry()){
+					return false;
+				}
 
-                $this->dataPacket($packet);
-                $this->server->broadcastPacket($this->getViewers(), $packet);
-                break;
+				$this->dataPacket($packet);
+				$this->server->broadcastPacket($this->getViewers(), $packet);
+				break;
 
-            default: return false;
-        }
+			default:
+				return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    public function handleLogin(LoginPacket $packet): bool
-    {
+	public function handleLogin(LoginPacket $packet) : bool{
 
-        $this->version = (string)$packet->clientData["GameVersion"];
+		$this->version = (string) $packet->clientData["GameVersion"];
 
-        /* if(strpos($this->version, "1.14.3") !== false) {
-            $this->close("", "Your particular version ({$this->version}) is not supported here yet.\nDowngrade to 1.14.2 to play!");
-            return false;
-        } */
+		/* if(strpos($this->version, "1.14.3") !== false) {
+			$this->close("", "Your particular version ({$this->version}) is not supported here yet.\nDowngrade to 1.14.2 to play!");
+			return false;
+		} */
 
-        return parent::handleLogin($packet);
-    }
+		return parent::handleLogin($packet);
+	}
 
 
-    /**
-     * @return string
-     *
-     * Gets the game version of the player.
-     */
-    public function getVersion() : string {
-        return $this->version;
-    }
+	/**
+	 * @return string
+	 *
+	 * Gets the game version of the player.
+	 */
+	public function getVersion() : string{
+		return $this->version;
+	}
 }

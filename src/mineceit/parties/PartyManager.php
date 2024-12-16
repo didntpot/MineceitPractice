@@ -18,136 +18,134 @@ use mineceit\player\MineceitPlayer;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-class PartyManager
-{
+class PartyManager{
 
-    /* @var MineceitParty[]|array */
-    private $parties;
+	/* @var MineceitParty[]|array */
+	private $parties;
 
-    /* @var Server */
-    private $server;
+	/* @var Server */
+	private $server;
 
-    /* @var MineceitCore */
-    private $core;
+	/* @var MineceitCore */
+	private $core;
 
-    /* @var PartyEventManager */
-    private $eventManager;
+	/* @var PartyEventManager */
+	private $eventManager;
 
-    public function __construct(MineceitCore $core)
-    {
-        $this->parties = [];
-        $this->eventManager = new PartyEventManager($core);
-        $this->server = $core->getServer();
-        $this->core = $core;
-    }
+	public function __construct(MineceitCore $core){
+		$this->parties = [];
+		$this->eventManager = new PartyEventManager($core);
+		$this->server = $core->getServer();
+		$this->core = $core;
+	}
 
-    /**
-     * @param MineceitPlayer $owner
-     * @param string $name
-     * @param int $maxPlayers
-     * @param bool $open
-     */
-    public function createParty(MineceitPlayer $owner, string $name, int $maxPlayers, bool $open = true) : void {
+	/**
+	 * @param MineceitPlayer $owner
+	 * @param string         $name
+	 * @param int            $maxPlayers
+	 * @param bool           $open
+	 */
+	public function createParty(MineceitPlayer $owner, string $name, int $maxPlayers, bool $open = true) : void{
 
-        $name = trim($name);
+		$name = trim($name);
 
-        $ownerName = $owner->getName();
+		$ownerName = $owner->getName();
 
-        $local = strtolower($ownerName) . ":$name";
+		$local = strtolower($ownerName) . ":$name";
 
-        if(!isset($this->parties[$local])) {
+		if(!isset($this->parties[$local])){
 
-            $this->parties[$local] = new MineceitParty($owner, $name, $maxPlayers, $open);
+			$this->parties[$local] = new MineceitParty($owner, $name, $maxPlayers, $open);
 
-            $lang = $owner->getLanguage();
+			$lang = $owner->getLanguage();
 
-            $owner->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'You have successfully created a new party.');
+			$owner->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'You have successfully created a new party.');
 
-            $itemHandler = MineceitCore::getItemHandler();
+			$itemHandler = MineceitCore::getItemHandler();
 
-            $itemHandler->spawnPartyItems($owner);
-            // TODO SEND MESSAGE THAT OWNER CREATED A NEW PARTY
-        }
-    }
+			$itemHandler->spawnPartyItems($owner);
+			// TODO SEND MESSAGE THAT OWNER CREATED A NEW PARTY
+		}
+	}
 
-    /**
-     * @param string $name
-     * @return MineceitParty|null
-     */
-    public function getPartyFromName(string $name) {
+	/**
+	 * @param string $name
+	 *
+	 * @return MineceitParty|null
+	 */
+	public function getPartyFromName(string $name){
 
-        $name = strtolower($name);
+		$name = strtolower($name);
 
-        $keys = array_keys($this->parties);
+		$keys = array_keys($this->parties);
 
-        $result = null;
+		$result = null;
 
-        foreach($keys as $key) {
-            $partyName = strtolower(explode(':', $key)[1]);
-            if($partyName === $name) {
-                $result = $this->parties[$key];
-                break;
-            }
-        }
+		foreach($keys as $key){
+			$partyName = strtolower(explode(':', $key)[1]);
+			if($partyName === $name){
+				$result = $this->parties[$key];
+				break;
+			}
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * @param MineceitPlayer $player
-     * @return MineceitParty|null
-     */
-    public function getPartyFromPlayer(MineceitPlayer $player) {
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return MineceitParty|null
+	 */
+	public function getPartyFromPlayer(MineceitPlayer $player){
 
-        $result = null;
+		$result = null;
 
-        foreach($this->parties as $party) {
-            if($party->isPlayer($player)) {
-                $result = $party;
-                break;
-            }
-        }
+		foreach($this->parties as $party){
+			if($party->isPlayer($player)){
+				$result = $party;
+				break;
+			}
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * @return array|MineceitParty[]
-     */
-    public function getParties() : array {
-        return $this->parties;
-    }
+	/**
+	 * @return array|MineceitParty[]
+	 */
+	public function getParties() : array{
+		return $this->parties;
+	}
 
-    /**
-     * @return PartyEventManager
-     */
-    public function getEventManager() : PartyEventManager {
-        return $this->eventManager;
-    }
+	/**
+	 * @return PartyEventManager
+	 */
+	public function getEventManager() : PartyEventManager{
+		return $this->eventManager;
+	}
 
-    /**
-     * @param MineceitParty $party
-     */
-    public function endParty(MineceitParty $party) : void
-    {
-        $local = $party->getLocalName();
+	/**
+	 * @param MineceitParty $party
+	 */
+	public function endParty(MineceitParty $party) : void{
+		$local = $party->getLocalName();
 
-        if(isset($this->parties[$local]))
-            unset($this->parties[$local]);
-    }
+		if(isset($this->parties[$local]))
+			unset($this->parties[$local]);
+	}
 
-    /**
-     * @param string $oldLocal
-     * @param string $newLocal
-     *
-     * Only used for promoting a new owner.
-     */
-    public function swapLocal(string $oldLocal, string $newLocal)
-    {
-        if(isset($this->parties[$oldLocal])) {
-            $party = $this->parties[$oldLocal];
-            unset($this->parties[$oldLocal]);
-            $this->parties[$newLocal] = $party;
-        }
-    }
+	/**
+	 * @param string $oldLocal
+	 * @param string $newLocal
+	 *
+	 * Only used for promoting a new owner.
+	 */
+	public function swapLocal(string $oldLocal, string $newLocal){
+		if(isset($this->parties[$oldLocal])){
+			$party = $this->parties[$oldLocal];
+			unset($this->parties[$oldLocal]);
+			$this->parties[$newLocal] = $party;
+		}
+	}
 }

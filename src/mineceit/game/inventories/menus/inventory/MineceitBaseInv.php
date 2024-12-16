@@ -22,137 +22,137 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\Player;
 
-abstract class MineceitBaseInv extends ContainerInventory {
+abstract class MineceitBaseInv extends ContainerInventory{
 
-    private $size;
+	private $size;
 
-    const HEIGHT_ABOVE = 3;
+	const HEIGHT_ABOVE = 3;
 
-    protected $sendDelay = 0;
+	protected $sendDelay = 0;
 
-    private $holders = [];
+	private $holders = [];
 
-    private $menu;
+	private $menu;
 
-    public function __construct(BaseMenu $menu, array $items = [], int $size = 0, string $title = null) {
-        parent::__construct(new Vector3(), $items, $size, $title);
-        $this->size = $size;
-        $this->menu = $menu;
-    }
+	public function __construct(BaseMenu $menu, array $items = [], int $size = 0, string $title = null){
+		parent::__construct(new Vector3(), $items, $size, $title);
+		$this->size = $size;
+		$this->menu = $menu;
+	}
 
-    public function getMenu() : BaseMenu {
-        return $this->menu;
-    }
+	public function getMenu() : BaseMenu{
+		return $this->menu;
+	}
 
-    abstract public function getTEId() : string;
+	abstract public function getTEId() : string;
 
-    public function send(MineceitPlayer $player, ?string $customName) : bool {
+	public function send(MineceitPlayer $player, ?string $customName) : bool{
 
-        $pos = $player->getPosition()->floor()->add(0, self::HEIGHT_ABOVE, 0);
+		$pos = $player->getPosition()->floor()->add(0, self::HEIGHT_ABOVE, 0);
 
-        $result = false;
+		$result = false;
 
-        if($player->getLevel()->isInWorld($pos->x, $pos->y, $pos->z)) {
+		if($player->getLevel()->isInWorld($pos->x, $pos->y, $pos->z)){
 
-            $this->holders[$player->getId()] = new MineceitHolderData($pos, $customName);
+			$this->holders[$player->getId()] = new MineceitHolderData($pos, $customName);
 
-            $this->sendPrivateInv($player, $this->holders[$player->getId()]);
+			$this->sendPrivateInv($player, $this->holders[$player->getId()]);
 
-            $result = true;
-        }
+			$result = true;
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    public function onOpen(Player $who): void {
+	public function onOpen(Player $who) : void{
 
-        $data = $this->holders[$who->getId()];
+		$data = $this->holders[$who->getId()];
 
-        if($data instanceof MineceitHolderData) {
-            $this->holder = $data->getPos();
-        }
+		if($data instanceof MineceitHolderData){
+			$this->holder = $data->getPos();
+		}
 
-        parent::onOpen($who);
-        $this->holder = null;
-    }
+		parent::onOpen($who);
+		$this->holder = null;
+	}
 
-    public function onClose(Player $who): void {
+	public function onClose(Player $who) : void{
 
-        $holder = $this->holders[$who->getId()];
+		$holder = $this->holders[$who->getId()];
 
-        if(isset($holder) and $holder instanceof MineceitHolderData){
+		if(isset($holder) and $holder instanceof MineceitHolderData){
 
-            $pos = $holder->getPos();
+			$pos = $holder->getPos();
 
-            if($who->getLevel()->isChunkLoaded($pos->x >> 4, $pos->z >> 4)){
+			if($who->getLevel()->isChunkLoaded($pos->x >> 4, $pos->z >> 4)){
 
-                $this->sendPublicInv($who, $holder);
-            }
+				$this->sendPublicInv($who, $holder);
+			}
 
-            unset($holder);
+			unset($holder);
 
-            parent::onClose($who);
+			parent::onClose($who);
 
-        }
-    }
+		}
+	}
 
-    public function open(Player $player) : bool{
+	public function open(Player $player) : bool{
 
-        if(!isset($this->holders[$player->getId()])){
-            return false;
-        }
+		if(!isset($this->holders[$player->getId()])){
+			return false;
+		}
 
-        return parent::open($player);
-    }
+		return parent::open($player);
+	}
 
-    public function setSendDelay(int $delay) : void {
-        $this->sendDelay = $delay;
-    }
+	public function setSendDelay(int $delay) : void{
+		$this->sendDelay = $delay;
+	}
 
-    public function getSendDelay(MineceitPlayer $player) : int {
-        return $this->sendDelay;
-    }
+	public function getSendDelay(MineceitPlayer $player) : int{
+		return $this->sendDelay;
+	}
 
-    abstract function sendPrivateInv(Player $player, MineceitHolderData $data) : void;
+	abstract function sendPrivateInv(Player $player, MineceitHolderData $data) : void;
 
-    abstract function sendPublicInv(Player $player, MineceitHolderData $data) : void;
+	abstract function sendPublicInv(Player $player, MineceitHolderData $data) : void;
 
-    public function onInventorySend(MineceitPlayer $player) : void {
+	public function onInventorySend(MineceitPlayer $player) : void{
 
-        $delay = $this->getSendDelay($player);
+		$delay = $this->getSendDelay($player);
 
-        if($delay > 0)
-            MineceitCore::getInstance()->getScheduler()->scheduleDelayedTask(new InventoryTask($player, $this), $delay);
-        else $this->onSendInvSuccess($player);
-    }
+		if($delay > 0)
+			MineceitCore::getInstance()->getScheduler()->scheduleDelayedTask(new InventoryTask($player, $this), $delay);
+		else $this->onSendInvSuccess($player);
+	}
 
-    public function onSendInvSuccess(MineceitPlayer $player) : void {
+	public function onSendInvSuccess(MineceitPlayer $player) : void{
 
-        $playerHandler = MineceitCore::getPlayerHandler();
+		$playerHandler = MineceitCore::getPlayerHandler();
 
-        $id = $playerHandler->getOpenChestID($player);
+		$id = $playerHandler->getOpenChestID($player);
 
-        if($playerHandler->setClosedInventoryID($id, $player))
-            $player->addWindow($this, $id);
-        else $this->onSendInvFail($player);
-    }
+		if($playerHandler->setClosedInventoryID($id, $player))
+			$player->addWindow($this, $id);
+		else $this->onSendInvFail($player);
+	}
 
-    public function onSendInvFail(MineceitPlayer $player) : void {
-        unset($this->holders[$player->getId()]);
-    }
+	public function onSendInvFail(MineceitPlayer $player) : void{
+		unset($this->holders[$player->getId()]);
+	}
 
-    public function getDefaultSize(): int {
-        return $this->size;
-    }
+	public function getDefaultSize() : int{
+		return $this->size;
+	}
 
-    protected function sendTileEntity(Player $player, Vector3 $pos, CompoundTag $tag) : void {
-        $writer = new NetworkLittleEndianNBTStream();
-        $tag->setString('id', $this->getTEId());
-        $pkt = new BlockActorDataPacket();
-        $pkt->x = $pos->x;
-        $pkt->y = $pos->y;
-        $pkt->z = $pos->z;
-        $pkt->namedtag = $writer->write($tag);
-        $player->sendDataPacket($pkt);
-    }
+	protected function sendTileEntity(Player $player, Vector3 $pos, CompoundTag $tag) : void{
+		$writer = new NetworkLittleEndianNBTStream();
+		$tag->setString('id', $this->getTEId());
+		$pkt = new BlockActorDataPacket();
+		$pkt->x = $pos->x;
+		$pkt->y = $pos->y;
+		$pkt->z = $pos->z;
+		$pkt->namedtag = $writer->write($tag);
+		$player->sendDataPacket($pkt);
+	}
 }

@@ -12,7 +12,6 @@ namespace mineceit\commands\types;
 
 
 use mineceit\arenas\EventArena;
-use mineceit\commands\arenas\EventArena as CommandEventArena;
 use mineceit\MineceitCore;
 use mineceit\MineceitUtil;
 use mineceit\player\language\Language;
@@ -20,256 +19,255 @@ use mineceit\player\MineceitPlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\utils\TextFormat;
 
-class ParameterUtil
-{
+class ParameterUtil{
 
-    // TODO DO THE LANGUAGE FOR SUCCESSFULLY EDITED ARENA
+	// TODO DO THE LANGUAGE FOR SUCCESSFULLY EDITED ARENA
 
-    /**
-     * @return array|MineceitCommandParameter[]
-     *
-     * Initializes and gets the event arena command parameters.
-     */
-    public static function getEventArenaParameters() {
+	/**
+	 * @return array|MineceitCommandParameter[]
+	 *
+	 * Initializes and gets the event arena command parameters.
+	 */
+	public static function getEventArenaParameters(){
 
-        $createParameter = new MineceitCommandParameter("create", function(CommandSender $sender, array $args) {
+		$createParameter = new MineceitCommandParameter("create", function(CommandSender $sender, array $args){
 
-            $length = count($args);
+			$length = count($args);
 
-            $msg = null;
+			$msg = null;
 
-            $usage = "Usage: /event create <name> <kit>";
+			$usage = "Usage: /event create <name> <kit>";
 
-            if($sender instanceof MineceitPlayer) {
+			if($sender instanceof MineceitPlayer){
 
-                $language = $sender->getLanguage();
+				$language = $sender->getLanguage();
 
-                if ($length === 2) {
+				if($length === 2){
 
-                    $arenaName = strval($args[0]);
+					$arenaName = strval($args[0]);
 
-                    $kitName = strval($args[1]);
+					$kitName = strval($args[1]);
 
-                    $kitHandler = MineceitCore::getKits();
-                    $arenaHandler = MineceitCore::getArenas();
+					$kitHandler = MineceitCore::getKits();
+					$arenaHandler = MineceitCore::getArenas();
 
-                    if ($kitHandler->isKit($kitName)) {
+					if($kitHandler->isKit($kitName)){
 
-                        $kit = $kitHandler->getKit($kitName);
+						$kit = $kitHandler->getKit($kitName);
 
-                        $arena = $arenaHandler->getArena($arenaName);
+						$arena = $arenaHandler->getArena($arenaName);
 
-                        if ($arena !== null) {
+						if($arena !== null){
 
-                            $msg = $language->arenaMessage(Language::ARENA_EXISTS, $arena);
+							$msg = $language->arenaMessage(Language::ARENA_EXISTS, $arena);
 
-                        } else {
+						}else{
 
-                            $arenaHandler->createArena($arenaName, $kit->getLocalizedName(), $sender->getPlayer(), true);
-                            $msg = $language->arenaMessage(Language::CREATE_ARENA, $arenaName);
-                        }
+							$arenaHandler->createArena($arenaName, $kit->getLocalizedName(), $sender->getPlayer(), true);
+							$msg = $language->arenaMessage(Language::CREATE_ARENA, $arenaName);
+						}
 
-                    } else $msg = $language->kitMessage($kitName, Language::KIT_NO_EXIST);
+					}else $msg = $language->kitMessage($kitName, Language::KIT_NO_EXIST);
 
-                } else {
-                    $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
-                }
-            } else {
-                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
-            }
+				}else{
+					$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
+				}
+			}else{
+				$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
+			}
 
-            if($msg !== null) {
-                $sender->sendMessage($msg);
-            }
+			if($msg !== null){
+				$sender->sendMessage($msg);
+			}
 
-        });
+		});
 
 
-        $deleteParameter = new MineceitCommandParameter('delete', function(CommandSender $sender, array $args) {
+		$deleteParameter = new MineceitCommandParameter('delete', function(CommandSender $sender, array $args){
 
-            $length = count($args);
+			$length = count($args);
 
-            $msg = null;
+			$msg = null;
 
-            $usage = "Usage: /event delete <name>";
+			$usage = "Usage: /event delete <name>";
 
-            if($sender instanceof MineceitPlayer) {
+			if($sender instanceof MineceitPlayer){
 
-                $arenaHandler = MineceitCore::getArenas();
+				$arenaHandler = MineceitCore::getArenas();
 
-                $language = $sender->getLanguage();
+				$language = $sender->getLanguage();
 
-                if ($length === 1) {
+				if($length === 1){
 
-                    $arenaName = $args[0];
+					$arenaName = $args[0];
 
-                    $arena = $arenaHandler->getArena($arenaName);
+					$arena = $arenaHandler->getArena($arenaName);
 
-                    if ($arena !== null and $arena instanceof EventArena) {
+					if($arena !== null and $arena instanceof EventArena){
 
-                        $arenaName = $arena->getName();
+						$arenaName = $arena->getName();
 
-                        $arenaHandler->deleteArena($arenaName);
+						$arenaHandler->deleteArena($arenaName);
 
-                        $msg = $language->arenaMessage(Language::DELETE_ARENA, $arenaName);
+						$msg = $language->arenaMessage(Language::DELETE_ARENA, $arenaName);
 
-                    } else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
+					}else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
 
-                } else {
-                    $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
-                }
-            } else {
-                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
-            }
+				}else{
+					$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
+				}
+			}else{
+				$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
+			}
 
-            if($msg !== null) {
-                $sender->sendMessage($msg);
-            }
-        });
+			if($msg !== null){
+				$sender->sendMessage($msg);
+			}
+		});
 
 
-        $pos1Parameter = new MineceitCommandParameter('p1start', function(CommandSender $sender, array $args) {
+		$pos1Parameter = new MineceitCommandParameter('p1start', function(CommandSender $sender, array $args){
 
-            $length = count($args);
+			$length = count($args);
 
-            $msg = null;
+			$msg = null;
 
-            $usage = "Usage: /event p1Start <name>";
+			$usage = "Usage: /event p1Start <name>";
 
-            if($sender instanceof MineceitPlayer) {
+			if($sender instanceof MineceitPlayer){
 
-                $arenaHandler = MineceitCore::getArenas();
+				$arenaHandler = MineceitCore::getArenas();
 
-                $language = $sender->getLanguage();
+				$language = $sender->getLanguage();
 
-                if ($length === 1) {
+				if($length === 1){
 
-                    $arenaName = $args[0];
+					$arenaName = $args[0];
 
-                    $arena = $arenaHandler->getArena($arenaName);
+					$arena = $arenaHandler->getArena($arenaName);
 
-                    if ($arena !== null and $arena instanceof EventArena) {
+					if($arena !== null and $arena instanceof EventArena){
 
-                        $arena->setP1SpawnPos($sender->asVector3());
+						$arena->setP1SpawnPos($sender->asVector3());
 
-                        $arenaHandler->editArena($arena);
+						$arenaHandler->editArena($arena);
 
-                        $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
-                        // TODO LANG
+						$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
+						// TODO LANG
 
-                    } else {
-                        $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
-                    }
+					}else{
+						$msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
+					}
 
-                } else {
-                    $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
-                }
-            } else {
-                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
-            }
+				}else{
+					$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
+				}
+			}else{
+				$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
+			}
 
-            if($msg !== null) {
-                $sender->sendMessage($msg);
-            }
-        });
+			if($msg !== null){
+				$sender->sendMessage($msg);
+			}
+		});
 
 
-        $pos2Parameter = new MineceitCommandParameter('p2start', function(CommandSender $sender, array $args) {
+		$pos2Parameter = new MineceitCommandParameter('p2start', function(CommandSender $sender, array $args){
 
-            $length = count($args);
+			$length = count($args);
 
-            $msg = null;
+			$msg = null;
 
-            $usage = "Usage: /event p2Start <name>";
+			$usage = "Usage: /event p2Start <name>";
 
-            if($sender instanceof MineceitPlayer) {
+			if($sender instanceof MineceitPlayer){
 
-                $arenaHandler = MineceitCore::getArenas();
+				$arenaHandler = MineceitCore::getArenas();
 
-                $language = $sender->getLanguage();
+				$language = $sender->getLanguage();
 
-                if ($length === 1) {
+				if($length === 1){
 
-                    $arenaName = $args[0];
+					$arenaName = $args[0];
 
-                    $arena = $arenaHandler->getArena($arenaName);
+					$arena = $arenaHandler->getArena($arenaName);
 
-                    if ($arena !== null and $arena instanceof EventArena) {
+					if($arena !== null and $arena instanceof EventArena){
 
-                        $arena->setP2SpawnPos($sender->asVector3());
+						$arena->setP2SpawnPos($sender->asVector3());
 
-                        $arenaHandler->editArena($arena);
+						$arenaHandler->editArena($arena);
 
-                        $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
+						$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
 
-                        // TODO LANG
+						// TODO LANG
 
-                    } else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
+					}else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
 
-                } else {
-                    $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
-                }
-            } else {
-                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
-            }
+				}else{
+					$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
+				}
+			}else{
+				$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
+			}
 
-            if($msg !== null) {
-                $sender->sendMessage($msg);
-            }
-        });
+			if($msg !== null){
+				$sender->sendMessage($msg);
+			}
+		});
 
 
-        $spawnParameter = new MineceitCommandParameter('spawn', function(CommandSender $sender, array $args) {
+		$spawnParameter = new MineceitCommandParameter('spawn', function(CommandSender $sender, array $args){
 
-            $length = count($args);
+			$length = count($args);
 
-            $msg = null;
+			$msg = null;
 
-            $usage = "Usage: /event spawn <name>";
+			$usage = "Usage: /event spawn <name>";
 
-            if($sender instanceof MineceitPlayer) {
+			if($sender instanceof MineceitPlayer){
 
-                $arenaHandler = MineceitCore::getArenas();
+				$arenaHandler = MineceitCore::getArenas();
 
-                $language = $sender->getLanguage();
+				$language = $sender->getLanguage();
 
-                if ($length === 1) {
+				if($length === 1){
 
-                    $arenaName = $args[0];
+					$arenaName = $args[0];
 
-                    $arena = $arenaHandler->getArena($arenaName);
+					$arena = $arenaHandler->getArena($arenaName);
 
-                    if ($arena !== null and $arena instanceof EventArena) {
+					if($arena !== null and $arena instanceof EventArena){
 
-                        $arena->setSpawn($sender->asVector3());
+						$arena->setSpawn($sender->asVector3());
 
-                        $arenaHandler->editArena($arena);
+						$arenaHandler->editArena($arena);
 
-                        $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
+						$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . 'Successfully edited the arena!';
 
-                        // TODO LANG
+						// TODO LANG
 
-                    } else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
+					}else $msg = $language->arenaMessage(Language::ARENA_NO_EXIST, $arenaName);
 
-                } else {
-                    $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
-                }
-            } else {
-                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
-            }
+				}else{
+					$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $usage;
+				}
+			}else{
+				$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . "Console can't use this command.";
+			}
 
-            if($msg !== null) {
-                $sender->sendMessage($msg);
-            }
-        });
+			if($msg !== null){
+				$sender->sendMessage($msg);
+			}
+		});
 
-        return [
-            $createParameter->getName() => $createParameter,
-            $deleteParameter->getName() => $deleteParameter,
-            $pos1Parameter->getName() => $pos1Parameter,
-            $pos2Parameter->getName() => $pos2Parameter,
-            $spawnParameter->getName() => $spawnParameter
-        ];
-    }
+		return [
+			$createParameter->getName() => $createParameter,
+			$deleteParameter->getName() => $deleteParameter,
+			$pos1Parameter->getName() => $pos1Parameter,
+			$pos2Parameter->getName() => $pos2Parameter,
+			$spawnParameter->getName() => $spawnParameter
+		];
+	}
 
 }

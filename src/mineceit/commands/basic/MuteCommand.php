@@ -22,86 +22,82 @@ use pocketmine\command\utils\CommandException;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-class MuteCommand extends MineceitCommand
-{
-    /** @var bool */
-    private $muted;
+class MuteCommand extends MineceitCommand{
+	/** @var bool */
+	private $muted;
 
-    public function __construct(bool $mute)
-    {
-        parent::__construct($mute ? "mute" : "unmute", ($mute ? "Mutes " : "Unmutes ") . "the specified player.", "Usage: " . ($mute ? "/mute" : "/unmute") . " <player>", []);
-        parent::setPermission('mineceit.permission.mute');
-        $this->muted = $mute;
-    }
+	public function __construct(bool $mute){
+		parent::__construct($mute ? "mute" : "unmute", ($mute ? "Mutes " : "Unmutes ") . "the specified player.", "Usage: " . ($mute ? "/mute" : "/unmute") . " <player>", []);
+		parent::setPermission('mineceit.permission.mute');
+		$this->muted = $mute;
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 
-        $msg = null;
+		$msg = null;
 
-        if($this->testPermission($sender) and $this->canUseCommand($sender)) {
+		if($this->testPermission($sender) and $this->canUseCommand($sender)){
 
-            $count = count($args);
+			$count = count($args);
 
-            $language = MineceitCore::getPlayerHandler()->getLanguage();
+			$language = MineceitCore::getPlayerHandler()->getLanguage();
 
-            if($sender instanceof MineceitPlayer) {
-                $language = $sender->getLanguage();
-            }
+			if($sender instanceof MineceitPlayer){
+				$language = $sender->getLanguage();
+			}
 
-            if($count === 1) {
+			if($count === 1){
 
-                $playerName = (string)$args[0];
-                $server = Server::getInstance();
-                if(($player = $server->getPlayer($playerName)) !== null and $player instanceof MineceitPlayer) {
+				$playerName = (string) $args[0];
+				$server = Server::getInstance();
+				if(($player = $server->getPlayer($playerName)) !== null and $player instanceof MineceitPlayer){
 
-                    $string = Language::PLAYER_SET_UNMUTED_SENDER;
+					$string = Language::PLAYER_SET_UNMUTED_SENDER;
 
-                    if($this->muted) {
-                        $string = Language::PLAYER_SET_MUTED_SENDER;
-                    }
+					if($this->muted){
+						$string = Language::PLAYER_SET_MUTED_SENDER;
+					}
 
-                    $player->setMuted($this->muted);
-                    $msg = $language->getMessage($string, ['name' => $player->getDisplayName()]);
+					$player->setMuted($this->muted);
+					$msg = $language->getMessage($string, ['name' => $player->getDisplayName()]);
 
-                    $title = DiscordUtil::boldText($this->muted ? "Mute" : "Unmute");
-                    $description = DiscordUtil::boldText("User:") . " " . $sender->getName() . "\n" . DiscordUtil::boldText($this->muted ? "Muted:" : "Unmuted:") . " " . $player->getName();
+					$title = DiscordUtil::boldText($this->muted ? "Mute" : "Unmute");
+					$description = DiscordUtil::boldText("User:") . " " . $sender->getName() . "\n" . DiscordUtil::boldText($this->muted ? "Muted:" : "Unmuted:") . " " . $player->getName();
 
-                    DiscordUtil::sendLog($title, $description, DiscordUtil::GOLD);
+					DiscordUtil::sendLog($title, $description, DiscordUtil::GOLD);
 
 
-                } else {
-                    $msg = $language->getMessage(Language::PLAYER_NOT_ONLINE, ['name' => $playerName]);
-                }
+				}else{
+					$msg = $language->getMessage(Language::PLAYER_NOT_ONLINE, ['name' => $playerName]);
+				}
 
-            } else {
-                $msg = $this->getUsage();
-            }
-        }
+			}else{
+				$msg = $this->getUsage();
+			}
+		}
 
-        if($msg !== null) {
-            $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
-        }
+		if($msg !== null){
+			$sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 
-    public function testPermission(CommandSender $sender): bool
-    {
+	public function testPermission(CommandSender $sender) : bool{
 
-        if($sender instanceof MineceitPlayer and $sender->hasModPermissions()) {
-            return true;
-        }
+		if($sender instanceof MineceitPlayer and $sender->hasModPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($sender);
-    }
+		return parent::testPermission($sender);
+	}
 }

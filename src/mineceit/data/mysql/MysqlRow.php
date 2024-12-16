@@ -11,138 +11,138 @@ declare(strict_types=1);
 namespace mineceit\data\mysql;
 
 
-class MysqlRow
-{
+class MysqlRow{
 
-    /** @var string */
-    private $tableName;
+	/** @var string */
+	private $tableName;
 
-    /** @var array */
-    private $columns;
+	/** @var array */
+	private $columns;
 
-    public function __construct(string $table)
-    {
-        $this->tableName = $table;
-        $this->columns = [];
-    }
+	public function __construct(string $table){
+		$this->tableName = $table;
+		$this->columns = [];
+	}
 
-    /**
-     * @return string
-     */
-    public function getTable() : string {
-        return $this->tableName;
-    }
+	/**
+	 * @return string
+	 */
+	public function getTable() : string{
+		return $this->tableName;
+	}
 
 
-    /**
-     * Adds a value to the columns.
-     *
-     * @param string $column
-     * @param $value
-     */
-    public function put(string $column, $value) : void {
+	/**
+	 * Adds a value to the columns.
+	 *
+	 * @param string $column
+	 * @param        $value
+	 */
+	public function put(string $column, $value) : void{
 
-        if(is_string($value))
-            $value = "'{$value}'";
-        elseif (is_bool($value))
-            $value = intval($value);
+		if(is_string($value))
+			$value = "'{$value}'";
+		elseif(is_bool($value))
+			$value = intval($value);
 
-        $this->columns[$column] = $value;
-    }
+		$this->columns[$column] = $value;
+	}
 
-    /**
-     * @param array $statements
-     * @param string $tableName
-     * @return string
-     *
-     * Returns the query string for inserting a row.
-     */
-    public function queryInsert($statements = [], $tableName = '') : string {
+	/**
+	 * @param array  $statements
+	 * @param string $tableName
+	 *
+	 * @return string
+	 *
+	 * Returns the query string for inserting a row.
+	 */
+	public function queryInsert($statements = [], $tableName = '') : string{
 
-        $tableName = strlen($tableName) <= 0 ? $this->tableName : $tableName;
+		$tableName = strlen($tableName) <= 0 ? $this->tableName : $tableName;
 
-        $keys = array_keys($this->columns);
+		$keys = array_keys($this->columns);
 
-        $keys = implode(", ", $keys);
+		$keys = implode(", ", $keys);
 
-        $values = implode(", ", array_values($this->columns));
+		$values = implode(", ", array_values($this->columns));
 
-        $result = "INSERT INTO {$this->tableName} ({$keys}) SELECT {$values}";
+		$result = "INSERT INTO {$this->tableName} ({$keys}) SELECT {$values}";
 
-        $size = count($statements);
+		$size = count($statements);
 
-        if($size > 0) {
+		if($size > 0){
 
-            $statement = implode(" AND ", $statements);
+			$statement = implode(" AND ", $statements);
 
-            $result .= " WHERE NOT EXISTS (SELECT * FROM {$tableName} WHERE {$statement})";
-        }
+			$result .= " WHERE NOT EXISTS (SELECT * FROM {$tableName} WHERE {$statement})";
+		}
 
-        return $result;
-    }
-
-
-    /**
-     * @return string
-     *
-     * Returns the query string for inserting and updating a duplicate.
-     */
-    public function queryInsertNUpdate() : string {
-
-        $keys = array_keys($this->columns);
-
-        $implodedKeys = implode(", ", $keys);
-
-        $implodedValues = implode(", ", array_values($this->columns));
-
-        $array = [];
-
-        foreach($keys as $key) {
-
-            $value = $this->columns[$key];
-
-            $string = "{$key} = {$value}";
-
-            $array[] = $string;
-        }
-
-        $imploded = implode(", ", $array);
-
-        return "INSERT INTO {$this->tableName} ({$implodedKeys}) VALUES ({$implodedValues}) ON DUPLICATE KEY UPDATE {$imploded}";
-    }
+		return $result;
+	}
 
 
-    /**
-     * @param array $statements
-     * @return string
-     *
-     * Returns the query string for inserting a row.
-     */
-    public function queryUpdate($statements = []) : string {
+	/**
+	 * @return string
+	 *
+	 * Returns the query string for inserting and updating a duplicate.
+	 */
+	public function queryInsertNUpdate() : string{
 
-        $keys = array_keys($this->columns);
+		$keys = array_keys($this->columns);
 
-        $array = [];
+		$implodedKeys = implode(", ", $keys);
 
-        foreach($keys as $key) {
+		$implodedValues = implode(", ", array_values($this->columns));
 
-            $value = $this->columns[$key];
+		$array = [];
 
-            $array[] = "$key = $value";
-        }
+		foreach($keys as $key){
 
-        $string = implode(', ', $array);
+			$value = $this->columns[$key];
 
-        $result = "UPDATE {$this->tableName} SET {$string}";
+			$string = "{$key} = {$value}";
 
-        $size = count($statements);
+			$array[] = $string;
+		}
 
-        if($size > 0) {
+		$imploded = implode(", ", $array);
 
-            $statement = implode(" AND ", $statements);
+		return "INSERT INTO {$this->tableName} ({$implodedKeys}) VALUES ({$implodedValues}) ON DUPLICATE KEY UPDATE {$imploded}";
+	}
 
-            $result .= " WHERE {$statement}";
-        }
-        return $result;
-    }
+
+	/**
+	 * @param array $statements
+	 *
+	 * @return string
+	 *
+	 * Returns the query string for inserting a row.
+	 */
+	public function queryUpdate($statements = []) : string{
+
+		$keys = array_keys($this->columns);
+
+		$array = [];
+
+		foreach($keys as $key){
+
+			$value = $this->columns[$key];
+
+			$array[] = "$key = $value";
+		}
+
+		$string = implode(', ', $array);
+
+		$result = "UPDATE {$this->tableName} SET {$string}";
+
+		$size = count($statements);
+
+		if($size > 0){
+
+			$statement = implode(" AND ", $statements);
+
+			$result .= " WHERE {$statement}";
+		}
+		return $result;
+	}
 }

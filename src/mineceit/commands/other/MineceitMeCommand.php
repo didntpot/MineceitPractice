@@ -19,26 +19,24 @@ use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\utils\TextFormat;
 
-class MineceitMeCommand extends MeCommand
-{
+class MineceitMeCommand extends MeCommand{
 
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        if(!$this->testPermission($sender)){
-            return true;
-        }
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		if(!$this->testPermission($sender)){
+			return true;
+		}
 
-        if(count($args) === 0){
-            throw new InvalidCommandSyntaxException();
-        }
+		if(count($args) === 0){
+			throw new InvalidCommandSyntaxException();
+		}
 
-        $message = implode(" ", $args);
+		$message = implode(" ", $args);
 
-        $container = new TranslationContainer("chat.type.emote", [$sender instanceof MineceitPlayer ? $sender->getDisplayName() : $sender->getName(), $message]);
+		$container = new TranslationContainer("chat.type.emote", [$sender instanceof MineceitPlayer ? $sender->getDisplayName() : $sender->getName(), $message]);
 
-        MineceitUtil::broadcastTranslatedMessage($sender, TextFormat::WHITE, $container, null, 1);
+		MineceitUtil::broadcastTranslatedMessage($sender, TextFormat::WHITE, $container, null, 1);
 
-        return true;
-    }
+		return true;
+	}
 
 }

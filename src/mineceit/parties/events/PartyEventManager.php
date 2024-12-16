@@ -15,58 +15,57 @@ use mineceit\MineceitCore;
 use mineceit\parties\MineceitParty;
 use pocketmine\Server;
 
-class PartyEventManager
-{
+class PartyEventManager{
 
 
-    /* @var PartyEvent[]|array */
-    private $partyEvents;
+	/* @var PartyEvent[]|array */
+	private $partyEvents;
 
-    /* @var Server */
-    private $server;
+	/* @var Server */
+	private $server;
 
-    /* @var MineceitCore */
-    private $core;
+	/* @var MineceitCore */
+	private $core;
 
-    public function __construct(MineceitCore $core)
-    {
-        $this->partyEvents = [];
-        $this->core = $core;
-        $this->server = $core->getServer();
-    }
+	public function __construct(MineceitCore $core){
+		$this->partyEvents = [];
+		$this->core = $core;
+		$this->server = $core->getServer();
+	}
 
-    /**
-     * @param MineceitParty $party
-     * @param string $type
-     */
-    public function startPartyEvent(MineceitParty $party, string $type) : void {
-        // TODO
-    }
+	/**
+	 * @param MineceitParty $party
+	 * @param string        $type
+	 */
+	public function startPartyEvent(MineceitParty $party, string $type) : void{
+		// TODO
+	}
 
-    /**
-     * @param MineceitParty $party
-     * @return PartyEvent|null
-     */
-    public function getPartyEvent(MineceitParty $party) {
+	/**
+	 * @param MineceitParty $party
+	 *
+	 * @return PartyEvent|null
+	 */
+	public function getPartyEvent(MineceitParty $party){
 
-        $local = $party->getLocalName();
+		$local = $party->getLocalName();
 
-        $event = null;
+		$event = null;
 
-        if(isset($this->partyEvents[$local]))
-            $event = $this->partyEvents[$local];
+		if(isset($this->partyEvents[$local]))
+			$event = $this->partyEvents[$local];
 
-        return $event;
-    }
+		return $event;
+	}
 
 
-    /**
-     * Updates the party events.
-     */
-    public function updateEvents() : void {
+	/**
+	 * Updates the party events.
+	 */
+	public function updateEvents() : void{
 
-        foreach($this->partyEvents as $event) {
-            $event->update();
-        }
-    }
+		foreach($this->partyEvents as $event){
+			$event->update();
+		}
+	}
 }

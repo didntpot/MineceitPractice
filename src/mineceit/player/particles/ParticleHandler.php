@@ -18,58 +18,57 @@ use pocketmine\level\particle\FlameParticle;
 use pocketmine\level\particle\PortalParticle;
 use pocketmine\level\particle\SmokeParticle;
 
-class ParticleHandler
-{
+class ParticleHandler{
 
-    public const FLAME = "flame";
-    public const BUBBLES = "bubble";
-    public const PORTAL = "portal";
-    public const SMOKE = "smoke";
-    public const CRIT = "critical";
+	public const FLAME = "flame";
+	public const BUBBLES = "bubble";
+	public const PORTAL = "portal";
+	public const SMOKE = "smoke";
+	public const CRIT = "critical";
 
-    private $particles;
+	private $particles;
 
-    /** @var MineceitCore */
-    private $core;
+	/** @var MineceitCore */
+	private $core;
 
-    /*
-     * RANKS WITH PARTICLES:
-     *
-     * Famous
-     * Famous+
-     * VIP
-     * VIP+
-     * YouTube
-     */
+	/*
+	 * RANKS WITH PARTICLES:
+	 *
+	 * Famous
+	 * Famous+
+	 * VIP
+	 * VIP+
+	 * YouTube
+	 */
 
-    public function __construct(MineceitCore $core)
-    {
+	public function __construct(MineceitCore $core){
 
-        $this->core = $core;
+		$this->core = $core;
 
-        $this->particles = [
+		$this->particles = [
 
-            self::FLAME => new MineceitParticle(self::FLAME, "Flame", FlameParticle::class),
-            self::BUBBLES => new MineceitParticle(self::BUBBLES, "Bubbles", BubbleParticle::class),
-            self::PORTAL => new MineceitParticle(self::PORTAL, "Portal", PortalParticle::class),
-            self::SMOKE => new MineceitParticle(self::SMOKE, "Smoke", SmokeParticle::class),
-            self::CRIT => new MineceitParticle(self::CRIT, "Critical", CriticalParticle::class)
+			self::FLAME => new MineceitParticle(self::FLAME, "Flame", FlameParticle::class),
+			self::BUBBLES => new MineceitParticle(self::BUBBLES, "Bubbles", BubbleParticle::class),
+			self::PORTAL => new MineceitParticle(self::PORTAL, "Portal", PortalParticle::class),
+			self::SMOKE => new MineceitParticle(self::SMOKE, "Smoke", SmokeParticle::class),
+			self::CRIT => new MineceitParticle(self::CRIT, "Critical", CriticalParticle::class)
 
-        ];
-    }
+		];
+	}
 
-    /**
-     * @param string $local
-     * @return MineceitParticle|null
-     */
-    public function getParticle(string $local) {
-        return $this->particles[$local] ?? null;
-    }
+	/**
+	 * @param string $local
+	 *
+	 * @return MineceitParticle|null
+	 */
+	public function getParticle(string $local){
+		return $this->particles[$local] ?? null;
+	}
 
-    /**
-     * @return array|MineceitParticle[]
-     */
-    public function getParticles() : array {
-        return $this->particles;
-    }
+	/**
+	 * @return array|MineceitParticle[]
+	 */
+	public function getParticles() : array{
+		return $this->particles;
+	}
 }

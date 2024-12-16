@@ -11,146 +11,142 @@ declare(strict_types=1);
 namespace mineceit\data\players;
 
 
-use mineceit\data\mysql\MysqlRow;
-use mineceit\data\mysql\MysqlStream;
 use mineceit\MineceitCore;
 use mineceit\MineceitUtil;
-use mineceit\player\language\Language;
 use mineceit\player\MineceitPlayer;
+use mysqli;
 use pocketmine\scheduler\AsyncTask;
 
-class AsyncSavePlayerData extends AsyncTask
-{
+class AsyncSavePlayerData extends AsyncTask{
 
-    /** @var string */
-    private $name;
+	/** @var string */
+	private $name;
 
-    /** @var string */
-    private $path;
+	/** @var string */
+	private $path;
 
-    /** @var bool */
-    private $isMysql = MineceitCore::MYSQL_ENABLED;
+	/** @var bool */
+	private $isMysql = MineceitCore::MYSQL_ENABLED;
 
-    /** @var array */
-    private $yamlInfo;
+	/** @var array */
+	private $yamlInfo;
 
-    /** @var string */
-    private $username;
+	/** @var string */
+	private $username;
 
-    /** @var string -> The ip of the db */
-    private $host;
+	/** @var string -> The ip of the db */
+	private $host;
 
-    /** @var string */
-    private $password;
+	/** @var string */
+	private $password;
 
-    /** @var int */
-    private $port;
+	/** @var int */
+	private $port;
 
-    /** @var string */
-    private $database;
+	/** @var string */
+	private $database;
 
-    /** @var array */
-    private $mysqlStream;
+	/** @var array */
+	private $mysqlStream;
 
-    /**
-     * AsyncSavePlayerData constructor.
-     * @param MineceitPlayer $player
-     * @param string $path
-     */
-    public function __construct(MineceitPlayer $player, string $path)
-    {
-        $this->name = $player->getName();
-        $this->path = $path;
+	/**
+	 * AsyncSavePlayerData constructor.
+	 *
+	 * @param MineceitPlayer $player
+	 * @param string         $path
+	 */
+	public function __construct(MineceitPlayer $player, string $path){
+		$this->name = $player->getName();
+		$this->path = $path;
 
-        $this->yamlInfo = [
-            'kills' => $player->getKills(), // Stats
-            'deaths' => $player->getDeaths(), // Stats
-            'scoreboards-enabled' => $player->isScoreboardEnabled(), // Settings
-            'pe-only' => $player->isPeOnly(), // Settings
-            'place-break' => $player->isBuilderModeEnabled(), // Settings
-            // 'permissions' => $player->getPermissions(),
-            'muted' => $player->isMuted(), // Settings
-            'language' => $player->getLanguage()->getLocale(), // Settings
-            'particles' => $player->isParticlesEnabled(), // Settings
-            'tag' => $player->getCustomTag(), // Settings
-            'elo' => $player->getElo(), // Elo
-            'ranks' => $player->getRanks(true), // Ranks
-            'translate' => $player->doesTranslateMessages(), // Settings
-            'swish-sound' => $player->isSwishEnabled(),
-            'lastTimePlayed' => time(),
-            'change-tag' => $player->canChangeTag(),
-            'limited-features' => $player->getLimitedFeaturesTime(),
-            'lightning-enabled' => $player->lightningEnabled()
-        ];
+		$this->yamlInfo = [
+			'kills' => $player->getKills(), // Stats
+			'deaths' => $player->getDeaths(), // Stats
+			'scoreboards-enabled' => $player->isScoreboardEnabled(), // Settings
+			'pe-only' => $player->isPeOnly(), // Settings
+			'place-break' => $player->isBuilderModeEnabled(), // Settings
+			// 'permissions' => $player->getPermissions(),
+			'muted' => $player->isMuted(), // Settings
+			'language' => $player->getLanguage()->getLocale(), // Settings
+			'particles' => $player->isParticlesEnabled(), // Settings
+			'tag' => $player->getCustomTag(), // Settings
+			'elo' => $player->getElo(), // Elo
+			'ranks' => $player->getRanks(true), // Ranks
+			'translate' => $player->doesTranslateMessages(), // Settings
+			'swish-sound' => $player->isSwishEnabled(),
+			'lastTimePlayed' => time(),
+			'change-tag' => $player->canChangeTag(),
+			'limited-features' => $player->getLimitedFeaturesTime(),
+			'lightning-enabled' => $player->lightningEnabled()
+		];
 
-        $stream = MineceitUtil::getMysqlStream($player, true);
+		$stream = MineceitUtil::getMysqlStream($player, true);
 
-        $this->host = $stream->host;
+		$this->host = $stream->host;
 
-        $this->username = $stream->username;
+		$this->username = $stream->username;
 
-        $this->password = $stream->password;
+		$this->password = $stream->password;
 
-        $this->database = $stream->database;
+		$this->database = $stream->database;
 
-        $this->port = $stream->port;
+		$this->port = $stream->port;
 
-        $this->mysqlStream = $stream->getStream();
-    }
+		$this->mysqlStream = $stream->getStream();
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @return void
-     */
-    public function onRun()
-    {
+	/**
+	 * Actions to execute when run
+	 *
+	 * @return void
+	 */
+	public function onRun(){
 
-        $info = (array)$this->yamlInfo;
+		$info = (array) $this->yamlInfo;
 
-        $keys = array_keys($info);
+		$keys = array_keys($info);
 
-        if (!$this->isMysql) {
+		if(!$this->isMysql){
 
-            $parsed = yaml_parse_file($this->path, 0);
+			$parsed = yaml_parse_file($this->path, 0);
 
-            foreach($keys as $key) {
+			foreach($keys as $key){
 
-                $dataInfo = $info[$key];
-                switch($key) {
-                    case 'ranks':
-                    // case 'permissions':
-                    case 'elo':
-                        $dataInfo = (array)$info[$key];
-                        break;
-                }
-                $parsed[$key] = $dataInfo;
-            }
+				$dataInfo = $info[$key];
+				switch($key){
+					case 'ranks':
+						// case 'permissions':
+					case 'elo':
+						$dataInfo = (array) $info[$key];
+						break;
+				}
+				$parsed[$key] = $dataInfo;
+			}
 
-            yaml_emit_file($this->path, $parsed);
+			yaml_emit_file($this->path, $parsed);
 
-        } else {
+		}else{
 
-            $stream = (array)$this->mysqlStream;
+			$stream = (array) $this->mysqlStream;
 
-            $mysql = new \mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
+			$mysql = new mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
 
-            if ($mysql->connect_error) {
-                var_dump("Unable to connect");
-                // TODO
-                return;
-            }
+			if($mysql->connect_error){
+				var_dump("Unable to connect");
+				// TODO
+				return;
+			}
 
-            foreach($stream as $query) {
+			foreach($stream as $query){
 
-                $querySuccess = $mysql->query($query);
+				$querySuccess = $mysql->query($query);
 
-                if($querySuccess === FALSE) {
-                    var_dump("FAILED [SAVE PLAYER]: $query\n{$mysql->error}");
-                }
-            }
+				if($querySuccess === false){
+					var_dump("FAILED [SAVE PLAYER]: $query\n{$mysql->error}");
+				}
+			}
 
-            $mysql->close();
-        }
-    }
+			$mysql->close();
+		}
+	}
 }

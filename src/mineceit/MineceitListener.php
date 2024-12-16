@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace mineceit;
 
+use Exception;
 use mineceit\commands\MineceitCommand;
 use mineceit\fixes\player\PMPlayer;
 use mineceit\game\entities\ReplayHuman;
@@ -65,942 +66,919 @@ use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-class MineceitListener implements Listener
-{
-
-    /* @var Server */
-    private $server;
-
-    /* @var MineceitCore */
-    private $core;
-
-    public function __construct(MineceitCore $core)
-    {
-        $this->server = $core->getServer();
-        $this->core = $core;
-    }
-
-    /**
-     * @param PlayerCreationEvent $event
-     */
-    public function onPlayerCreation(PlayerCreationEvent $event): void
-    {
-        $player = MineceitPlayer::class;
-        $base = PMPlayer::class;
-        $event->setBaseClass($base);
-        $event->setPlayerClass($player);
-    }
-
-    /**
-     * @param PlayerChangeSkinEvent $event
-     */
-    public function onPlayerChangeSkin(PlayerChangeSkinEvent $event): void
-    {
-
-        $newSkin = $event->getNewSkin();
-
-        $skinData = SkinAdapterSingleton::get()->toSkinData($newSkin);
-
-        $skinData = new SkinInfo($skinData);
-
-        if (!$skinData->isValidSkin()) {
-            try {
-                $skin = new Skin("Standard_Custom", str_repeat(random_bytes(3) . "\xff", 2048));
-                $event->setNewSkin($skin);
-            } catch (\Exception $e) {
-                $event->setNewSkin($event->getOldSkin());
-            }
-        }
-    }
-
-    /**
-     * @param PlayerPreLoginEvent $event
-     */
-    public function onPreLogin(PlayerPreLoginEvent $event): void
-    {
-
-        $player = $event->getPlayer();
-
-        if ($player instanceof MineceitPlayer) {
-
-            // $ip = $player->getAddress();
-            $skinData = SkinAdapterSingleton::get()->toSkinData($player->getSkin());
-
-            $skinData = new SkinInfo($skinData);
-
-            if (!$skinData->isValidSkin()) {
-                try {
-                    $skin = new Skin("Standard_Custom", str_repeat(random_bytes(3) . "\xff", 2048));
-                    $player->setSkin($skin);
-                } catch (\Exception $e) {
-                    $player->kick("Invalid skin.");
-                    return;
-                }
-            }
-        }
-    }
-
-    /**
-     * @param PlayerJoinEvent $event
-     */
-    public function onJoin(PlayerJoinEvent $event): void
-    {
-
-        $player = $event->getPlayer();
-
-        $playerHandler = MineceitCore::getPlayerHandler();
-
-        if ($player instanceof MineceitPlayer) {
-
-            $address = $player->getAddress();
-            if (MineceitCore::PROXY_ENABLED && $address !== "127.0.0.1") {
-                $player->transfer("mineceit.ml", 19132);
-            }
+class MineceitListener implements Listener{
+
+	/* @var Server */
+	private $server;
+
+	/* @var MineceitCore */
+	private $core;
 
+	public function __construct(MineceitCore $core){
+		$this->server = $core->getServer();
+		$this->core = $core;
+	}
 
-            if ($playerHandler->doKickOnJoin($player)) {
-                $event->setJoinMessage("");
-                return;
-            }
+	/**
+	 * @param PlayerCreationEvent $event
+	 */
+	public function onPlayerCreation(PlayerCreationEvent $event) : void{
+		$player = MineceitPlayer::class;
+		$base = PMPlayer::class;
+		$event->setBaseClass($base);
+		$event->setPlayerClass($player);
+	}
+
+	/**
+	 * @param PlayerChangeSkinEvent $event
+	 */
+	public function onPlayerChangeSkin(PlayerChangeSkinEvent $event) : void{
+
+		$newSkin = $event->getNewSkin();
+
+		$skinData = SkinAdapterSingleton::get()->toSkinData($newSkin);
+
+		$skinData = new SkinInfo($skinData);
+
+		if(!$skinData->isValidSkin()){
+			try{
+				$skin = new Skin("Standard_Custom", str_repeat(random_bytes(3) . "\xff", 2048));
+				$event->setNewSkin($skin);
+			}catch(Exception $e){
+				$event->setNewSkin($event->getOldSkin());
+			}
+		}
+	}
 
-            // $players = $this->server->getOnlinePlayers();
+	/**
+	 * @param PlayerPreLoginEvent $event
+	 */
+	public function onPreLogin(PlayerPreLoginEvent $event) : void{
 
-            /* foreach($players as $p) {
-                if($p instanceof MineceitPlayer and $p->getName() !== $player->getName() and $p->isInHub()) {
-                    if(!$p->isDisplayPlayers())
-                        $p->hidePlayer($player);
-                }
-            } */
+		$player = $event->getPlayer();
 
-            $level = $this->server->getDefaultLevel();
-            $pos = $level->getSpawnLocation();
-            $player->teleport($pos);
+		if($player instanceof MineceitPlayer){
 
-            $playerHandler->loadPlayerData($player);
+			// $ip = $player->getAddress();
+			$skinData = SkinAdapterSingleton::get()->toSkinData($player->getSkin());
 
-            $player->reset();
-            $player->onJoin();
+			$skinData = new SkinInfo($skinData);
 
-            ScoreboardUtil::updateSpawnScoreboard(ScoreboardUtil::ONLINE_PLAYERS, $player);
+			if(!$skinData->isValidSkin()){
+				try{
+					$skin = new Skin("Standard_Custom", str_repeat(random_bytes(3) . "\xff", 2048));
+					$player->setSkin($skin);
+				}catch(Exception $e){
+					$player->kick("Invalid skin.");
+					return;
+				}
+			}
+		}
+	}
 
-            $event->setJoinMessage(MineceitUtil::getJoinMessage($player));
-        }
-    }
+	/**
+	 * @param PlayerJoinEvent $event
+	 */
+	public function onJoin(PlayerJoinEvent $event) : void{
 
-    /**
-     * @param PlayerLoginEvent $event
-     */
-    public function onLogin(PlayerLoginEvent $event): void
-    {
-        $player = $event->getPlayer();
-        $ipManager = MineceitCore::getPlayerHandler()->getIPManager();
-        if ($player instanceof MineceitPlayer) {
-            $ipManager->checkIPSafe($player);
-        }
-    }
+		$player = $event->getPlayer();
 
-    /**
-     * @param PlayerQuitEvent $event
-     */
-    public function onLeave(PlayerQuitEvent $event): void
-    {
-        $player = $event->getPlayer();
+		$playerHandler = MineceitCore::getPlayerHandler();
 
-        if($player instanceof MineceitPlayer) {
+		if($player instanceof MineceitPlayer){
 
-            $duelHandler = MineceitCore::getDuelHandler();
+			$address = $player->getAddress();
+			if(MineceitCore::PROXY_ENABLED && $address !== "127.0.0.1"){
+				$player->transfer("mineceit.ml", 19132);
+			}
 
-            $playerHandler = MineceitCore::getPlayerHandler();
 
-            $partyManager = MineceitCore::getPartyManager();
+			if($playerHandler->doKickOnJoin($player)){
+				$event->setJoinMessage("");
+				return;
+			}
 
-            if ($player->isInQueue()) {
-                $duelHandler->removeFromQueue($player, false);
-            }
+			// $players = $this->server->getOnlinePlayers();
 
-            if ($player->isFrozen()) {
-                $player->setLimitedFeatureMode(true, false);
-            }
+			/* foreach($players as $p) {
+				if($p instanceof MineceitPlayer and $p->getName() !== $player->getName() and $p->isInHub()) {
+					if(!$p->isDisplayPlayers())
+						$p->hidePlayer($player);
+				}
+			} */
 
-            if ($player->isInEvent()) {
-                $theEvent = MineceitCore::getEventManager()->getEventFromPlayer($player);
-                $theEvent->removePlayer($player, false);
-            }
+			$level = $this->server->getDefaultLevel();
+			$pos = $level->getSpawnLocation();
+			$player->teleport($pos);
 
-            if ($player->isInParty()) {
+			$playerHandler->loadPlayerData($player);
 
-                $party = $partyManager->getPartyFromPlayer($player);
+			$player->reset();
+			$player->onJoin();
 
-                $partyEvent = $partyManager->getEventManager()->getPartyEvent($party);
+			ScoreboardUtil::updateSpawnScoreboard(ScoreboardUtil::ONLINE_PLAYERS, $player);
 
-                if ($partyEvent !== null) {
-                    $partyEvent->removeFromEvent($player);
-                }
+			$event->setJoinMessage(MineceitUtil::getJoinMessage($player));
+		}
+	}
 
-                $party->removePlayer($player);
-            }
+	/**
+	 * @param PlayerLoginEvent $event
+	 */
+	public function onLogin(PlayerLoginEvent $event) : void{
+		$player = $event->getPlayer();
+		$ipManager = MineceitCore::getPlayerHandler()->getIPManager();
+		if($player instanceof MineceitPlayer){
+			$ipManager->checkIPSafe($player);
+		}
+	}
 
-            if ($player->isInDuel()) {
-                $duel = $duelHandler->getDuel($player);
-                $opponent = $duel->getOpponent($player);
-                if ($duel->isRunning() && $opponent !== null) {
-                    $duel->setEnded($opponent);
-                } elseif ($duel->isCountingDown()) {
-                    $duel->setEnded(null, false);
-                }
-            }
+	/**
+	 * @param PlayerQuitEvent $event
+	 */
+	public function onLeave(PlayerQuitEvent $event) : void{
+		$player = $event->getPlayer();
 
-            if ($player->isInCombat() && $player->isInArena()) {
+		if($player instanceof MineceitPlayer){
 
-                $lastDamageCause = $player->getLastDamageCause();
+			$duelHandler = MineceitCore::getDuelHandler();
 
-                if ($lastDamageCause !== null && $lastDamageCause instanceof EntityDamageByEntityEvent) {
+			$playerHandler = MineceitCore::getPlayerHandler();
 
-                    $cause = $lastDamageCause->getDamager();
+			$partyManager = MineceitCore::getPartyManager();
 
-                    if ($cause instanceof MineceitPlayer && $cause->isOnline() && $cause->isInArena()) {
+			if($player->isInQueue()){
+				$duelHandler->removeFromQueue($player, false);
+			}
 
-                        $cause->addKill();
-                        $cause->setInCombat(false);
-                        // TODO ADD CUSTOM DEATH MESSAGES
-                        $message = MineceitUtil::getDeathMessage($player->getName(), $lastDamageCause);
-                        $this->server->broadcastMessage($message);
-                    }
-                }
-                $player->addDeath();
-                $player->setInCombat(false, false);
-            }
+			if($player->isFrozen()){
+				$player->setLimitedFeatureMode(true, false);
+			}
 
-            $duelHandler->getRequestHandler()->removeAllRequestsWith($player);
+			if($player->isInEvent()){
+				$theEvent = MineceitCore::getEventManager()->getEventFromPlayer($player);
+				$theEvent->removePlayer($player, false);
+			}
 
-            $playerHandler->savePlayerData($player);
+			if($player->isInParty()){
 
-            $event->setQuitMessage(MineceitUtil::getLeaveMessage($player));
+				$party = $partyManager->getPartyFromPlayer($player);
 
-            $this->core->getScheduler()->scheduleDelayedTask(new DelayScoreboardUpdate(ScoreboardUtil::ONLINE_PLAYERS, $player), 3);
-        }
-    }
+				$partyEvent = $partyManager->getEventManager()->getPartyEvent($party);
 
-    /**
-     * @param PlayerKickEvent $event
-     */
-    public function onKick(PlayerKickEvent $event): void
-    {
+				if($partyEvent !== null){
+					$partyEvent->removeFromEvent($player);
+				}
 
-        $player = $event->getPlayer();
+				$party->removePlayer($player);
+			}
 
-        $duelHandler = MineceitCore::getDuelHandler();
+			if($player->isInDuel()){
+				$duel = $duelHandler->getDuel($player);
+				$opponent = $duel->getOpponent($player);
+				if($duel->isRunning() && $opponent !== null){
+					$duel->setEnded($opponent);
+				}elseif($duel->isCountingDown()){
+					$duel->setEnded(null, false);
+				}
+			}
 
-        $playerHandler = MineceitCore::getPlayerHandler();
+			if($player->isInCombat() && $player->isInArena()){
 
-        $eventManager = MineceitCore::getEventManager();
+				$lastDamageCause = $player->getLastDamageCause();
 
-        $partyManager = MineceitCore::getPartyManager();
+				if($lastDamageCause !== null && $lastDamageCause instanceof EntityDamageByEntityEvent){
 
-        if ($player instanceof MineceitPlayer) {
+					$cause = $lastDamageCause->getDamager();
 
-            if ($player->isInQueue()) {
-                $duelHandler->removeFromQueue($player, false);
-            }
+					if($cause instanceof MineceitPlayer && $cause->isOnline() && $cause->isInArena()){
 
-            if ($player->isInEvent()) {
-                $theEvent = $eventManager->getEventFromPlayer($player);
-                $theEvent->removePlayer($player, false);
-            }
+						$cause->addKill();
+						$cause->setInCombat(false);
+						// TODO ADD CUSTOM DEATH MESSAGES
+						$message = MineceitUtil::getDeathMessage($player->getName(), $lastDamageCause);
+						$this->server->broadcastMessage($message);
+					}
+				}
+				$player->addDeath();
+				$player->setInCombat(false, false);
+			}
 
-            if ($player->isInParty()) {
+			$duelHandler->getRequestHandler()->removeAllRequestsWith($player);
 
-                $party = $partyManager->getPartyFromPlayer($player);
+			$playerHandler->savePlayerData($player);
 
-                $eventManager = $partyManager->getEventManager();
+			$event->setQuitMessage(MineceitUtil::getLeaveMessage($player));
 
-                $partyEvent = $eventManager->getPartyEvent($party);
+			$this->core->getScheduler()->scheduleDelayedTask(new DelayScoreboardUpdate(ScoreboardUtil::ONLINE_PLAYERS, $player), 3);
+		}
+	}
 
-                if ($partyEvent !== null)
-                    $partyEvent->removeFromEvent($player);
+	/**
+	 * @param PlayerKickEvent $event
+	 */
+	public function onKick(PlayerKickEvent $event) : void{
 
-                $party->removePlayer($player);
-            }
+		$player = $event->getPlayer();
 
-            if ($player->isInDuel()) {
-                $duel = $duelHandler->getDuel($player);
-                $duel->setEnded(null, false);
-            }
+		$duelHandler = MineceitCore::getDuelHandler();
 
-            if ($player->isInCombat() and $player->isInArena()) {
-                $lastDamageCause = $player->getLastDamageCause();
-                if ($lastDamageCause !== null and $lastDamageCause instanceof EntityDamageByEntityEvent) {
-                    $cause = $lastDamageCause->getDamager();
-                    if ($cause instanceof MineceitPlayer and $cause->isOnline() and $cause->isInArena()) {
-                        $cause->addKill();
-                        $cause->setInCombat(false);
-                    }
-                }
-                $player->setInCombat(false, false);
-            }
+		$playerHandler = MineceitCore::getPlayerHandler();
 
-            $duelHandler->getRequestHandler()->removeAllRequestsWith($player);
+		$eventManager = MineceitCore::getEventManager();
 
-            $playerHandler->savePlayerData($player);
+		$partyManager = MineceitCore::getPartyManager();
 
-            $this->core->getScheduler()->scheduleDelayedTask(new DelayScoreboardUpdate(ScoreboardUtil::ONLINE_PLAYERS, $player), 3);
-        }
-    }
-
-    /**
-     * @param PlayerInteractEvent $event
-     */
-    public function onInteract(PlayerInteractEvent $event): void
-    {
-
-        $action = $event->getAction();
-        $player = $event->getPlayer();
-
-        $item = $event->getItem();
-
-        $itemHandler = MineceitCore::getItemHandler();
-
-        $duelHandler = MineceitCore::getDuelHandler();
-
-        if ($player instanceof MineceitPlayer) {
-
-            if ($player->isPe() and $action === PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
-                $player->addCps(false);
-            }
-
-            $mineceitItem = $itemHandler->getItem($item);
-
-            if ($mineceitItem !== null) {
-
-                $localName = $mineceitItem->getLocalName();
-
-                $partyManager = MineceitCore::getPartyManager();
-
-                $eventManager = MineceitCore::getEventManager();
-
-                if ($player->isInParty()) {
-
-                    $party = $partyManager->getPartyFromPlayer($player);
-
-                    switch ($localName) {
-                        case ItemHandler::PARTY_LEAVE:
-                            $form = FormUtil::getLeavePartyForm($player, $party->isOwner($player));
-                            $player->sendFormWindow($form);
-                            break;
-                        case ItemHandler::PARTY_SETTINGS:
-                            $form = FormUtil::getPartyOptionsForm($party);
-                            $player->sendFormWindow($form);
-                            break;
-                        case ItemHandler::HUB_PLAYER_SETTINGS:
-                            $form = FormUtil::getSettingsMenu($player);
-                            $player->sendFormWindow($form);
-                            break;
-                    }
-
-                } elseif ($player->isInEvent()) {
-
-                    $theEvent = $eventManager->getEventFromPlayer($player);
-
-                    switch ($localName) {
-                        case ItemHandler::SPEC_LEAVE:
-                            $theEvent->removePlayer($player);
-                            break;
-                        case ItemHandler::HUB_PLAYER_SETTINGS:
-                            $form = FormUtil::getSettingsMenu($player);
-                            $player->sendFormWindow($form);
-                            break;
-                    }
-
-                } elseif ($player->isInHub()) {
-
-                    switch ($localName) {
-                        case ItemHandler::HUB_PLAY:
-                            $form = FormUtil::getPlayForm($player);
-                            $player->sendFormWindow($form);
-                            break;
-                        case ItemHandler::HUB_REPORTS_ITEM:
-                            $perms = $player->getReportPermissions();
-                            $form = FormUtil::getReportMenuForm($player, $perms);
-                            $player->sendFormWindow($form, ["perms" => $perms]);
-                            break;
-                        /* case ItemHandler::HUB_PLAY_FFA:
-                            $form = FormUtil::getFFAForm($player);
-                            $player->$this->sendFormWindow($form);
-                            break;
-                        case ItemHandler::HUB_PLAY_UNRANKED_DUELS:
-                            $form = FormUtil::getDuelForm($player, $language->formWindow(Language::DUELS_UNRANKED_FORM_TITLE), false);
-                            $player->$this->sendFormWindow($form, ['ranked' => false]);
-                            break;
-                        case ItemHandler::HUB_PLAY_RANKED_DUELS:
-                            $form = FormUtil::getDuelForm($player, $language->formWindow(Language::DUELS_RANKED_FORM_TITLE), true);
-                            $player->$this->sendFormWindow($form, ['ranked' => true]);
-                            break; */
-                        case ItemHandler::HUB_PLAYER_SETTINGS:
-                            $form = FormUtil::getSettingsMenu($player);
-                            $player->sendFormWindow($form);
-                            break;
-                        case ItemHandler::HUB_LEAVE_QUEUE:
-                            $duelHandler->removeFromQueue($player);
-                            break;
-                        case ItemHandler::HUB_DUEL_HISTORY:
-                            $form = FormUtil::getDuelHistoryForm($player);
-                            $player->sendFormWindow($form);
-                            break;
-                        case ItemHandler::HUB_REQUEST_INBOX:
-                            $requestHandler = MineceitCore::getDuelHandler()->getRequestHandler();
-                            $requests = $requestHandler->getRequestsOf($player);
-                            $form = FormUtil::getDuelInbox($player, $item->getName(), $requests);
-                            $player->sendFormWindow($form, ['requests' => $requests]);
-                            break;
-                        case ItemHandler::HUB_PARTY_ITEM:
-                            $form = FormUtil::getDefaultPartyForm($player);
-                            $party = $partyManager->getPartyFromPlayer($player);
-                            $option = $party !== null ? 'leave' : 'join';
-                            $player->sendFormWindow($form, ['party-option' => $option]);
-                            break;
-                    }
-
-                } elseif ($player->isADuelSpec()) {
-
-                    $duel = $duelHandler->getDuelFromSpec($player);
-
-                    switch ($localName) {
-                        case ItemHandler::SPEC_LEAVE:
-                            $duel->removeSpectator($player);
-                            $player->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
-                            break;
-                    }
-
-                } elseif ($player->isWatchingReplay()) {
-
-                    $replayManager = MineceitCore::getReplayManager();
-
-                    $replay = $replayManager->getReplayFrom($player);
-
-                    switch ($localName) {
-                        case ItemHandler::SPEC_LEAVE:
-                            $replay->endReplay();
-                            break;
-                        case ItemHandler::PAUSE_REPLAY:
-                            $replay->setPaused(true);
-                            break;
-                        case ItemHandler::PLAY_REPLAY:
-                            $replay->setPaused(false);
-                            break;
-                        case ItemHandler::REWIND_REPLAY:
-                            $replay->rewind(5);
-                            break;
-                        case ItemHandler::FAST_FORWARD_REPLAY:
-                            $replay->fastForward(5);
-                            break;
-                    }
-                }
-
-                $event->setCancelled();
-
-            } elseif (!$player->isInHub()) {
-
-                $id = $item->getId();
-
-                if ($id === Item::FISHING_ROD) {
-
-                    $use = false;
-                    if ($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR) {
-                        if ($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
-                            $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
-                        else $use = true;
-                    }
-
-                    if ($use) $player->useRod($item);
-                    else $event->setCancelled();
-
-                } elseif ($id === Item::ENDER_PEARL and $item instanceof EnderPearl) {
-
-                    $use = false;
-                    if ($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR) {
-                        if ($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
-                            $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
-                        else $use = true;
-                    }
-
-                    if ($use and $player->canThrowPearl())
-                        $player->throwPearl($item);
-
-                    $event->setCancelled();
-
-                } elseif ($id === Item::SPLASH_POTION and $item instanceof SplashPotion) {
-
-                    $use = false;
-                    if ($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR) {
-                        if ($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
-                            $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
-                        else $use = true;
-                    }
-
-                    if ($use) {
-                        $player->throwPotion($item);
-                        if ($action === PlayerInteractEvent::RIGHT_CLICK_AIR)
-                            $event->setCancelled();
-                    } else $event->setCancelled();
-
-                } elseif ($player->isInDuel() and $id === Item::BUCKET AND $item->getDamage() === 0) {
-                    $blockClicked = $event->getBlock();
-                    $duel = $duelHandler->getDuel($player);
-                    if ($blockClicked !== null and ($blockClicked instanceof Liquid))
-                        $duel->setLiquidAt(0, $blockClicked);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param EntityDamageEvent $event
-     */
-    public function onEntityDamaged(EntityDamageEvent $event): void
-    {
-
-        $cancel = false;
-
-        $e = $event->getEntity();
-
-        $cause = $event->getCause();
-
-        if ($e instanceof MineceitPlayer) {
-
-            if ($cause === EntityDamageEvent::CAUSE_FALL)
-                $cancel = true;
-            elseif ($e->isFrozen()) {
-                $cancel = true;
-            } elseif ($e->isSpectator() or $e->isADuelSpec() or $e->isWatchingReplay()) {
-                $cancel = true;
-            } elseif ($e->isImmobile() and $e->isInDuel()) {
-                $duel = MineceitCore::getDuelHandler()->getDuel($e);
-                $cancel = $duel->isCountingDown();
-            } elseif ($e->isInEvent() and !$e->isInEventDuel()) {
-                $cancel = true;
-            }
-
-            if ($cancel) {
-                $event->setCancelled();
-                return;
-            }
-
-            if ($e->isInHub()) {
-
-                $cancel = !$e->isInEventDuel();
-
-                if ($cause === EntityDamageEvent::CAUSE_VOID) {
-                    $level = $this->server->getDefaultLevel();
-                    $center = $level->getSpawnLocation();
-                    $e->teleport($center);
-                    $cancel = true;
-                }
-            }
-
-        } elseif ($e instanceof ReplayHuman)
-            $cancel = true;
-
-        $event->setCancelled($cancel);
-
-    }
-
-    /**
-     * @param EntityDamageByEntityEvent $event
-     */
-    public function onEntityDamagedByEntity(EntityDamageByEntityEvent $event): void
-    {
-
-        $cancel = false;
-
-        $e = $event->getEntity();
-
-        if ($e instanceof MineceitPlayer) {
-
-            $cancel = $e->isInHub() or $e->isSpectator() or $e->isADuelSpec() or ($e->isInEvent() and !$e->isInEventDuel());
-
-            if ($event->getDamager() instanceof MineceitPlayer) {
-                $e->disableForChecks(1500);
-            }
-        }
-
-        $event->setCancelled($cancel);
-    }
-
-
-    /**
-     * @param EntityDamageByChildEntityEvent $event
-     */
-    public function onEntityDamagedByChildEntity(EntityDamageByChildEntityEvent $event): void
-    {
-
-        $child = $event->getChild();
-        $e = $event->getDamager();
-
-        if ($child instanceof Arrow and $e instanceof MineceitPlayer) {
-
-            $cancel = $e->isInHub() or $e->isSpectator() or $e->isADuelSpec() or ($e->isInEvent() and !$e->isInEventDuel());
-
-            if (!$cancel) {
-                MineceitUtil::sendArrowDingSound($e);
-            }
-
-            $event->setCancelled($cancel);
-        }
-    }
-
-    /**
-     * @param BlockPlaceEvent $event
-     */
-    public function onBlockPlace(BlockPlaceEvent $event): void
-    {
-
-        $player = $event->getPlayer();
-
-        $block = $event->getBlock();
-
-        $cancel = true;
-
-        if ($player instanceof MineceitPlayer) {
-
-            if ($player->isInDuel()) {
-                $duel = MineceitCore::getDuelHandler()->getDuel($player);
-                $cancel = !$duel->canPlaceBlock($block);
-                if (!$cancel) {
-                    $duel->setBlockAt($block);
-                }
-            } elseif ($player->canBuild()) {
-                $cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
-            }
-        }
-        $event->setCancelled($cancel);
-    }
-
-    /**
-     * @param BlockBreakEvent $event
-     */
-    public function onBlockBreak(BlockBreakEvent $event): void
-    {
-
-        $player = $event->getPlayer();
-
-        $block = $event->getBlock();
-
-        $cancel = true;
-
-        if ($player->isSpectator()) {
-            $event->setCancelled(true);
-            return;
-        }
-
-        if ($player instanceof MineceitPlayer) {
-
-            if ($player->isInDuel()) {
-                $duel = MineceitCore::getDuelHandler()->getDuel($player);
-                $cancel = !$duel->canPlaceBlock($block, true);
-                if (!$cancel) {
-                    $duel->setBlockAt($block, true);
-                    if ($duel->isSpleef()) {
-                        $drops = $event->getDrops();
-                        foreach ($drops as $drop) {
-                            $player->getInventory()->addItem($drop);
-                        }
-                        $event->setDrops([]);
-                    }
-                }
-            } elseif ($player->canBuild()) {
-                $cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena();
-            }
-        }
-        $event->setCancelled($cancel);
-    }
-
-    public function onBucketEmpty(PlayerBucketEmptyEvent $event): void
-    {
+		if($player instanceof MineceitPlayer){
 
-        $player = $event->getPlayer();
-
-        $cancel = true;
-
-        if ($player instanceof MineceitPlayer) {
-
-            if ($player->isInDuel()) {
-                $duel = MineceitCore::getDuelHandler()->getDuel($player);
-                $cancel = !$duel->isRunning() and $duel->getQueue() !== 'Sumo';
-                if (!$cancel) {
-                    $blockClicked = $event->getBlockClicked();
-                    $bucket = $event->getBucket();
-                    $duel->setLiquidAt($bucket->getDamage(), $blockClicked);
-                }
-            } elseif ($player->canBuild()) {
-                $cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
-            }
-        }
+			if($player->isInQueue()){
+				$duelHandler->removeFromQueue($player, false);
+			}
 
-        $event->setCancelled($cancel);
-    }
+			if($player->isInEvent()){
+				$theEvent = $eventManager->getEventFromPlayer($player);
+				$theEvent->removePlayer($player, false);
+			}
 
-    /**
-     * @param PlayerBucketFillEvent $event
-     */
-    public function onBucketFill(PlayerBucketFillEvent $event): void
-    {
+			if($player->isInParty()){
 
-        $player = $event->getPlayer();
+				$party = $partyManager->getPartyFromPlayer($player);
 
-        $cancel = true;
+				$eventManager = $partyManager->getEventManager();
 
-        if ($player instanceof MineceitPlayer) {
+				$partyEvent = $eventManager->getPartyEvent($party);
 
-            if ($player->isInDuel()) {
-                $duel = MineceitCore::getDuelHandler()->getDuel($player);
-                $cancel = !$duel->isRunning() and $duel->getQueue() !== 'Sumo';
-            } elseif ($player->canBuild()) {
-                $cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
-            }
-        }
+				if($partyEvent !== null)
+					$partyEvent->removeFromEvent($player);
 
-        $event->setCancelled($cancel);
-    }
+				$party->removePlayer($player);
+			}
 
-    /**
-     * @param BlockSpreadEvent $event
-     */
-    public function onSpread(BlockSpreadEvent $event): void
-    {
+			if($player->isInDuel()){
+				$duel = $duelHandler->getDuel($player);
+				$duel->setEnded(null, false);
+			}
 
-        $block = $event->getNewState();
+			if($player->isInCombat() and $player->isInArena()){
+				$lastDamageCause = $player->getLastDamageCause();
+				if($lastDamageCause !== null and $lastDamageCause instanceof EntityDamageByEntityEvent){
+					$cause = $lastDamageCause->getDamager();
+					if($cause instanceof MineceitPlayer and $cause->isOnline() and $cause->isInArena()){
+						$cause->addKill();
+						$cause->setInCombat(false);
+					}
+				}
+				$player->setInCombat(false, false);
+			}
 
-        $pos = $event->getBlock();
+			$duelHandler->getRequestHandler()->removeAllRequestsWith($player);
 
-        $level = $pos->getLevel();
+			$playerHandler->savePlayerData($player);
 
-        $duelHandler = MineceitCore::getDuelHandler();
+			$this->core->getScheduler()->scheduleDelayedTask(new DelayScoreboardUpdate(ScoreboardUtil::ONLINE_PLAYERS, $player), 3);
+		}
+	}
 
-        $replayHandler = MineceitCore::getReplayManager();
+	/**
+	 * @param PlayerInteractEvent $event
+	 */
+	public function onInteract(PlayerInteractEvent $event) : void{
 
-        $duel = $level !== null ? $duelHandler->getDuelFromLevel($level->getName()) : null;
+		$action = $event->getAction();
+		$player = $event->getPlayer();
 
-        $cancel = true;
+		$item = $event->getItem();
+
+		$itemHandler = MineceitCore::getItemHandler();
+
+		$duelHandler = MineceitCore::getDuelHandler();
+
+		if($player instanceof MineceitPlayer){
 
-        if ($duel !== null and $block instanceof Liquid) {
-            $duel->setLiquidAt($block->getId(), $pos, $block->getDamage());
-            $cancel = false;
-        } elseif (($replay = $replayHandler->getReplayFromLevel($level)) !== null) {
-            $cancel = $replay->isPaused();
-        }
+			if($player->isPe() and $action === PlayerInteractEvent::RIGHT_CLICK_BLOCK){
+				$player->addCps(false);
+			}
 
-        $event->setCancelled($cancel);
-    }
+			$mineceitItem = $itemHandler->getItem($item);
+
+			if($mineceitItem !== null){
 
+				$localName = $mineceitItem->getLocalName();
 
-    /**
-     * @param BlockFormEvent $event
-     */
-    public function onBlockForm(BlockFormEvent $event): void
-    {
+				$partyManager = MineceitCore::getPartyManager();
 
-        $block = $event->getBlock();
+				$eventManager = MineceitCore::getEventManager();
 
-        $newState = $event->getNewState();
+				if($player->isInParty()){
 
-        $duelHandler = MineceitCore::getDuelHandler();
+					$party = $partyManager->getPartyFromPlayer($player);
 
-        $level = $block->getLevel();
+					switch($localName){
+						case ItemHandler::PARTY_LEAVE:
+							$form = FormUtil::getLeavePartyForm($player, $party->isOwner($player));
+							$player->sendFormWindow($form);
+							break;
+						case ItemHandler::PARTY_SETTINGS:
+							$form = FormUtil::getPartyOptionsForm($party);
+							$player->sendFormWindow($form);
+							break;
+						case ItemHandler::HUB_PLAYER_SETTINGS:
+							$form = FormUtil::getSettingsMenu($player);
+							$player->sendFormWindow($form);
+							break;
+					}
+
+				}elseif($player->isInEvent()){
+
+					$theEvent = $eventManager->getEventFromPlayer($player);
+
+					switch($localName){
+						case ItemHandler::SPEC_LEAVE:
+							$theEvent->removePlayer($player);
+							break;
+						case ItemHandler::HUB_PLAYER_SETTINGS:
+							$form = FormUtil::getSettingsMenu($player);
+							$player->sendFormWindow($form);
+							break;
+					}
+
+				}elseif($player->isInHub()){
+
+					switch($localName){
+						case ItemHandler::HUB_PLAY:
+							$form = FormUtil::getPlayForm($player);
+							$player->sendFormWindow($form);
+							break;
+						case ItemHandler::HUB_REPORTS_ITEM:
+							$perms = $player->getReportPermissions();
+							$form = FormUtil::getReportMenuForm($player, $perms);
+							$player->sendFormWindow($form, ["perms" => $perms]);
+							break;
+						/* case ItemHandler::HUB_PLAY_FFA:
+							$form = FormUtil::getFFAForm($player);
+							$player->$this->sendFormWindow($form);
+							break;
+						case ItemHandler::HUB_PLAY_UNRANKED_DUELS:
+							$form = FormUtil::getDuelForm($player, $language->formWindow(Language::DUELS_UNRANKED_FORM_TITLE), false);
+							$player->$this->sendFormWindow($form, ['ranked' => false]);
+							break;
+						case ItemHandler::HUB_PLAY_RANKED_DUELS:
+							$form = FormUtil::getDuelForm($player, $language->formWindow(Language::DUELS_RANKED_FORM_TITLE), true);
+							$player->$this->sendFormWindow($form, ['ranked' => true]);
+							break; */
+						case ItemHandler::HUB_PLAYER_SETTINGS:
+							$form = FormUtil::getSettingsMenu($player);
+							$player->sendFormWindow($form);
+							break;
+						case ItemHandler::HUB_LEAVE_QUEUE:
+							$duelHandler->removeFromQueue($player);
+							break;
+						case ItemHandler::HUB_DUEL_HISTORY:
+							$form = FormUtil::getDuelHistoryForm($player);
+							$player->sendFormWindow($form);
+							break;
+						case ItemHandler::HUB_REQUEST_INBOX:
+							$requestHandler = MineceitCore::getDuelHandler()->getRequestHandler();
+							$requests = $requestHandler->getRequestsOf($player);
+							$form = FormUtil::getDuelInbox($player, $item->getName(), $requests);
+							$player->sendFormWindow($form, ['requests' => $requests]);
+							break;
+						case ItemHandler::HUB_PARTY_ITEM:
+							$form = FormUtil::getDefaultPartyForm($player);
+							$party = $partyManager->getPartyFromPlayer($player);
+							$option = $party !== null ? 'leave' : 'join';
+							$player->sendFormWindow($form, ['party-option' => $option]);
+							break;
+					}
+
+				}elseif($player->isADuelSpec()){
+
+					$duel = $duelHandler->getDuelFromSpec($player);
+
+					switch($localName){
+						case ItemHandler::SPEC_LEAVE:
+							$duel->removeSpectator($player);
+							$player->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
+							break;
+					}
+
+				}elseif($player->isWatchingReplay()){
+
+					$replayManager = MineceitCore::getReplayManager();
+
+					$replay = $replayManager->getReplayFrom($player);
+
+					switch($localName){
+						case ItemHandler::SPEC_LEAVE:
+							$replay->endReplay();
+							break;
+						case ItemHandler::PAUSE_REPLAY:
+							$replay->setPaused(true);
+							break;
+						case ItemHandler::PLAY_REPLAY:
+							$replay->setPaused(false);
+							break;
+						case ItemHandler::REWIND_REPLAY:
+							$replay->rewind(5);
+							break;
+						case ItemHandler::FAST_FORWARD_REPLAY:
+							$replay->fastForward(5);
+							break;
+					}
+				}
+
+				$event->setCancelled();
+
+			}elseif(!$player->isInHub()){
+
+				$id = $item->getId();
+
+				if($id === Item::FISHING_ROD){
+
+					$use = false;
+					if($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR){
+						if($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
+							$use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+						else $use = true;
+					}
+
+					if($use) $player->useRod($item);
+					else $event->setCancelled();
+
+				}elseif($id === Item::ENDER_PEARL and $item instanceof EnderPearl){
+
+					$use = false;
+					if($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR){
+						if($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
+							$use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+						else $use = true;
+					}
+
+					if($use and $player->canThrowPearl())
+						$player->throwPearl($item);
 
-        if ($level !== null and ($duel = $duelHandler->getDuelFromLevel($level->getName())) !== null) {
-            $duel->setLiquidAt($newState->getId(), $block, $newState->getDamage());
-            return;
-        }
+					$event->setCancelled();
 
-        $event->setCancelled();
-    }
+				}elseif($id === Item::SPLASH_POTION and $item instanceof SplashPotion){
+
+					$use = false;
+					if($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK or $action === PlayerInteractEvent::RIGHT_CLICK_AIR){
+						if($player->getDeviceOS() === MineceitPlayer::WINDOWS_10)
+							$use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+						else $use = true;
+					}
 
+					if($use){
+						$player->throwPotion($item);
+						if($action === PlayerInteractEvent::RIGHT_CLICK_AIR)
+							$event->setCancelled();
+					}else $event->setCancelled();
 
-    /**
-     * @param DataPacketReceiveEvent $event
-     */
-    public function onPacketReceive(DataPacketReceiveEvent $event): void
-    {
+				}elseif($player->isInDuel() and $id === Item::BUCKET and $item->getDamage() === 0){
+					$blockClicked = $event->getBlock();
+					$duel = $duelHandler->getDuel($player);
+					if($blockClicked !== null and ($blockClicked instanceof Liquid))
+						$duel->setLiquidAt(0, $blockClicked);
+				}
+			}
+		}
+	}
 
-        $pkt = $event->getPacket();
+	/**
+	 * @param EntityDamageEvent $event
+	 */
+	public function onEntityDamaged(EntityDamageEvent $event) : void{
 
-        $p = $event->getPlayer();
+		$cancel = false;
 
-        if($p instanceof MineceitPlayer) {
+		$e = $event->getEntity();
 
-            if ($pkt instanceof PlayerActionPacket/* and $pkt->action === PlayerActionPacket::ACTION_START_BREAK */) {
+		$cause = $event->getCause();
 
-                $position = new Position($pkt->x, $pkt->y, $pkt->z, $p->getLevel());
+		if($e instanceof MineceitPlayer){
 
-                $p->setAction($pkt->action);
+			if($cause === EntityDamageEvent::CAUSE_FALL)
+				$cancel = true;
+			elseif($e->isFrozen()){
+				$cancel = true;
+			}elseif($e->isSpectator() or $e->isADuelSpec() or $e->isWatchingReplay()){
+				$cancel = true;
+			}elseif($e->isImmobile() and $e->isInDuel()){
+				$duel = MineceitCore::getDuelHandler()->getDuel($e);
+				$cancel = $duel->isCountingDown();
+			}elseif($e->isInEvent() and !$e->isInEventDuel()){
+				$cancel = true;
+			}
 
-                if ($pkt->action === PlayerActionPacket::ACTION_START_BREAK && !$p->isPe()) {
+			if($cancel){
+				$event->setCancelled();
+				return;
+			}
 
-                    $p->addCps(true, $position);
-                }
+			if($e->isInHub()){
 
-            } elseif ($pkt instanceof LevelSoundEventPacket) {
+				$cancel = !$e->isInEventDuel();
 
-                $sound = $pkt->sound;
-                $sounds = [41 => true, 42 => true, 43 => true];
+				if($cause === EntityDamageEvent::CAUSE_VOID){
+					$level = $this->server->getDefaultLevel();
+					$center = $level->getSpawnLocation();
+					$e->teleport($center);
+					$cancel = true;
+				}
+			}
 
-                if (isset($sounds[$sound])) {
+		}elseif($e instanceof ReplayHuman)
+			$cancel = true;
 
-                    $p->addCps(false);
-                    $inv = $p->getInventory();
+		$event->setCancelled($cancel);
+
+	}
+
+	/**
+	 * @param EntityDamageByEntityEvent $event
+	 */
+	public function onEntityDamagedByEntity(EntityDamageByEntityEvent $event) : void{
+
+		$cancel = false;
+
+		$e = $event->getEntity();
+
+		if($e instanceof MineceitPlayer){
+
+			$cancel = $e->isInHub() or $e->isSpectator() or $e->isADuelSpec() or ($e->isInEvent() and !$e->isInEventDuel());
 
-                    $item = $inv->getItemInHand();
-                    $id = $item->getId();
+			if($event->getDamager() instanceof MineceitPlayer){
+				$e->disableForChecks(1500);
+			}
+		}
+
+		$event->setCancelled($cancel);
+	}
+
+
+	/**
+	 * @param EntityDamageByChildEntityEvent $event
+	 */
+	public function onEntityDamagedByChildEntity(EntityDamageByChildEntityEvent $event) : void{
+
+		$child = $event->getChild();
+		$e = $event->getDamager();
+
+		if($child instanceof Arrow and $e instanceof MineceitPlayer){
+
+			$cancel = $e->isInHub() or $e->isSpectator() or $e->isADuelSpec() or ($e->isInEvent() and !$e->isInEventDuel());
+
+			if(!$cancel){
+				MineceitUtil::sendArrowDingSound($e);
+			}
+
+			$event->setCancelled($cancel);
+		}
+	}
+
+	/**
+	 * @param BlockPlaceEvent $event
+	 */
+	public function onBlockPlace(BlockPlaceEvent $event) : void{
+
+		$player = $event->getPlayer();
+
+		$block = $event->getBlock();
+
+		$cancel = true;
+
+		if($player instanceof MineceitPlayer){
+
+			if($player->isInDuel()){
+				$duel = MineceitCore::getDuelHandler()->getDuel($player);
+				$cancel = !$duel->canPlaceBlock($block);
+				if(!$cancel){
+					$duel->setBlockAt($block);
+				}
+			}elseif($player->canBuild()){
+				$cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
+			}
+		}
+		$event->setCancelled($cancel);
+	}
 
-                    if ($p->isPe()) {
+	/**
+	 * @param BlockBreakEvent $event
+	 */
+	public function onBlockBreak(BlockBreakEvent $event) : void{
 
-                        if ($id === Item::FISHING_ROD) {
-                            $p->useRod($item, true);
-                        } elseif ($id === Item::ENDER_PEARL && $item instanceof EnderPearl && $p->canThrowPearl()) {
-                            $p->throwPearl($item, true);
-                        } elseif ($id === Item::SPLASH_POTION && $item instanceof SplashPotion) {
-                            $p->throwPotion($item, true);
-                        }
-                    }
-                }
-            } elseif ($pkt instanceof InventoryTransactionPacket) {
+		$player = $event->getPlayer();
 
+		$block = $event->getBlock();
 
-                // Initialize time so that we get most accurate representation of consistency as possible.
-                $time = microtime(true);
+		$cancel = true;
 
-                if ($pkt->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM_ON_ENTITY) {
-                    $target = $p->getLevel()->getEntity($pkt->trData->entityRuntimeId);
-                    if ($target === null) {
-                        return;
-                    }
+		if($player->isSpectator()){
+			$event->setCancelled(true);
+			return;
+		}
 
-                    $type = $pkt->trData->actionType;
-                    if ($target instanceof MineceitPlayer && $type === InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_ATTACK) {
-                        if (!$target->isAlive() or !$p->canInteract($target, 8)) {
-                            return;
-                        }
-                        $check = $p->getConsistencyCheck();
-                        $check->checkClick($target, $time);
-                    }
-                }
-            } else if ($pkt instanceof ScriptCustomEventPacket) {
+		if($player instanceof MineceitPlayer){
 
-                var_dump($pkt);
+			if($player->isInDuel()){
+				$duel = MineceitCore::getDuelHandler()->getDuel($player);
+				$cancel = !$duel->canPlaceBlock($block, true);
+				if(!$cancel){
+					$duel->setBlockAt($block, true);
+					if($duel->isSpleef()){
+						$drops = $event->getDrops();
+						foreach($drops as $drop){
+							$player->getInventory()->addItem($drop);
+						}
+						$event->setDrops([]);
+					}
+				}
+			}elseif($player->canBuild()){
+				$cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena();
+			}
+		}
+		$event->setCancelled($cancel);
+	}
 
-                RequestPool::doRequest($pkt->eventData, $p);
-            }
+	public function onBucketEmpty(PlayerBucketEmptyEvent $event) : void{
 
+		$player = $event->getPlayer();
 
-            /* elseif ($pkt instanceof PlayerAuthInputPacket) {
-                var_dump($pkt);
-            }*/
-        }
-    }
+		$cancel = true;
 
+		if($player instanceof MineceitPlayer){
 
-    /**
-     * @param PlayerAnimationEvent $event
-     */
-    public function onAnimated(PlayerAnimationEvent $event): void
-    {
+			if($player->isInDuel()){
+				$duel = MineceitCore::getDuelHandler()->getDuel($player);
+				$cancel = !$duel->isRunning() and $duel->getQueue() !== 'Sumo';
+				if(!$cancel){
+					$blockClicked = $event->getBlockClicked();
+					$bucket = $event->getBucket();
+					$duel->setLiquidAt($bucket->getDamage(), $blockClicked);
+				}
+			}elseif($player->canBuild()){
+				$cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
+			}
+		}
 
-        $p = $event->getPlayer();
+		$event->setCancelled($cancel);
+	}
 
-        if ($p instanceof MineceitPlayer && $p->isInDuel()) {
-            $duel = MineceitCore::getDuelHandler()->getDuel($p);
-            $duel->setAnimationFor($p->getName(), $event->getAnimationType());
-        }
-    }
+	/**
+	 * @param PlayerBucketFillEvent $event
+	 */
+	public function onBucketFill(PlayerBucketFillEvent $event) : void{
 
-    /**
-     * @param PlayerChatEvent $event
-     */
-    public function onChat(PlayerChatEvent $event): void
-    {
+		$player = $event->getPlayer();
 
-        $player = $event->getPlayer();
+		$cancel = true;
 
-        if($player instanceof MineceitPlayer) {
+		if($player instanceof MineceitPlayer){
 
-            $format = MineceitCore::getRankHandler()->formatRanksForChat($player);
+			if($player->isInDuel()){
+				$duel = MineceitCore::getDuelHandler()->getDuel($player);
+				$cancel = !$duel->isRunning() and $duel->getQueue() !== 'Sumo';
+			}elseif($player->canBuild()){
+				$cancel = $player->isSpectator() or $player->isFrozen() or $player->isInParty() or $player->isWatchingReplay() or $player->isInArena() or $player->isInEvent();
+			}
+		}
 
-            if (!$player->canChat()) {
-                $event->setCancelled(true);
-                return;
-            }
+		$event->setCancelled($cancel);
+	}
 
-            $player->setInSpam();
+	/**
+	 * @param BlockSpreadEvent $event
+	 */
+	public function onSpread(BlockSpreadEvent $event) : void{
 
-            MineceitUtil::broadcastTranslatedMessage($player, $format . " " . TextFormat::RESET, $event->getMessage(), $event->getRecipients());
+		$block = $event->getNewState();
 
-            $event->setCancelled(true);
-        }
-    }
+		$pos = $event->getBlock();
 
-    /**
-     * @param PlayerCommandPreprocessEvent $event
-     */
-    public function onCommandPreprocess(PlayerCommandPreprocessEvent $event): void
-    {
+		$level = $pos->getLevel();
 
-        $player = $event->getPlayer();
+		$duelHandler = MineceitCore::getDuelHandler();
 
-        $message = $event->getMessage();
+		$replayHandler = MineceitCore::getReplayManager();
 
-        $firstChar = $message[0];
+		$duel = $level !== null ? $duelHandler->getDuelFromLevel($level->getName()) : null;
 
-        if ($firstChar === '/') {
+		$cancel = true;
 
-            $cancel = false;
+		if($duel !== null and $block instanceof Liquid){
+			$duel->setLiquidAt($block->getId(), $pos, $block->getDamage());
+			$cancel = false;
+		}elseif(($replay = $replayHandler->getReplayFromLevel($level)) !== null){
+			$cancel = $replay->isPaused();
+		}
 
-            $split = explode(' ', $message);
+		$event->setCancelled($cancel);
+	}
 
-            if ($split[0] === "/") {
-                return;
-            }
 
-            $commandName = str_replace('/', '', $split[0]);
+	/**
+	 * @param BlockFormEvent $event
+	 */
+	public function onBlockForm(BlockFormEvent $event) : void{
 
-            $command = $this->server->getCommandMap()->getCommand($commandName);
+		$block = $event->getBlock();
 
-            $tellCommands = ['tell' => true, 'msg' => true, 'w' => true];
+		$newState = $event->getNewState();
 
-            if (!($command instanceof MineceitCommand) && $player instanceof MineceitPlayer) {
+		$duelHandler = MineceitCore::getDuelHandler();
 
-                $cancel = $player->isInDuel() or $player->isInCombat() or $player->isADuelSpec() or $player->isInEventDuel();
-            }
+		$level = $block->getLevel();
 
-            if ($cancel && $commandName !== 'me' && !isset($tellCommands[$commandName])) {
+		if($level !== null and ($duel = $duelHandler->getDuelFromLevel($level->getName())) !== null){
+			$duel->setLiquidAt($newState->getId(), $block, $newState->getDamage());
+			return;
+		}
 
-                $event->setCancelled();
+		$event->setCancelled();
+	}
 
-                $msg = null;
 
-                $language = $player->getLanguage();
+	/**
+	 * @param DataPacketReceiveEvent $event
+	 */
+	public function onPacketReceive(DataPacketReceiveEvent $event) : void{
 
-                if ($player->isInDuel()) {
-                    $msg = $language->generalMessage(Language::COMMAND_FAIL_IN_DUEL);
-                } elseif ($player->isInCombat()) {
-                    $msg = $language->generalMessage(Language::COMMAND_FAIL_IN_COMBAT);
-                }
+		$pkt = $event->getPacket();
 
-                if ($msg !== null) $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		$p = $event->getPlayer();
 
-                return;
-            }
+		if($p instanceof MineceitPlayer){
 
+			if($pkt instanceof PlayerActionPacket/* and $pkt->action === PlayerActionPacket::ACTION_START_BREAK */){
 
-            if ($commandName === 'me' or isset($tellCommands[$commandName])) {
+				$position = new Position($pkt->x, $pkt->y, $pkt->z, $p->getLevel());
 
-                if (!$player->canChat(true)) {
-                    $event->setCancelled();
-                    return;
-                }
+				$p->setAction($pkt->action);
 
-                $player->setInTellSpam();
+				if($pkt->action === PlayerActionPacket::ACTION_START_BREAK && !$p->isPe()){
 
-            }/*  elseif ($player->isOp()) {
+					$p->addCps(true, $position);
+				}
+
+			}elseif($pkt instanceof LevelSoundEventPacket){
+
+				$sound = $pkt->sound;
+				$sounds = [41 => true, 42 => true, 43 => true];
+
+				if(isset($sounds[$sound])){
+
+					$p->addCps(false);
+					$inv = $p->getInventory();
+
+					$item = $inv->getItemInHand();
+					$id = $item->getId();
+
+					if($p->isPe()){
+
+						if($id === Item::FISHING_ROD){
+							$p->useRod($item, true);
+						}elseif($id === Item::ENDER_PEARL && $item instanceof EnderPearl && $p->canThrowPearl()){
+							$p->throwPearl($item, true);
+						}elseif($id === Item::SPLASH_POTION && $item instanceof SplashPotion){
+							$p->throwPotion($item, true);
+						}
+					}
+				}
+			}elseif($pkt instanceof InventoryTransactionPacket){
+
+
+				// Initialize time so that we get most accurate representation of consistency as possible.
+				$time = microtime(true);
+
+				if($pkt->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM_ON_ENTITY){
+					$target = $p->getLevel()->getEntity($pkt->trData->entityRuntimeId);
+					if($target === null){
+						return;
+					}
+
+					$type = $pkt->trData->actionType;
+					if($target instanceof MineceitPlayer && $type === InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_ATTACK){
+						if(!$target->isAlive() or !$p->canInteract($target, 8)){
+							return;
+						}
+						$check = $p->getConsistencyCheck();
+						$check->checkClick($target, $time);
+					}
+				}
+			}else if($pkt instanceof ScriptCustomEventPacket){
+
+				var_dump($pkt);
+
+				RequestPool::doRequest($pkt->eventData, $p);
+			}
+
+
+			/* elseif ($pkt instanceof PlayerAuthInputPacket) {
+				var_dump($pkt);
+			}*/
+		}
+	}
+
+
+	/**
+	 * @param PlayerAnimationEvent $event
+	 */
+	public function onAnimated(PlayerAnimationEvent $event) : void{
+
+		$p = $event->getPlayer();
+
+		if($p instanceof MineceitPlayer && $p->isInDuel()){
+			$duel = MineceitCore::getDuelHandler()->getDuel($p);
+			$duel->setAnimationFor($p->getName(), $event->getAnimationType());
+		}
+	}
+
+	/**
+	 * @param PlayerChatEvent $event
+	 */
+	public function onChat(PlayerChatEvent $event) : void{
+
+		$player = $event->getPlayer();
+
+		if($player instanceof MineceitPlayer){
+
+			$format = MineceitCore::getRankHandler()->formatRanksForChat($player);
+
+			if(!$player->canChat()){
+				$event->setCancelled(true);
+				return;
+			}
+
+			$player->setInSpam();
+
+			MineceitUtil::broadcastTranslatedMessage($player, $format . " " . TextFormat::RESET, $event->getMessage(), $event->getRecipients());
+
+			$event->setCancelled(true);
+		}
+	}
+
+	/**
+	 * @param PlayerCommandPreprocessEvent $event
+	 */
+	public function onCommandPreprocess(PlayerCommandPreprocessEvent $event) : void{
+
+		$player = $event->getPlayer();
+
+		$message = $event->getMessage();
+
+		$firstChar = $message[0];
+
+		if($firstChar === '/'){
+
+			$cancel = false;
+
+			$split = explode(' ', $message);
+
+			if($split[0] === "/"){
+				return;
+			}
+
+			$commandName = str_replace('/', '', $split[0]);
+
+			$command = $this->server->getCommandMap()->getCommand($commandName);
+
+			$tellCommands = ['tell' => true, 'msg' => true, 'w' => true];
+
+			if(!($command instanceof MineceitCommand) && $player instanceof MineceitPlayer){
+
+				$cancel = $player->isInDuel() or $player->isInCombat() or $player->isADuelSpec() or $player->isInEventDuel();
+			}
+
+			if($cancel && $commandName !== 'me' && !isset($tellCommands[$commandName])){
+
+				$event->setCancelled();
+
+				$msg = null;
+
+				$language = $player->getLanguage();
+
+				if($player->isInDuel()){
+					$msg = $language->generalMessage(Language::COMMAND_FAIL_IN_DUEL);
+				}elseif($player->isInCombat()){
+					$msg = $language->generalMessage(Language::COMMAND_FAIL_IN_COMBAT);
+				}
+
+				if($msg !== null) $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+
+				return;
+			}
+
+
+			if($commandName === 'me' or isset($tellCommands[$commandName])){
+
+				if(!$player->canChat(true)){
+					$event->setCancelled();
+					return;
+				}
+
+				$player->setInTellSpam();
+
+			}/*  elseif ($player->isOp()) {
 
                 if($commandName === 'op' or $commandName === 'deop') {
 
@@ -1023,121 +1001,117 @@ class MineceitListener implements Listener
                     }
                 }
             } */
-        }
-    }
+		}
+	}
 
-    /**
-     * @param InventoryTransactionEvent $event
-     */
-    public function onItemMoved(InventoryTransactionEvent $event): void
-    {
+	/**
+	 * @param InventoryTransactionEvent $event
+	 */
+	public function onItemMoved(InventoryTransactionEvent $event) : void{
 
-        $transaction = $event->getTransaction();
+		$transaction = $event->getTransaction();
 
-        $player = $transaction->getSource();
+		$player = $transaction->getSource();
 
-        $actions = $transaction->getActions();
+		$actions = $transaction->getActions();
 
-        if ($player instanceof MineceitPlayer) {
+		if($player instanceof MineceitPlayer){
 
-            if ($player->isInHub()) {
+			if($player->isInHub()){
 
-                $testInv = false;
+				$testInv = false;
 
-                $permToPlaceNBreak = $player->isOp() or $player->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE);
+				$permToPlaceNBreak = $player->isOp() or $player->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE);
 
-                if ($permToPlaceNBreak) {
-                    $testInv = $player->canBuild();
-                } else {
-                    $event->setCancelled();
-                }
+				if($permToPlaceNBreak){
+					$testInv = $player->canBuild();
+				}else{
+					$event->setCancelled();
+				}
 
-                if ($testInv and !$event->isCancelled()) {
+				if($testInv and !$event->isCancelled()){
 
-                    foreach ($actions as $action) {
+					foreach($actions as $action){
 
-                        if ($action instanceof SlotChangeAction) {
+						if($action instanceof SlotChangeAction){
 
-                            $inventory = $action->getInventory();
+							$inventory = $action->getInventory();
 
-                            if ($inventory instanceof MineceitBaseInv) {
+							if($inventory instanceof MineceitBaseInv){
 
-                                $menu = $inventory->getMenu();
+								$menu = $inventory->getMenu();
 
-                                $menu->onItemMoved($player, $action);
+								$menu->onItemMoved($player, $action);
 
-                                if (!$menu->canEdit()) {
-                                    $event->setCancelled();
-                                    return;
-                                }
+								if(!$menu->canEdit()){
+									$event->setCancelled();
+									return;
+								}
 
-                            }
-                        }
-                    }
+							}
+						}
+					}
 
-                } else {
+				}else{
 
-                    $event->setCancelled(!$testInv);
-                }
-            }
-        }
-    }
+					$event->setCancelled(!$testInv);
+				}
+			}
+		}
+	}
 
-    /**
-     * @param EntityShootBowEvent $event
-     */
-    public function onShootBow(EntityShootBowEvent $event): void
-    {
+	/**
+	 * @param EntityShootBowEvent $event
+	 */
+	public function onShootBow(EntityShootBowEvent $event) : void{
 
-        $e = $event->getEntity();
+		$e = $event->getEntity();
 
-        if ($e instanceof MineceitPlayer and $e->isInDuel()) {
-            $duel = MineceitCore::getDuelHandler()->getDuel($e);
-            if ($duel->isCountingDown()) {
-                $event->setCancelled();
-                return;
-            }
-            $duel->setReleaseBow($e, $event->getForce());
-        }
-    }
+		if($e instanceof MineceitPlayer and $e->isInDuel()){
+			$duel = MineceitCore::getDuelHandler()->getDuel($e);
+			if($duel->isCountingDown()){
+				$event->setCancelled();
+				return;
+			}
+			$duel->setReleaseBow($e, $event->getForce());
+		}
+	}
 
-    /**
-     * @param PluginDisableEvent $event
-     */
-    public function onPluginDisable(PluginDisableEvent $event): void
-    {
+	/**
+	 * @param PluginDisableEvent $event
+	 */
+	public function onPluginDisable(PluginDisableEvent $event) : void{
 
-        $plugin = $event->getPlugin();
+		$plugin = $event->getPlugin();
 
-        if ($plugin instanceof MineceitCore) {
+		if($plugin instanceof MineceitCore){
 
-            $playerHandler = MineceitCore::getPlayerHandler();
+			$playerHandler = MineceitCore::getPlayerHandler();
 
-            $playerHandler->getIPManager()->save();
-            $playerHandler->getAliasManager()->save();
+			$playerHandler->getIPManager()->save();
+			$playerHandler->getAliasManager()->save();
 
-            $players = $plugin->getServer()->getOnlinePlayers();
-            foreach ($players as $player) {
-                if($player instanceof MineceitPlayer) {
-                    $playerHandler->savePlayerData($player);
-                }
-            }
-        }
-    }
+			$players = $plugin->getServer()->getOnlinePlayers();
+			foreach($players as $player){
+				if($player instanceof MineceitPlayer){
+					$playerHandler->savePlayerData($player);
+				}
+			}
+		}
+	}
 
-    /**
-     * @param QueryRegenerateEvent $event
-     */
-    public function onQueryRegenEvent(QueryRegenerateEvent $event): void
-    {
+	/**
+	 * @param QueryRegenerateEvent $event
+	 */
+	public function onQueryRegenEvent(QueryRegenerateEvent $event) : void{
 
-        /* $leaderboards = MineceitCore::getLeaderboards();
+		/* $leaderboards = MineceitCore::getLeaderboards();
 
-        $encoded_elo = json_encode($leaderboards->getEloLeaderboards());
-        $encoded_stats = json_encode($leaderboards->getStatsLeaderboards());
+		$encoded_elo = json_encode($leaderboards->getEloLeaderboards());
+		$encoded_stats = json_encode($leaderboards->getStatsLeaderboards());
 
-        $event->setExtraData(["elo-leaderboards" => $encoded_elo, 'stats-leaderboards' => $encoded_stats]); */
+		$event->setExtraData(["elo-leaderboards" => $encoded_elo, 'stats-leaderboards' => $encoded_stats]); */
 
-        // TODO FIX -> CAUSES A LOT OF LAG
-    }
+		// TODO FIX -> CAUSES A LOT OF LAG
+	}
 }

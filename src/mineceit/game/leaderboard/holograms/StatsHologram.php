@@ -17,98 +17,96 @@ use pocketmine\level\particle\FloatingTextParticle;
 use pocketmine\math\Vector3;
 use pocketmine\utils\TextFormat;
 
-class StatsHologram extends LeaderboardHologram
-{
+class StatsHologram extends LeaderboardHologram{
 
-    public function __construct(Vector3 $vec3, Level $level, bool $build, Leaderboards $leaderboards = null)
-    {
-        parent::__construct($vec3, $level, $leaderboards);
-        $this->leaderboardKeys = $leaderboards->getLeaderboardKeys(false);
-        if($build) {
-            $this->placeFloatingHologram(false);
-        }
-    }
+	public function __construct(Vector3 $vec3, Level $level, bool $build, Leaderboards $leaderboards = null){
+		parent::__construct($vec3, $level, $leaderboards);
+		$this->leaderboardKeys = $leaderboards->getLeaderboardKeys(false);
+		if($build){
+			$this->placeFloatingHologram(false);
+		}
+	}
 
-    /**
-     *
-     * @param bool $updateKey
-     *
-     * Places the hologram down into the world.
-     */
-    protected function placeFloatingHologram(bool $updateKey = true): void
-    {
-        $len = count($this->leaderboardKeys) - 1;
+	/**
+	 *
+	 * @param bool $updateKey
+	 *
+	 * Places the hologram down into the world.
+	 */
+	protected function placeFloatingHologram(bool $updateKey = true) : void{
+		$len = count($this->leaderboardKeys) - 1;
 
-        $key = $this->leaderboardKeys[$this->currentKey];
+		$key = $this->leaderboardKeys[$this->currentKey];
 
-        $text = $this->leaderboards->getStatsLeaderboardOf($key);
+		$text = $this->leaderboards->getStatsLeaderboardOf($key);
 
-        if($updateKey) {
-            $this->currentKey++;
-        }
+		if($updateKey){
+			$this->currentKey++;
+		}
 
-        if($this->currentKey > $len)
-            $this->currentKey = 0;
+		if($this->currentKey > $len)
+			$this->currentKey = 0;
 
-        $string = '';
+		$string = '';
 
-        $count = 0;
+		$count = 0;
 
-        $players = array_keys($text);
+		$players = array_keys($text);
 
-        $size = count($text);
+		$size = count($text);
 
-        if ($size > 0) {
+		if($size > 0){
 
-            $keyName = $this->getNameFromKey($key);
+			$keyName = $this->getNameFromKey($key);
 
-            $title = TextFormat::BLUE . TextFormat::BOLD . $keyName . ' Leaderboards';
+			$title = TextFormat::BLUE . TextFormat::BOLD . $keyName . ' Leaderboards';
 
-            foreach ($players as $name) {
+			foreach($players as $name){
 
-                if ($count > 9) break;
+				if($count > 9) break;
 
-                $line = $count === 9 ? "" : "\n";
+				$line = $count === 9 ? "" : "\n";
 
-                $stat = $text[$name];
-                $place = $count + 1;
-                $format = TextFormat::GRAY . $place . '. ' . TextFormat::GOLD . $name . ' ' . TextFormat::DARK_GRAY . '(' . TextFormat::WHITE . $stat . TextFormat::DARK_GRAY . ')' . $line;
-                $string .= $format;
+				$stat = $text[$name];
+				$place = $count + 1;
+				$format = TextFormat::GRAY . $place . '. ' . TextFormat::GOLD . $name . ' ' . TextFormat::DARK_GRAY . '(' . TextFormat::WHITE . $stat . TextFormat::DARK_GRAY . ')' . $line;
+				$string .= $format;
 
-                $count++;
-            }
+				$count++;
+			}
 
-            if ($this->floatingText === null)
-                $this->floatingText = new FloatingTextParticle($this->vec3, $string, $title);
-            else {
-                $this->floatingText->setTitle($title);
-                $this->floatingText->setText($string);
-            }
+			if($this->floatingText === null)
+				$this->floatingText = new FloatingTextParticle($this->vec3, $string, $title);
+			else{
+				$this->floatingText->setTitle($title);
+				$this->floatingText->setText($string);
+			}
 
-            $this->level->addParticle($this->floatingText);
-        }
-    }
+			$this->level->addParticle($this->floatingText);
+		}
+	}
 
-    /**
-     * @param string $key
-     * @return string
-     */
-    private function getNameFromKey(string $key) : string {
+	/**
+	 * @param string $key
+	 *
+	 * @return string
+	 */
+	private function getNameFromKey(string $key) : string{
 
-        $result = 'Unknown';
+		$result = 'Unknown';
 
-        switch($key) {
-            case 'kdr':
-                $result = "KDR";
-                break;
-            case 'kills':
-                $result = 'Kills';
-                break;
-            case 'deaths':
-                $result = 'Deaths';
-                break;
-        }
+		switch($key){
+			case 'kdr':
+				$result = "KDR";
+				break;
+			case 'kills':
+				$result = 'Kills';
+				break;
+			case 'deaths':
+				$result = 'Deaths';
+				break;
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 }

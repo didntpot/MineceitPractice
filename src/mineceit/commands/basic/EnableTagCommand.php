@@ -21,115 +21,111 @@ use pocketmine\command\utils\CommandException;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-class EnableTagCommand extends MineceitCommand
-{
+class EnableTagCommand extends MineceitCommand{
 
-    public function __construct()
-    {
-        parent::__construct("tag", "Gives the specified player permission to give themselves a tag.", "Usage: /tag <enable:disable> <player>", []);
-        parent::setPermission('mineceit.permission.tag');
-    }
+	public function __construct(){
+		parent::__construct("tag", "Gives the specified player permission to give themselves a tag.", "Usage: /tag <enable:disable> <player>", []);
+		parent::setPermission('mineceit.permission.tag');
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        $msg = null;
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		$msg = null;
 
-        $playerHandler = MineceitCore::getPlayerHandler();
+		$playerHandler = MineceitCore::getPlayerHandler();
 
-        $size = count($args);
+		$size = count($args);
 
-        if($this->testPermission($sender)) {
+		if($this->testPermission($sender)){
 
-            $use = true;
+			$use = true;
 
-            if($sender instanceof MineceitPlayer)
-                $use = $this->canUseCommand($sender);
+			if($sender instanceof MineceitPlayer)
+				$use = $this->canUseCommand($sender);
 
-            if($use) {
+			if($use){
 
-                $sendUsage = true;
+				$sendUsage = true;
 
-                if($size === 2) {
+				if($size === 2){
 
-                    $type = strval($args[0]);
+					$type = strval($args[0]);
 
-                    if($type === 'enable' or $type === 'disable') {
-                        $sendUsage = false;
-                        $enable = $type === 'enable' ? true : false;
-                        $name = strval($args[1]);
-                        $server = Server::getInstance();
-                        $player = $server->getPlayer($name);
-                        if ($player !== null and $player instanceof MineceitPlayer) {
+					if($type === 'enable' or $type === 'disable'){
+						$sendUsage = false;
+						$enable = $type === 'enable' ? true : false;
+						$name = strval($args[1]);
+						$server = Server::getInstance();
+						$player = $server->getPlayer($name);
+						if($player !== null and $player instanceof MineceitPlayer){
 
-                            $eng = $playerHandler->getLanguage();
+							$eng = $playerHandler->getLanguage();
 
-                            $senderLang = ($sender instanceof MineceitPlayer) ? $sender->getLanguage() : $eng;
-                            $receivedLang = $player->getLanguage();
+							$senderLang = ($sender instanceof MineceitPlayer) ? $sender->getLanguage() : $eng;
+							$receivedLang = $player->getLanguage();
 
-                            if($enable) {
+							if($enable){
 
-                                $msg = $senderLang->generalMessage(Language::SET_TAG_PERMISSION_SENDER, [
-                                    "name" => $player->getDisplayName()
-                                ]);
+								$msg = $senderLang->generalMessage(Language::SET_TAG_PERMISSION_SENDER, [
+									"name" => $player->getDisplayName()
+								]);
 
-                                if($sender instanceof MineceitPlayer and $player->equalsPlayer($sender->getPlayer()))
-                                    $msg = $senderLang->generalMessage(Language::SET_TAG_PERMISSION_RECEIVER);
-                                else {
-                                    $receivedMsg = $receivedLang->generalMessage(Language::SET_TAG_PERMISSION_RECEIVER);
-                                    $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $receivedMsg);
-                                }
-                            } else {
+								if($sender instanceof MineceitPlayer and $player->equalsPlayer($sender->getPlayer()))
+									$msg = $senderLang->generalMessage(Language::SET_TAG_PERMISSION_RECEIVER);
+								else{
+									$receivedMsg = $receivedLang->generalMessage(Language::SET_TAG_PERMISSION_RECEIVER);
+									$player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $receivedMsg);
+								}
+							}else{
 
-                                $msg = $senderLang->generalMessage(Language::REMOVE_TAG_PERMISSION_SENDER, [
-                                    "name" => $player->getDisplayName()
-                                ]);
+								$msg = $senderLang->generalMessage(Language::REMOVE_TAG_PERMISSION_SENDER, [
+									"name" => $player->getDisplayName()
+								]);
 
-                                if ($sender instanceof MineceitPlayer and $player->equalsPlayer($sender->getPlayer()))
-                                    $msg = $senderLang->generalMessage(Language::REMOVE_TAG_PERMISSION_RECEIVER);
-                                else {
-                                    $receivedMsg = $receivedLang->generalMessage(Language::REMOVE_TAG_PERMISSION_RECEIVER);
-                                    $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $receivedMsg);
-                                }
-                            }
+								if($sender instanceof MineceitPlayer and $player->equalsPlayer($sender->getPlayer()))
+									$msg = $senderLang->generalMessage(Language::REMOVE_TAG_PERMISSION_RECEIVER);
+								else{
+									$receivedMsg = $receivedLang->generalMessage(Language::REMOVE_TAG_PERMISSION_RECEIVER);
+									$player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $receivedMsg);
+								}
+							}
 
-                            // $player->setPermission(MineceitPlayer::PERMISSION_TAG, $enable);
+							// $player->setPermission(MineceitPlayer::PERMISSION_TAG, $enable);
 
-                        } else {
+						}else{
 
-                            $language = $sender instanceof MineceitPlayer ? $sender->getLanguage() : $playerHandler->getLanguage();
+							$language = $sender instanceof MineceitPlayer ? $sender->getLanguage() : $playerHandler->getLanguage();
 
-                            $msg = $language->generalMessage(Language::PLAYER_NOT_ONLINE, [
-                                "name" => $player->getDisplayName()
-                            ]);
-                        }
-                    }
-                }
+							$msg = $language->generalMessage(Language::PLAYER_NOT_ONLINE, [
+								"name" => $player->getDisplayName()
+							]);
+						}
+					}
+				}
 
-                if($sendUsage) $msg = $this->getUsage();
-            }
-        }
+				if($sendUsage) $msg = $this->getUsage();
+			}
+		}
 
-        if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
 
-        return true;
-    }
+		return true;
+	}
 
 
-    public function testPermission(CommandSender $sender): bool
-    {
+	public function testPermission(CommandSender $sender) : bool{
 
-        if($sender instanceof MineceitPlayer and $sender->hasAdminPermissions()) {
-            return true;
-        }
+		if($sender instanceof MineceitPlayer and $sender->hasAdminPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($sender);
-    }
+		return parent::testPermission($sender);
+	}
 }

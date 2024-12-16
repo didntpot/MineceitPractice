@@ -12,60 +12,56 @@ namespace mineceit\commands\basic\discord;
 
 
 use mineceit\commands\MineceitCommand;
-use mineceit\discord\DiscordUtil;
 use mineceit\MineceitUtil;
 use mineceit\player\MineceitPlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandException;
 
-class VerifyCommand extends MineceitCommand
-{
+class VerifyCommand extends MineceitCommand{
 
-    public function __construct()
-    {
-        parent::__construct('verify', 'Links your MCPE account to your discord.', 'Usage: /verify <verification-code>', []);
-        parent::setPermission('mineceit.permission.verify');
-    }
+	public function __construct(){
+		parent::__construct('verify', 'Links your MCPE account to your discord.', 'Usage: /verify <verification-code>', []);
+		parent::setPermission('mineceit.permission.verify');
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 
-        $message = null;
+		$message = null;
 
-        if($sender instanceof MineceitPlayer) {
+		if($sender instanceof MineceitPlayer){
 
-            // $lang = $sender->getLanguage();
+			// $lang = $sender->getLanguage();
 
-            if($this->testPermission($sender) and $this->canUseCommand($sender)) {
+			if($this->testPermission($sender) and $this->canUseCommand($sender)){
 
-                $length = count($args);
+				$length = count($args);
 
-                if($length === 1) {
+				if($length === 1){
 
-                    $code = $args[0];
-                    $length = strlen($code);
+					$code = $args[0];
+					$length = strlen($code);
 
-                    if($length !== 6) {
-                        // TODO INVALID DISCORD CODE
-                    } else {
-                        // DiscordUtil::sendVerification($code, $sender->getName());
-                    }
+					if($length !== 6){
+						// TODO INVALID DISCORD CODE
+					}else{
+						// DiscordUtil::sendVerification($code, $sender->getName());
+					}
 
-                } else $message = $this->getUsage();
+				}else $message = $this->getUsage();
 
-            }
-        }
+			}
+		}
 
-        if($message !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . $message);
+		if($message !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . $message);
 
-        return true;
-    }
+		return true;
+	}
 }

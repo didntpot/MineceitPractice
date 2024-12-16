@@ -18,38 +18,36 @@ use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
 
-class GoldenApple extends PMGoldenApple
-{
+class GoldenApple extends PMGoldenApple{
 
-    public function __construct()
-    {
-        parent::__construct(2);
-    }
+	public function __construct(){
+		parent::__construct(2);
+	}
 
-    public function getAdditionalEffects(): array
-    {
-        if($this->getDamage() === 0) {
-            return [
-                new EffectInstance(Effect::getEffect(Effect::REGENERATION), 100, 1),
-                new EffectInstance(Effect::getEffect(Effect::ABSORPTION), MineceitUtil::minutesToTicks(2))
-            ];
-        } else {
-            return [
-                new EffectInstance(Effect::getEffect(Effect::REGENERATION), MineceitUtil::secondsToTicks(10), 1),
-                new EffectInstance(Effect::getEffect(Effect::ABSORPTION), MineceitUtil::minutesToTicks(2))
-            ];
-        }
-    }
+	public function getAdditionalEffects() : array{
+		if($this->getDamage() === 0){
+			return [
+				new EffectInstance(Effect::getEffect(Effect::REGENERATION), 100, 1),
+				new EffectInstance(Effect::getEffect(Effect::ABSORPTION), MineceitUtil::minutesToTicks(2))
+			];
+		}else{
+			return [
+				new EffectInstance(Effect::getEffect(Effect::REGENERATION), MineceitUtil::secondsToTicks(10), 1),
+				new EffectInstance(Effect::getEffect(Effect::ABSORPTION), MineceitUtil::minutesToTicks(2))
+			];
+		}
+	}
 
-    /**
-     *
-     * @param bool $head
-     * @param int $count
-     * @return Item
-     *
-     * Creates a Golden Head.
-     */
-    public static function create(bool $head = true, int $count = 1) : Item {
-        return Item::get(Item::GOLDEN_APPLE, !$head ? 0 : 1, $count)->setCustomName(TextFormat::GOLD . "Golden Head");
-    }
+	/**
+	 *
+	 * @param bool $head
+	 * @param int  $count
+	 *
+	 * @return Item
+	 *
+	 * Creates a Golden Head.
+	 */
+	public static function create(bool $head = true, int $count = 1) : Item{
+		return Item::get(Item::GOLDEN_APPLE, !$head ? 0 : 1, $count)->setCustomName(TextFormat::GOLD . "Golden Head");
+	}
 }

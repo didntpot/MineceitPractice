@@ -20,56 +20,53 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandException;
 use pocketmine\utils\TextFormat;
 
-class DeleteRank extends MineceitCommand
-{
+class DeleteRank extends MineceitCommand{
 
-    public function __construct()
-    {
-        parent::__construct('deleteRank', 'Delete an existing rank.', 'Usage: /deleteRank <name>', ['rank-delete', 'deleterank']);
-        parent::setPermission('mineceit.permission.toggle-ranks');
-    }
+	public function __construct(){
+		parent::__construct('deleteRank', 'Delete an existing rank.', 'Usage: /deleteRank <name>', ['rank-delete', 'deleterank']);
+		parent::setPermission('mineceit.permission.toggle-ranks');
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        $msg = null;
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		$msg = null;
 
-        $playerHandler = MineceitCore::getPlayerHandler();
+		$playerHandler = MineceitCore::getPlayerHandler();
 
-        $language = $sender instanceof MineceitPlayer ? $sender->getLanguage() : $playerHandler->getLanguage();
+		$language = $sender instanceof MineceitPlayer ? $sender->getLanguage() : $playerHandler->getLanguage();
 
-        if ($this->testPermission($sender) and $this->canUseCommand($sender)) {
+		if($this->testPermission($sender) and $this->canUseCommand($sender)){
 
-            $size = count($args);
+			$size = count($args);
 
-            if ($size === 1) {
+			if($size === 1){
 
-                $rankName = strval($args[0]);
+				$rankName = strval($args[0]);
 
-                $rankHandler = MineceitCore::getRankHandler();
+				$rankHandler = MineceitCore::getRankHandler();
 
-                $rank = $rankHandler->getRank($rankName);
+				$rank = $rankHandler->getRank($rankName);
 
-                if ($rank !== null) {
+				if($rank !== null){
 
-                    $rankHandler->removeRank($rankName);
+					$rankHandler->removeRank($rankName);
 
-                    $msg = $language->rankMessage($rankName, Language::RANK_DELETE);
+					$msg = $language->rankMessage($rankName, Language::RANK_DELETE);
 
-                } else $msg = $language->rankMessage($rankName, Language::RANK_NO_EXIST);
+				}else $msg = $language->rankMessage($rankName, Language::RANK_NO_EXIST);
 
-            } else $msg = $this->getUsage();
-        }
+			}else $msg = $this->getUsage();
+		}
 
-        if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
 
-        return true;
-    }
+		return true;
+	}
 }

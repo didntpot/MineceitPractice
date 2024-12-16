@@ -19,69 +19,65 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandException;
 use pocketmine\utils\TextFormat;
 
-class HealCommand extends MineceitCommand
-{
+class HealCommand extends MineceitCommand{
 
-    public function __construct()
-    {
-        parent::__construct('heal', 'A command to heal other players.', 'Usage: /heal <player>', []);
-        parent::setPermission('mineceit.permission.heal');
-    }
+	public function __construct(){
+		parent::__construct('heal', 'A command to heal other players.', 'Usage: /heal <player>', []);
+		parent::setPermission('mineceit.permission.heal');
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        $msg = null;
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		$msg = null;
 
-        $personHealed = null;
+		$personHealed = null;
 
-        if($sender instanceof MineceitPlayer){
+		if($sender instanceof MineceitPlayer){
 
-            if($this->testPermission($sender) and $this->canUseCommand($sender)) {
+			if($this->testPermission($sender) and $this->canUseCommand($sender)){
 
-                $count = count($args);
+				$count = count($args);
 
-                if ($count <= 1) {
+				if($count <= 1){
 
-                    $player = $sender;
-                    $lang = $sender->getLanguage();
+					$player = $sender;
+					$lang = $sender->getLanguage();
 
-                    if ($count === 1) {
-                        $playerName = $args[0];
-                        $player = MineceitUtil::getPlayer($playerName);
-                        if ($player === null or !$player->isOnline())
-                            $msg = $lang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $playerName]);
-                    }
+					if($count === 1){
+						$playerName = $args[0];
+						$player = MineceitUtil::getPlayer($playerName);
+						if($player === null or !$player->isOnline())
+							$msg = $lang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $playerName]);
+					}
 
-                    if ($player !== null and $player->isOnline()) {
-                        $lang = $player->getLanguage();
-                        $message = $lang->generalMessage(Language::PLAYER_HEAL);
-                        $player->setHealth($player->getMaxHealth());
-                        $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                    }
-                } else $msg = $this->getUsage();
-            }
-        }
+					if($player !== null and $player->isOnline()){
+						$lang = $player->getLanguage();
+						$message = $lang->generalMessage(Language::PLAYER_HEAL);
+						$player->setHealth($player->getMaxHealth());
+						$player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+					}
+				}else $msg = $this->getUsage();
+			}
+		}
 
-        if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
 
-        return true;
-    }
+		return true;
+	}
 
-    public function testPermission(CommandSender $sender): bool
-    {
+	public function testPermission(CommandSender $sender) : bool{
 
-        if($sender instanceof MineceitPlayer and $sender->hasModPermissions()) {
-            return true;
-        }
+		if($sender instanceof MineceitPlayer and $sender->hasModPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($sender);
-    }
+		return parent::testPermission($sender);
+	}
 }

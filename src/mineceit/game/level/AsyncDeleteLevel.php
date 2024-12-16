@@ -14,43 +14,40 @@ namespace mineceit\game\level;
 use pocketmine\plugin\PluginException;
 use pocketmine\scheduler\AsyncTask;
 
-class AsyncDeleteLevel extends AsyncTask
-{
+class AsyncDeleteLevel extends AsyncTask{
 
-    /* @var string */
-    private $directory;
+	/* @var string */
+	private $directory;
 
-    public function __construct(string $path)
-    {
-        $this->directory = $path;
-    }
+	public function __construct(string $path){
+		$this->directory = $path;
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @return void
-     */
-    public function onRun()
-    {
-        $this->removeDirectory($this->directory);
-    }
+	/**
+	 * Actions to execute when run
+	 *
+	 * @return void
+	 */
+	public function onRun(){
+		$this->removeDirectory($this->directory);
+	}
 
-    private function removeDirectory(string $dir) : void {
+	private function removeDirectory(string $dir) : void{
 
-        if(!is_dir($dir)){
-            throw new PluginException("$dir must be a directory");
-        }
-        if(substr($dir, strlen($dir) - 1, 1) != '/'){
-            $dir .= '/';
-        }
-        $files = glob($dir . '*', GLOB_MARK);
-        foreach($files as $file){
-            if(is_dir($file)){
-                $this->removeDirectory($file);
-            }else{
-                unlink($file);
-            }
-        }
-        rmdir($dir);
-    }
+		if(!is_dir($dir)){
+			throw new PluginException("$dir must be a directory");
+		}
+		if(substr($dir, strlen($dir) - 1, 1) != '/'){
+			$dir .= '/';
+		}
+		$files = glob($dir . '*', GLOB_MARK);
+		foreach($files as $file){
+			if(is_dir($file)){
+				$this->removeDirectory($file);
+			}else{
+				unlink($file);
+			}
+		}
+		rmdir($dir);
+	}
 }

@@ -18,167 +18,166 @@ use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use shoghicp\BigBrother\DesktopPlayer;
 
-class ScoreboardUtil
-{
+class ScoreboardUtil{
 
-    public const ONLINE_PLAYERS = 'online-players';
-    public const IN_QUEUES = 'in-queues';
-    public const IN_FIGHTS = 'in-fights';
+	public const ONLINE_PLAYERS = 'online-players';
+	public const IN_QUEUES = 'in-queues';
+	public const IN_FIGHTS = 'in-fights';
 
-    /**
-     * @param string $type
-     * @param MineceitPlayer|null $matched
-     *
-     * Updates the spawn scoreboard for everyone.
-     */
-    public static function updateSpawnScoreboard(string $type, MineceitPlayer $matched = null) : void {
+	/**
+	 * @param string              $type
+	 * @param MineceitPlayer|null $matched
+	 *
+	 * Updates the spawn scoreboard for everyone.
+	 */
+	public static function updateSpawnScoreboard(string $type, MineceitPlayer $matched = null) : void{
 
-        switch($type) {
-            case self::ONLINE_PLAYERS:
-                self::updateOnlinePlayers($matched);
-                break;
-            case self::IN_QUEUES:
-                self::updateInQueues($matched);
-                break;
-            case self::IN_FIGHTS:
-                self::updateInFights($matched);
-                break;
-        }
+		switch($type){
+			case self::ONLINE_PLAYERS:
+				self::updateOnlinePlayers($matched);
+				break;
+			case self::IN_QUEUES:
+				self::updateInQueues($matched);
+				break;
+			case self::IN_FIGHTS:
+				self::updateInFights($matched);
+				break;
+		}
 
-    }
+	}
 
 
-    /**
-     * @param MineceitPlayer|null $matched
-     *
-     * Updates the online players.
-     */
-    private static function updateOnlinePlayers(MineceitPlayer $matched = null) : void {
+	/**
+	 * @param MineceitPlayer|null $matched
+	 *
+	 * Updates the online players.
+	 */
+	private static function updateOnlinePlayers(MineceitPlayer $matched = null) : void{
 
-        $players = Server::getInstance()->getOnlinePlayers();
+		$players = Server::getInstance()->getOnlinePlayers();
 
-        $online = count($players);
+		$online = count($players);
 
-        $lineNum = 1;
+		$lineNum = 1;
 
-        $color = MineceitUtil::getThemeColor();
+		$color = MineceitUtil::getThemeColor();
 
-        $original = TextFormat::WHITE . ' %online%: ' . $color . $online;
+		$original = TextFormat::WHITE . ' %online%: ' . $color . $online;
 
-        foreach($players as $player) {
+		foreach($players as $player){
 
-            if($player instanceof MineceitPlayer) {
+			if($player instanceof MineceitPlayer){
 
-                if ($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN) {
+				if($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN){
 
-                    if ($matched !== null and $matched->equalsPlayer($player)) {
-                        continue;
-                    }
+					if($matched !== null and $matched->equalsPlayer($player)){
+						continue;
+					}
 
-                    $language = $player->getLanguage();
+					$language = $player->getLanguage();
 
-                    $onlineStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_ONLINE);
+					$onlineStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_ONLINE);
 
-                    $line = $original;
-                    if ($language->getLocale() === Language::ARABIC) {
-                        $line = ' ' . $color . $online . TextFormat::WHITE . " :%online%";
-                    }
+					$line = $original;
+					if($language->getLocale() === Language::ARABIC){
+						$line = ' ' . $color . $online . TextFormat::WHITE . " :%online%";
+					}
 
-                    $theLine = str_replace('%online%', $onlineStr, $line);
+					$theLine = str_replace('%online%', $onlineStr, $line);
 
-                    $player->updateLineOfScoreboard($lineNum, $theLine);
-                }
+					$player->updateLineOfScoreboard($lineNum, $theLine);
+				}
 
-            } elseif ($player instanceof DesktopPlayer) {
+			}elseif($player instanceof DesktopPlayer){
 
-            }
-        }
-    }
+			}
+		}
+	}
 
-    /**
-     * @param MineceitPlayer|null $matched
-     *
-     * Updates the in-queues line of the scoreboadr for everyone.
-     */
-    private static function updateInQueues(MineceitPlayer $matched = null) : void {
+	/**
+	 * @param MineceitPlayer|null $matched
+	 *
+	 * Updates the in-queues line of the scoreboadr for everyone.
+	 */
+	private static function updateInQueues(MineceitPlayer $matched = null) : void{
 
-        /** @var MineceitPlayer[] $players */
-        $players = Server::getInstance()->getOnlinePlayers();
+		/** @var MineceitPlayer[] $players */
+		$players = Server::getInstance()->getOnlinePlayers();
 
-        $numInQueues = MineceitCore::getDuelHandler()->getEveryoneInQueues();
+		$numInQueues = MineceitCore::getDuelHandler()->getEveryoneInQueues();
 
-        $lineNum = 6;
+		$lineNum = 6;
 
-        $color = MineceitUtil::getThemeColor();
+		$color = MineceitUtil::getThemeColor();
 
-        $original = TextFormat::WHITE . ' %in-queues%: ' . $color . $numInQueues;
+		$original = TextFormat::WHITE . ' %in-queues%: ' . $color . $numInQueues;
 
-        foreach($players as $player) {
+		foreach($players as $player){
 
-            if($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN) {
+			if($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN){
 
-                if($matched !== null and $matched->equalsPlayer($player)) {
-                    continue;
-                }
+				if($matched !== null and $matched->equalsPlayer($player)){
+					continue;
+				}
 
-                $language = $player->getLanguage();
+				$language = $player->getLanguage();
 
-                $inQueuesStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_INQUEUES);
+				$inQueuesStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_INQUEUES);
 
-                $line = $original;
-                if($language->getLocale() === Language::ARABIC)
-                    $line = ' ' . $color . $numInQueues . TextFormat::WHITE . " :%in-queues%";
+				$line = $original;
+				if($language->getLocale() === Language::ARABIC)
+					$line = ' ' . $color . $numInQueues . TextFormat::WHITE . " :%in-queues%";
 
-                $theLine = str_replace('%in-queues%', $inQueuesStr, $line);
+				$theLine = str_replace('%in-queues%', $inQueuesStr, $line);
 
-                $player->updateLineOfScoreboard($lineNum, $theLine);
-            }
-        }
-    }
+				$player->updateLineOfScoreboard($lineNum, $theLine);
+			}
+		}
+	}
 
-    /**
-     * @param MineceitPlayer|null $matched
-     *
-     * Updates the scoreboard of the in-fights line.
-     */
-    private static function updateInFights(MineceitPlayer $matched = null) : void {
+	/**
+	 * @param MineceitPlayer|null $matched
+	 *
+	 * Updates the scoreboard of the in-fights line.
+	 */
+	private static function updateInFights(MineceitPlayer $matched = null) : void{
 
-        $players = Server::getInstance()->getOnlinePlayers();
+		$players = Server::getInstance()->getOnlinePlayers();
 
-        $numInFights = MineceitCore::getDuelHandler()->getDuels(true) * 2;
+		$numInFights = MineceitCore::getDuelHandler()->getDuels(true) * 2;
 
-        $lineNum = 5;
+		$lineNum = 5;
 
-        $color = MineceitUtil::getThemeColor();
+		$color = MineceitUtil::getThemeColor();
 
-        $originalFormat = TextFormat::WHITE . ' %in-fights%: ' . $color . $numInFights;
+		$originalFormat = TextFormat::WHITE . ' %in-fights%: ' . $color . $numInFights;
 
-        foreach($players as $player) {
+		foreach($players as $player){
 
-            if($player instanceof MineceitPlayer) {
+			if($player instanceof MineceitPlayer){
 
-                if ($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN) {
+				if($player->getScoreboardType() === Scoreboard::SCOREBOARD_SPAWN){
 
-                    if ($matched !== null and $matched->equalsPlayer($player)) {
-                        continue;
-                    }
+					if($matched !== null and $matched->equalsPlayer($player)){
+						continue;
+					}
 
-                    $language = $player->getLanguage();
+					$language = $player->getLanguage();
 
-                    $inFightsStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_INFIGHTS);
+					$inFightsStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_INFIGHTS);
 
-                    $line = $originalFormat;
-                    if ($language->getLocale() === Language::ARABIC)
-                        $line = ' ' . $color . $numInFights . TextFormat::WHITE . " :%in-fights%";
+					$line = $originalFormat;
+					if($language->getLocale() === Language::ARABIC)
+						$line = ' ' . $color . $numInFights . TextFormat::WHITE . " :%in-fights%";
 
-                    $theLine = str_replace('%in-fights%', $inFightsStr, $line);
+					$theLine = str_replace('%in-fights%', $inFightsStr, $line);
 
-                    $player->updateLineOfScoreboard($lineNum, $theLine);
-                }
+					$player->updateLineOfScoreboard($lineNum, $theLine);
+				}
 
-            } elseif ($player instanceof DesktopPlayer) {
+			}elseif($player instanceof DesktopPlayer){
 
-            }
-        }
-    }
+			}
+		}
+	}
 }

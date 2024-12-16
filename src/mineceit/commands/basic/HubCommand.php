@@ -21,70 +21,67 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandException;
 use pocketmine\utils\TextFormat;
 
-class HubCommand extends MineceitCommand
-{
+class HubCommand extends MineceitCommand{
 
-    public function __construct()
-    {
-        parent::__construct('hub', 'Go back to spawn.', "Usage: /hub", ['spawn'], true);
-        parent::setPermission('mineceit.permission.hub');
-    }
+	public function __construct(){
+		parent::__construct('hub', 'Go back to spawn.', "Usage: /hub", ['spawn'], true);
+		parent::setPermission('mineceit.permission.hub');
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param string[] $args
-     *
-     * @return mixed
-     * @throws CommandException
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args)
-    {
-        $msg = null;
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param string[]      $args
+	 *
+	 * @return mixed
+	 * @throws CommandException
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		$msg = null;
 
-        if($sender instanceof MineceitPlayer) {
+		if($sender instanceof MineceitPlayer){
 
-            $duelHandler = MineceitCore::getDuelHandler();
+			$duelHandler = MineceitCore::getDuelHandler();
 
-            $itemHandler = MineceitCore::getItemHandler();
+			$itemHandler = MineceitCore::getItemHandler();
 
-            $eventManager = MineceitCore::getEventManager();
+			$eventManager = MineceitCore::getEventManager();
 
-            $language = $sender->getLanguage();
+			$language = $sender->getLanguage();
 
-            if($this->testPermission($sender) and $this->canUseCommand($sender)) {
+			if($this->testPermission($sender) and $this->canUseCommand($sender)){
 
-                $sendMessage = true;
+				$sendMessage = true;
 
-                if($sender->isInEvent()) {
-                    $event = $eventManager->getEventFromPlayer($sender);
-                    $event->removePlayer($sender);
-                    $sendMessage = false;
-                }
+				if($sender->isInEvent()){
+					$event = $eventManager->getEventFromPlayer($sender);
+					$event->removePlayer($sender);
+					$sendMessage = false;
+				}
 
-                if($sender->isADuelSpec()) {
-                    $duel = $duelHandler->getDuelFromSpec($sender);
-                    $duel->removeSpectator($sender);
-                    $sendMessage = false;
-                }
+				if($sender->isADuelSpec()){
+					$duel = $duelHandler->getDuelFromSpec($sender);
+					$duel->removeSpectator($sender);
+					$sendMessage = false;
+				}
 
-                if($sendMessage){
-                    $sender->reset(true, true);
-                    $itemHandler->spawnHubItems($sender);
-                    $msg = $language->generalMessage(Language::IN_HUB);
-                    $sender->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
-                }
+				if($sendMessage){
+					$sender->reset(true, true);
+					$itemHandler->spawnHubItems($sender);
+					$msg = $language->generalMessage(Language::IN_HUB);
+					$sender->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
+				}
 
-                if ($sender->isWatchingReplay()) {
-                    $replay = MineceitCore::getReplayManager()->getReplayFrom($sender);
-                    $replay->endReplay(false);
-                }
-            }
+				if($sender->isWatchingReplay()){
+					$replay = MineceitCore::getReplayManager()->getReplayFrom($sender);
+					$replay->endReplay(false);
+				}
+			}
 
-        } else $msg = TextFormat::RED . "Console can't use this command.";
+		}else $msg = TextFormat::RED . "Console can't use this command.";
 
-        if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
+		if($msg !== null) $sender->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $msg);
 
-        return true;
-    }
+		return true;
+	}
 }

@@ -34,3045 +34,3042 @@ use mineceit\scoreboard\Scoreboard;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class FormUtil
-{
+class FormUtil{
 
-    /**
-     * @param string $locale
-     *
-     * @return SimpleForm
-     */
-    public static function getLanguageForm(string $locale): SimpleForm
-    {
+	/**
+	 * @param string $locale
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getLanguageForm(string $locale) : SimpleForm{
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            if($event instanceof MineceitPlayer){
+			if($event instanceof MineceitPlayer){
 
-                $formData = $event->removeFormData();
+				$formData = $event->removeFormData();
 
-                if ($data !== null) {
+				if($data !== null){
 
-                    $locale = (string)$formData["locale"];
+					$locale = (string) $formData["locale"];
 
-                    $id = intval($data);
+					$id = intval($data);
 
-                    if (isset($formData[$id])) {
+					if(isset($formData[$id])){
 
-                        $text = TextFormat::clean(strval($formData[$id]['text']));
-                        if (strpos($text, "\n") !== false) {
-                            $text = strval(explode("\n", $text)[0]);
-                        }
+						$text = TextFormat::clean(strval($formData[$id]['text']));
+						if(strpos($text, "\n") !== false){
+							$text = strval(explode("\n", $text)[0]);
+						}
 
-                        $lang = trim($text);
+						$lang = trim($text);
 
-                        $language = MineceitCore::getPlayerHandler()->getLanguageFromName($lang, $locale);
+						$language = MineceitCore::getPlayerHandler()->getLanguageFromName($lang, $locale);
 
-                        if ($language !== null and ($newLocale = $language->getLocale()) !== $locale) {
+						if($language !== null and ($newLocale = $language->getLocale()) !== $locale){
 
-                            $event->setLanguage($newLocale);
-                            $event->reloadScoreboard();
+							$event->setLanguage($newLocale);
+							$event->reloadScoreboard();
 
-                            $itemHandler = MineceitCore::getItemHandler();
+							$itemHandler = MineceitCore::getItemHandler();
 
-                            if ($event->isInEvent()) {
-                                $itemHandler->spawnEventItems($event);
-                            } elseif ($event->isInHub()) {
-                                $itemHandler->spawnHubItems($event);
-                            }
-                        }
-                    }
-                }
-            }
-        });
+							if($event->isInEvent()){
+								$itemHandler->spawnEventItems($event);
+							}elseif($event->isInHub()){
+								$itemHandler->spawnHubItems($event);
+							}
+						}
+					}
+				}
+			}
+		});
 
-        $olayerManager = MineceitCore::getPlayerHandler();
+		$olayerManager = MineceitCore::getPlayerHandler();
 
-        $playerLanguage = $olayerManager->getLanguage($locale);
+		$playerLanguage = $olayerManager->getLanguage($locale);
 
-        $form->setTitle(TextFormat::BOLD . $playerLanguage->formWindow(Language::LANGUAGE_FORM_TITLE));
+		$form->setTitle(TextFormat::BOLD . $playerLanguage->formWindow(Language::LANGUAGE_FORM_TITLE));
 
-        $languages = $olayerManager->getLanguages();
+		$languages = $olayerManager->getLanguages();
 
-        foreach ($languages as $lang) {
+		foreach($languages as $lang){
 
-            $texture = "textures/blocks/glass_white.png";
-            $name = TextFormat::BOLD . $lang->getNameFromLocale($locale);
+			$texture = "textures/blocks/glass_white.png";
+			$name = TextFormat::BOLD . $lang->getNameFromLocale($locale);
 
-            if ($lang->getLocale() === $locale) {
-                $texture = "textures/blocks/glass_light_blue.png";
-                $name = TextFormat::BLUE . $name;
-            }
+			if($lang->getLocale() === $locale){
+				$texture = "textures/blocks/glass_light_blue.png";
+				$name = TextFormat::BLUE . $name;
+			}
 
-            if ($lang->hasCredit()) {
-                $languageCredit = $lang->getCredit();
-                $creditMessage = $playerLanguage->getMessage(Language::LANGUAGE_CREDIT);
-                $credit = TextFormat::RESET . TextFormat::DARK_GRAY . "{$creditMessage}: {$languageCredit}";
-                if ($playerLanguage->getLocale() === Language::ARABIC) {
-                    $credit = TextFormat::RESET . TextFormat::DARK_GRAY . "{$languageCredit} :{$creditMessage}";
-                }
+			if($lang->hasCredit()){
+				$languageCredit = $lang->getCredit();
+				$creditMessage = $playerLanguage->getMessage(Language::LANGUAGE_CREDIT);
+				$credit = TextFormat::RESET . TextFormat::DARK_GRAY . "{$creditMessage}: {$languageCredit}";
+				if($playerLanguage->getLocale() === Language::ARABIC){
+					$credit = TextFormat::RESET . TextFormat::DARK_GRAY . "{$languageCredit} :{$creditMessage}";
+				}
 
-                $name .= "\n{$credit}";
-            }
+				$name .= "\n{$credit}";
+			}
 
-            $form->addButton($name, 0, $texture);
-        }
+			$form->addButton($name, 0, $texture);
+		}
 
-        return $form;
-    }
+		return $form;
+	}
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getFFAForm(MineceitPlayer $player): SimpleForm
-    {
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getFFAForm(MineceitPlayer $player) : SimpleForm{
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            if($event instanceof MineceitPlayer) {
+			if($event instanceof MineceitPlayer){
 
-                $formData = $event->removeFormData();
+				$formData = $event->removeFormData();
 
-                if ($data !== null) {
+				if($data !== null){
 
-                    $arenaName = (string)$formData[$data]['text'];
-                    $arenaName = TextFormat::clean(explode("\n", $arenaName)[0]);
-                    $arena = MineceitCore::getArenas()->getArena($arenaName);
+					$arenaName = (string) $formData[$data]['text'];
+					$arenaName = TextFormat::clean(explode("\n", $arenaName)[0]);
+					$arena = MineceitCore::getArenas()->getArena($arenaName);
 
-                    if ($arena !== null && $arena instanceof FFAArena && !$event->isInDuel()) {
+					if($arena !== null && $arena instanceof FFAArena && !$event->isInDuel()){
 
-                        if ($event->isInQueue()) {
-                            MineceitCore::getDuelHandler()->removeFromQueue($event, false);
-                        }
+						if($event->isInQueue()){
+							MineceitCore::getDuelHandler()->removeFromQueue($event, false);
+						}
 
-                        $event->teleportToFFAArena($arena);
-                    }
-                }
-            }
-        });
+						$event->teleportToFFAArena($arena);
+					}
+				}
+			}
+		});
 
-        $language = $player->getLanguage();
+		$language = $player->getLanguage();
 
-        $numPlayersStr = $language->formWindow(Language::FFA_FORM_NUMPLAYERS);
+		$numPlayersStr = $language->formWindow(Language::FFA_FORM_NUMPLAYERS);
 
-        $form->setTitle($language->formWindow(Language::FFA_FORM_TITLE));
+		$form->setTitle($language->formWindow(Language::FFA_FORM_TITLE));
 
-        $form->setContent($language->formWindow(Language::FFA_FORM_DESC));
+		$form->setContent($language->formWindow(Language::FFA_FORM_DESC));
 
-        $arenaHandler = MineceitCore::getArenas();
+		$arenaHandler = MineceitCore::getArenas();
 
-        $arenas = $arenaHandler->getFFAArenas();
+		$arenas = $arenaHandler->getFFAArenas();
 
-        $size = count($arenas);
+		$size = count($arenas);
 
-        if ($size <= 0) {
-            $form->addButton($language->generalMessage(Language::NONE));
-            return $form;
-        }
+		if($size <= 0){
+			$form->addButton($language->generalMessage(Language::NONE));
+			return $form;
+		}
 
-        foreach ($arenas as $arena) {
+		foreach($arenas as $arena){
 
-            $name = $arena->getName();
+			$name = $arena->getName();
 
-            $players = $arenaHandler->getPlayersInArena($arena);
+			$players = $arenaHandler->getPlayersInArena($arena);
 
-            $str = $name . "\n" . $numPlayersStr . TextFormat::BOLD . TextFormat::DARK_GRAY . ": " . TextFormat::WHITE . $players;
+			$str = $name . "\n" . $numPlayersStr . TextFormat::BOLD . TextFormat::DARK_GRAY . ": " . TextFormat::WHITE . $players;
 
-            if ($language->getLocale() === Language::ARABIC) {
-                $str = $name . "\n" . TextFormat::BOLD . TextFormat::WHITE . $players . TextFormat::DARK_GRAY . ' :' . $numPlayersStr;
-            }
+			if($language->getLocale() === Language::ARABIC){
+				$str = $name . "\n" . TextFormat::BOLD . TextFormat::WHITE . $players . TextFormat::DARK_GRAY . ' :' . $numPlayersStr;
+			}
 
-            $texture = $arena->getTexture();
-            $form->addButton($str, 0, $texture);
-        }
+			$texture = $arena->getTexture();
+			$form->addButton($str, 0, $texture);
+		}
 
-        return $form;
-    }
+		return $form;
+	}
 
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getPlayForm(MineceitPlayer $player): SimpleForm
-    {
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getPlayForm(MineceitPlayer $player) : SimpleForm{
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            if($event instanceof MineceitPlayer) {
+			if($event instanceof MineceitPlayer){
 
-                $event->removeFormData();
+				$event->removeFormData();
 
-                if ($data !== null) {
+				if($data !== null){
 
-                    $language = $event->getLanguage();
+					$language = $event->getLanguage();
 
-                    switch ($data) {
-                        case 0:
-                            $form = self::getFFAForm($event);
-                            $event->sendFormWindow($form);
-                            break;
-                        case 1:
-                            $form = FormUtil::getDuelForm($event, $language->formWindow(Language::DUELS_UNRANKED_FORM_TITLE), false);
-                            $event->sendFormWindow($form, ['ranked' => false]);
-                            break;
-                        case 2:
-                            $form = FormUtil::getDuelForm($event, $language->formWindow(Language::DUELS_RANKED_FORM_TITLE), true);
-                            $event->sendFormWindow($form, ['ranked' => true]);
-                            break;
-                        case 3:
-                            $form = self::getEventsForm($event);
-                            $event->sendFormWindow($form);
-                            break;
-                    }
-                }
-            }
-        });
+					switch($data){
+						case 0:
+							$form = self::getFFAForm($event);
+							$event->sendFormWindow($form);
+							break;
+						case 1:
+							$form = FormUtil::getDuelForm($event, $language->formWindow(Language::DUELS_UNRANKED_FORM_TITLE), false);
+							$event->sendFormWindow($form, ['ranked' => false]);
+							break;
+						case 2:
+							$form = FormUtil::getDuelForm($event, $language->formWindow(Language::DUELS_RANKED_FORM_TITLE), true);
+							$event->sendFormWindow($form, ['ranked' => true]);
+							break;
+						case 3:
+							$form = self::getEventsForm($event);
+							$event->sendFormWindow($form);
+							break;
+					}
+				}
+			}
+		});
 
-        $lang = $player->getLanguage();
+		$lang = $player->getLanguage();
 
-        $form->setTitle($lang->formWindow(Language::HUB_PLAY_FORM_TITLE));
+		$form->setTitle($lang->formWindow(Language::HUB_PLAY_FORM_TITLE));
 
-        $form->setContent($lang->formWindow(Language::HUB_PLAY_FORM_DESC));
+		$form->setContent($lang->formWindow(Language::HUB_PLAY_FORM_DESC));
 
-        $form->addButton(
-            TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_FFA),
-            0,
-            "textures/items/iron_axe.png"
-        );
+		$form->addButton(
+			TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_FFA),
+			0,
+			"textures/items/iron_axe.png"
+		);
 
-        $form->addButton(
-            TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_UNRANKED_DUELS),
-            0,
-            "textures/items/gold_sword.png"
-        );
-
-        $form->addButton(
-            TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_RANKED_DUELS),
-            0,
-            "textures/items/diamond_sword.png"
-        );
-
-        $form->addButton(
-            TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_EVENTS),
-            0,
-            "textures/items/totem.png"
-        );
-
-        return $form;
-    }
+		$form->addButton(
+			TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_UNRANKED_DUELS),
+			0,
+			"textures/items/gold_sword.png"
+		);
+
+		$form->addButton(
+			TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_RANKED_DUELS),
+			0,
+			"textures/items/diamond_sword.png"
+		);
+
+		$form->addButton(
+			TextFormat::BOLD . $lang->formWindow(Language::HUB_PLAY_FORM_EVENTS),
+			0,
+			"textures/items/totem.png"
+		);
+
+		return $form;
+	}
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getEventsForm(MineceitPlayer $player): SimpleForm
-    {
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getEventsForm(MineceitPlayer $player) : SimpleForm{
+
+		$form = new SimpleForm(function(Player $event, $data = null){
+
+			if($event instanceof MineceitPlayer){
+
+				$event->removeFormData();
+
+				if($data !== null){
+					$theEvent = MineceitCore::getEventManager()->getEventFromIndex((int) $data);
+					if($theEvent !== null){
+						$theEvent->addPlayer($event);
+					}
+				}
+			}
+		});
+
+		$lang = $player->getLanguage();
+
+		$form->setTitle($lang->getMessage(Language::EVENT_FORM_TITLE));
+		$form->setContent($lang->getMessage(Language::EVENT_FORM_DESC));
+
+		$events = MineceitCore::getEventManager()->getEvents();
+		if(count($events) <= 0){
+			$form->addButton($lang->getMessage(Language::NONE));
+			return $form;
+		}
+
+		foreach($events as $event){
+
+			$form->addButton(
+				$event->formatForForm($lang),
+				0,
+				$event->getArena()->getTexture()
+			);
+		}
+
+		return $form;
+	}
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
-
-            if($event instanceof MineceitPlayer) {
-
-                $event->removeFormData();
-
-                if ($data !== null) {
-                    $theEvent = MineceitCore::getEventManager()->getEventFromIndex((int)$data);
-                    if ($theEvent !== null) {
-                        $theEvent->addPlayer($event);
-                    }
-                }
-            }
-        });
-
-        $lang = $player->getLanguage();
-
-        $form->setTitle($lang->getMessage(Language::EVENT_FORM_TITLE));
-        $form->setContent($lang->getMessage(Language::EVENT_FORM_DESC));
-
-        $events = MineceitCore::getEventManager()->getEvents();
-        if (count($events) <= 0) {
-            $form->addButton($lang->getMessage(Language::NONE));
-            return $form;
-        }
-
-        foreach ($events as $event) {
-
-            $form->addButton(
-                $event->formatForForm($lang),
-                0,
-                $event->getArena()->getTexture()
-            );
-        }
-
-        return $form;
-    }
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getSettingsMenu(MineceitPlayer $player) : SimpleForm{
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getSettingsMenu(MineceitPlayer $player): SimpleForm
-    {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+			if($event instanceof MineceitPlayer){
 
-            if($event instanceof MineceitPlayer) {
+				$event->removeFormData();
 
-                $event->removeFormData();
+				if($data !== null){
+
+					switch((int) $data){
 
-                if ($data !== null) {
+						case 0:
+							$form = self::getChangeSettingsForm($event);
+							$event->sendFormWindow($form);
+							break;
+						case 1:
+							$perm = $event->getPermission(MineceitPlayer::PERMISSION_TAG);
+							if(!$perm){
+								$msg = MineceitUtil::getPrefix() . TextFormat::RESET . ' ' . TextFormat::RED . $event->getLanguage()->generalMessage(Language::SET_TAG_MSG_NO_PERMS);
+								$event->sendMessage($msg);
+							}else{
+								$form = self::getSetTagForm($event);
+								$event->sendFormWindow($form);
+							}
+							break;
+						case 2:
+							$form = self::getLanguageForm($event->getLanguage()->getLocale());
+							$event->sendFormWindow($form, ["locale" => $event->getLanguage()->getLocale()]);
+							break;
+						case 3:
+							$event->updateBuilderLevels();
+							$builderLevels = $event->getBuilderLevels();
+							$form = self::getBuilderModeForm($event, $builderLevels);
+							$event->sendFormWindow($form, ['builder-levels' => array_keys($builderLevels)]);
+							break;
+					}
+				}
+			}
+		});
+
+		// $player->reloadPermissions();
 
-                    switch ((int)$data) {
+		$lang = $player->getLanguage();
+
+		$title = TextFormat::BOLD . TextFormat::AQUA . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::SETTINGS_FORM_TITLE) . TextFormat::AQUA . ' «';
+
+		$form->setTitle($title);
+
+		$form->addButton(
+			TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_CHANGE_SETTINGS),
+			0,
+			'textures/items/comparator.png'
+		);
+
+		$form->addButton(
+			TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_SET_TAG),
+			0,
+			'textures/items/book_writable.png'
+		);
+
+		$form->addButton(
+			$lang->formWindow(Language::CHANGE_LANGUAGE_FORM),
+			0,
+			'textures/items/paper.png'
+		);
 
-                        case 0:
-                            $form = self::getChangeSettingsForm($event);
-                            $event->sendFormWindow($form);
-                            break;
-                        case 1:
-                            $perm = $event->getPermission(MineceitPlayer::PERMISSION_TAG);
-                            if (!$perm) {
-                                $msg = MineceitUtil::getPrefix() . TextFormat::RESET . ' ' . TextFormat::RED . $event->getLanguage()->generalMessage(Language::SET_TAG_MSG_NO_PERMS);
-                                $event->sendMessage($msg);
-                            } else {
-                                $form = self::getSetTagForm($event);
-                                $event->sendFormWindow($form);
-                            }
-                            break;
-                        case 2:
-                            $form = self::getLanguageForm($event->getLanguage()->getLocale());
-                            $event->sendFormWindow($form, ["locale" => $event->getLanguage()->getLocale()]);
-                            break;
-                        case 3:
-                            $event->updateBuilderLevels();
-                            $builderLevels = $event->getBuilderLevels();
-                            $form = self::getBuilderModeForm($event, $builderLevels);
-                            $event->sendFormWindow($form, ['builder-levels' => array_keys($builderLevels)]);
-                            break;
-                    }
-                }
-            }
-        });
+		if($player->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE)){
+
+			$form->addButton(
+				TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->generalMessage(Language::BUILDER_MODE_FORM_ENABLE),
+				0,
+				'textures/items/diamond_pickaxe.png'
+			);
+		}
+
+		return $form;
+	}
 
-        // $player->reloadPermissions();
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 */
+	public static function getChangeSettingsForm(MineceitPlayer $player) : CustomForm{
 
-        $lang = $player->getLanguage();
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $title = TextFormat::BOLD . TextFormat::AQUA . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::SETTINGS_FORM_TITLE) . TextFormat::AQUA . ' «';
-
-        $form->setTitle($title);
+			if($event instanceof MineceitPlayer){
 
-        $form->addButton(
-            TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_CHANGE_SETTINGS),
-            0,
-            'textures/items/comparator.png'
-        );
-
-        $form->addButton(
-            TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_SET_TAG),
-            0,
-            'textures/items/book_writable.png'
-        );
-
-        $form->addButton(
-            $lang->formWindow(Language::CHANGE_LANGUAGE_FORM),
-            0,
-            'textures/items/paper.png'
-        );
+				$event->removeFormData();
 
-        if ($player->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE)) {
+				if($data !== null){
 
-            $form->addButton(
-                TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->generalMessage(Language::BUILDER_MODE_FORM_ENABLE),
-                0,
-                'textures/items/diamond_pickaxe.png'
-            );
-        }
-
-        return $form;
-    }
+					$resultScoreboard = boolval($data[0]);
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     */
-    public static function getChangeSettingsForm(MineceitPlayer $player): CustomForm
-    {
+					$resultPeOnly = $event->isPe() ? boolval($data[2]) : false;
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					if($event->isPeOnly() !== $resultPeOnly){
+						$event->setPeOnly($resultPeOnly);
+					}
 
-            if($event instanceof MineceitPlayer) {
+					if($event->isScoreboardEnabled() !== $resultScoreboard){
+						$event->setScoreboardEnabled($resultScoreboard);
+						if(!$resultScoreboard){
+							$event->removeScoreboard();
+						}else{
+							$event->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
+						}
+					}
 
-                $event->removeFormData();
+					$resultDisplay = boolval($data[1]);
 
-                if ($data !== null) {
+					if($resultDisplay){
+						$event->showPlayers();
+					}else{
+						$event->hidePlayers();
+					}
 
-                    $resultScoreboard = boolval($data[0]);
+					$swishSounds = (bool) $data[3];
+					if($event->isSwishEnabled() !== $swishSounds){
+						$event->setSwishEnabled($swishSounds);
+					}
 
-                    $resultPeOnly = $event->isPe() ? boolval($data[2]) : false;
+					$translate = (bool) $data[4];
 
-                    if ($event->isPeOnly() !== $resultPeOnly) {
-                        $event->setPeOnly($resultPeOnly);
-                    }
+					if($event->doesTranslateMessages() !== $translate){
+						$event->setTranslateMessages($translate);
+					}
+				}
+			}
+		});
 
-                    if ($event->isScoreboardEnabled() !== $resultScoreboard) {
-                        $event->setScoreboardEnabled($resultScoreboard);
-                        if (!$resultScoreboard) {
-                            $event->removeScoreboard();
-                        } else {
-                            $event->setScoreboard(Scoreboard::SCOREBOARD_SPAWN);
-                        }
-                    }
+		$language = $player->getLanguage();
 
-                    $resultDisplay = boolval($data[1]);
+		$form->setTitle($language->formWindow(Language::CHANGE_SETTINGS_FORM_TITLE));
 
-                    if ($resultDisplay) {
-                        $event->showPlayers();
-                    } else {
-                        $event->hidePlayers();
-                    }
+		$form->addToggle(
+			$language->formWindow(Language::CHANGE_SETTINGS_FORM_SCOREBOARD),
+			$player->isScoreboardEnabled()
+		);
 
-                    $swishSounds = (bool)$data[3];
-                    if ($event->isSwishEnabled() !== $swishSounds) {
-                        $event->setSwishEnabled($swishSounds);
-                    }
+		$form->addToggle(
+			$language->formWindow(Language::CHANGE_SETTINGS_FORM_DISPLAYPLAYERS),
+			$player->isDisplayPlayers()
+		);
 
-                    $translate = (bool)$data[4];
+		$form->addToggle(
+			$language->formWindow(Language::CHANGE_SETTINGS_FORM_PEONLY),
+			$player->isPeOnly()
+		);
 
-                    if ($event->doesTranslateMessages() !== $translate) {
-                        $event->setTranslateMessages($translate);
-                    }
-                }
-            }
-        });
+		$form->addToggle(
+			$language->getMessage(Language::CHANGE_SETTINGS_FORM_HIT_SOUNDS),
+			$player->isSwishEnabled()
+		);
 
-        $language = $player->getLanguage();
+		$form->addToggle(
+			$language->formWindow(Language::TRANSLATE_MESSAGES) . " " . TextFormat::AQUA . TextFormat::BOLD . "[BETA]"
+			, $player->doesTranslateMessages()
+		);
 
-        $form->setTitle($language->formWindow(Language::CHANGE_SETTINGS_FORM_TITLE));
+		return $form;
+	}
 
-        $form->addToggle(
-            $language->formWindow(Language::CHANGE_SETTINGS_FORM_SCOREBOARD),
-            $player->isScoreboardEnabled()
-        );
 
-        $form->addToggle(
-            $language->formWindow(Language::CHANGE_SETTINGS_FORM_DISPLAYPLAYERS),
-            $player->isDisplayPlayers()
-        );
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|null     $builderLevels
+	 *
+	 * @return CustomForm
+	 */
+	public static function getBuilderModeForm(MineceitPlayer $player, array $builderLevels = null) : CustomForm{
 
-        $form->addToggle(
-            $language->formWindow(Language::CHANGE_SETTINGS_FORM_PEONLY),
-            $player->isPeOnly()
-        );
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form->addToggle(
-            $language->getMessage(Language::CHANGE_SETTINGS_FORM_HIT_SOUNDS),
-            $player->isSwishEnabled()
-        );
+			if($event instanceof MineceitPlayer){
 
-        $form->addToggle(
-            $language->formWindow(Language::TRANSLATE_MESSAGES) . " " . TextFormat::AQUA . TextFormat::BOLD . "[BETA]"
-            , $player->doesTranslateMessages()
-        );
+				$formData = $event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null){
 
+					if(!$event->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE)){
+						return;
+					}
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|null $builderLevels
-     * @return CustomForm
-     */
-    public static function getBuilderModeForm(MineceitPlayer $player, array $builderLevels = null): CustomForm
-    {
+					$event->setBuilderMode((bool) $data[1]);
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$builderLevels = $formData['builder-levels'];
 
-            if($event instanceof MineceitPlayer) {
+					if(($size = count($data)) > 2){
 
-                $formData = $event->removeFormData();
+						$start = 3;
 
-                if ($data !== null) {
+						while($start < $size){
 
-                    if (!$event->getPermission(MineceitPlayer::PERMISSION_BUILDER_MODE)) {
-                        return;
-                    }
+							$level = $builderLevels[$start - 3];
 
-                    $event->setBuilderMode((bool)$data[1]);
+							$event->setBuildInLevel(strval($level), (bool) $data[$start]);
 
-                    $builderLevels = $formData['builder-levels'];
+							$start++;
+						}
+					}
+				}
+			}
 
-                    if (($size = count($data)) > 2) {
+		});
 
-                        $start = 3;
+		$language = $player->getLanguage();
 
-                        while ($start < $size) {
+		$levels = $builderLevels ?? $player->getBuilderLevels();
 
-                            $level = $builderLevels[$start - 3];
+		$form->setTitle(TextFormat::BOLD . $language->getMessage(Language::BUILDER_MODE_FORM_TITLE));
 
-                            $event->setBuildInLevel(strval($level), (bool)$data[$start]);
+		$form->addLabel($language->getMessage(Language::BUILDER_MODE_FORM_DESC));
 
-                            $start++;
-                        }
-                    }
-                }
-            }
+		$enabled = $player->isBuilderModeEnabled();
 
-        });
+		$enableNDisableToggle = $enabled ? Language::BUILDER_MODE_FORM_DISABLE : Language::BUILDER_MODE_FORM_ENABLE;
 
-        $language = $player->getLanguage();
+		$enableNDisableToggle = $language->getMessage($enableNDisableToggle);
 
-        $levels = $builderLevels ?? $player->getBuilderLevels();
+		$form->addToggle($enableNDisableToggle, $enabled);
 
-        $form->setTitle(TextFormat::BOLD . $language->getMessage(Language::BUILDER_MODE_FORM_TITLE));
+		if(count($levels) <= 0){
 
-        $form->addLabel($language->getMessage(Language::BUILDER_MODE_FORM_DESC));
+			$form->addLabel($language->formWindow(Language::BUILDER_MODE_FORM_LEVEL_NONE));
 
-        $enabled = $player->isBuilderModeEnabled();
+			return $form;
+		}
 
-        $enableNDisableToggle = $enabled ? Language::BUILDER_MODE_FORM_DISABLE : Language::BUILDER_MODE_FORM_ENABLE;
+		$form->addLabel($language->formWindow(Language::BUILDER_MODE_FORM_LEVEL));
 
-        $enableNDisableToggle = $language->getMessage($enableNDisableToggle);
+		foreach($levels as $levelName => $value){
 
-        $form->addToggle($enableNDisableToggle, $enabled);
+			$form->addToggle(strval($levelName), $value);
+		}
 
-        if (count($levels) <= 0) {
+		return $form;
+	}
 
-            $form->addLabel($language->formWindow(Language::BUILDER_MODE_FORM_LEVEL_NONE));
 
-            return $form;
-        }
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 */
+	public static function getSetTagForm(MineceitPlayer $player) : CustomForm{
 
-        $form->addLabel($language->formWindow(Language::BUILDER_MODE_FORM_LEVEL));
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        foreach ($levels as $levelName => $value) {
+			if($event instanceof MineceitPlayer){
 
-            $form->addToggle(strval($levelName), $value);
-        }
+				$event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null){
 
+					$result = $event->setCustomTag((string) $data[1]);
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     */
-    public static function getSetTagForm(MineceitPlayer $player): CustomForm
-    {
+					$lang = $event->getLanguage();
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					if(!$result){
+						$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $lang->generalMessage(Language::SET_TAG_MSG_FAILED);
+					}else{
+						$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . $lang->generalMessage(Language::SET_TAG_MSG_SUCCESS);
+						$event->updateNameTag();
+					}
 
-            if($event instanceof MineceitPlayer) {
+					$event->sendMessage($msg);
+				}
+			}
+		});
 
-                $event->removeFormData();
+		$lang = $player->getLanguage();
 
-                if ($data !== null) {
+		$form->setTitle(TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_SET_TAG));
 
-                    $result = $event->setCustomTag((string)$data[1]);
+		$labelText = $lang->formWindow(Language::SET_TAG_FORM_DESC);
 
-                    $lang = $event->getLanguage();
+		if($lang->getLocale() === Language::ARABIC){
+			$labelText .= "\n";
+		}
 
-                    if (!$result) {
-                        $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $lang->generalMessage(Language::SET_TAG_MSG_FAILED);
-                    } else {
-                        $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::GREEN . $lang->generalMessage(Language::SET_TAG_MSG_SUCCESS);
-                        $event->updateNameTag();
-                    }
+		$form->addLabel($labelText);
 
-                    $event->sendMessage($msg);
-                }
-            }
-        });
+		$form->addInput($lang->formWindow(Language::FIFTEEN_CHARACTERS_MAX), $player->getCustomTag());
 
-        $lang = $player->getLanguage();
+		return $form;
+	}
 
-        $form->setTitle(TextFormat::DARK_GRAY . TextFormat::BOLD . $lang->formWindow(Language::SETTINGS_FORM_SET_TAG));
+	/**
+	 * @param MineceitPlayer $player
+	 * @param string         $title
+	 * @param bool           $ranked
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getDuelForm(MineceitPlayer $player, string $title, bool $ranked) : SimpleForm{
 
-        $labelText = $lang->formWindow(Language::SET_TAG_FORM_DESC);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        if ($lang->getLocale() === Language::ARABIC) {
-            $labelText .= "\n";
-        }
+			if($event instanceof MineceitPlayer){
 
-        $form->addLabel($labelText);
+				$formData = $event->removeFormData();
 
-        $form->addInput($lang->formWindow(Language::FIFTEEN_CHARACTERS_MAX), $player->getCustomTag());
+				if($data !== null){
 
-        return $form;
-    }
+					$queue = TextFormat::clean(explode("\n", $formData[$data]['text'])[0]);
 
-    /**
-     * @param MineceitPlayer $player
-     * @param string $title
-     * @param bool $ranked
-     * @return SimpleForm
-     */
-    public static function getDuelForm(MineceitPlayer $player, string $title, bool $ranked): SimpleForm
-    {
+					if($event->isInHub()){
+						MineceitCore::getDuelHandler()->placeInQueue($event, $queue, (bool) $formData['ranked']);
+					}
+				}
+			}
+		});
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$lang = $player->getLanguage();
 
-            if($event instanceof MineceitPlayer) {
+		$form->setTitle(TextFormat::BOLD . $title);
+		$form->setContent($lang->formWindow(Language::DUELS_FORM_DESC));
 
-                $formData = $event->removeFormData();
+		$list = MineceitCore::getKits()->getKits();
 
-                if ($data !== null) {
+		$format = TextFormat::GOLD . '» ' . $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GRAY . ': ' . TextFormat::WHITE . '%iq% ' . TextFormat::GOLD . ' «';
 
-                    $queue = TextFormat::clean(explode("\n", $formData[$data]['text'])[0]);
+		if($lang->getLocale() === Language::ARABIC){
+			$format = TextFormat::GOLD . '» ' . TextFormat::WHITE . '%iq% ' . TextFormat::GRAY . ':' . $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GOLD . ' «';
+		}elseif($lang->getLocale() === Language::FRENCH_FR || $lang->getLocale() === Language::FRENCH_CA){
+			$format = $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GRAY . ': ' . TextFormat::WHITE . '%iq%';
+		}
 
-                    if ($event->isInHub()) {
-                        MineceitCore::getDuelHandler()->placeInQueue($event, $queue, (bool)$formData['ranked']);
-                    }
-                }
-            }
-        });
+		foreach($list as $kit){
 
-        $lang = $player->getLanguage();
+			$name = $kit->getName();
+			$numInQueue = MineceitCore::getDuelHandler()->getPlayersInQueue($ranked, $name);
 
-        $form->setTitle(TextFormat::BOLD . $title);
-        $form->setContent($lang->formWindow(Language::DUELS_FORM_DESC));
+			$form->addButton(
+				$name . "\n" . str_replace('%iq%', $numInQueue, $format),
+				0,
+				$kit->getTexture()
+			);
+		}
 
-        $list = MineceitCore::getKits()->getKits();
+		return $form;
+	}
 
-        $format = TextFormat::GOLD . '» ' . $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GRAY . ': ' . TextFormat::WHITE . '%iq% ' . TextFormat::GOLD . ' «';
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getDuelHistoryForm(MineceitPlayer $player) : SimpleForm{
 
-        if ($lang->getLocale() === Language::ARABIC) {
-            $format = TextFormat::GOLD . '» ' . TextFormat::WHITE . '%iq% ' . TextFormat::GRAY . ':' . $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GOLD . ' «';
-        } elseif ($lang->getLocale() === Language::FRENCH_FR || $lang->getLocale() === Language::FRENCH_CA) {
-            $format = $lang->formWindow(Language::DUELS_FORM_INQUEUES) . TextFormat::GRAY . ': ' . TextFormat::WHITE . '%iq%';
-        }
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        foreach ($list as $kit) {
+			if($event instanceof MineceitPlayer){
 
-            $name = $kit->getName();
-            $numInQueue = MineceitCore::getDuelHandler()->getPlayersInQueue($ranked, $name);
+				$event->removeFormData();
 
-            $form->addButton(
-                $name . "\n" . str_replace('%iq%', $numInQueue, $format),
-                0,
-                $kit->getTexture()
-            );
-        }
+				if($data !== null){
 
-        return $form;
-    }
+					$length = count($event->getDuelHistory()) - 1;
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getDuelHistoryForm(MineceitPlayer $player): SimpleForm
-    {
+					$index = $length - (int) $data;
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$info = $event->getDuelInfo($index);
 
-            if($event instanceof MineceitPlayer) {
+					if($info !== null){
 
-                $event->removeFormData();
+						$form = self::getDuelInfoForm($event, $info);
+						$event->sendFormWindow($form, [
+							'info-index' => $index,
+							'size' => isset($info['replay']) ? 4 : 3
+						]);
+					}
+				}
+			}
+		});
 
-                if ($data !== null) {
+		$language = $player->getLanguage();
 
-                    $length = count($event->getDuelHistory()) - 1;
+		$form->setTitle($language->formWindow(Language::DUEL_HISTORY_FORM_TITLE));
+		$form->setContent($language->formWindow(Language::DUEL_HISTORY_FORM_DESC));
 
-                    $index = $length - (int)$data;
+		$duelHistory = $player->getDuelHistory();
 
-                    $info = $event->getDuelInfo($index);
+		$size = count($duelHistory);
 
-                    if ($info !== null) {
+		if($size <= 0){
+			$form->addButton($language->generalMessage(Language::NONE));
+			return $form;
+		}
 
-                        $form = self::getDuelInfoForm($event, $info);
-                        $event->sendFormWindow($form, [
-                            'info-index' => $index,
-                            'size' => isset($info['replay']) ? 4 : 3
-                        ]);
-                    }
-                }
-            }
-        });
+		$end = $size - 20 >= 0 ? $size - 20 : 0;
 
-        $language = $player->getLanguage();
+		for($index = $size - 1; $index >= $end; $index--){
 
-        $form->setTitle($language->formWindow(Language::DUEL_HISTORY_FORM_TITLE));
-        $form->setContent($language->formWindow(Language::DUEL_HISTORY_FORM_DESC));
+			$resultingDuel = $duelHistory[$index];
+			$winnerInfo = $resultingDuel['winner'];
+			$loserInfo = $resultingDuel['loser'];
+			$drawBool = (bool) $resultingDuel['draw'];
 
-        $duelHistory = $player->getDuelHistory();
+			if($winnerInfo instanceof DuelInfo and $loserInfo instanceof DuelInfo){
 
-        $size = count($duelHistory);
+				$winnerDisplayName = $winnerInfo->getDisplayName();
+				$loserDisplayName = $loserInfo->getDisplayName();
 
-        if ($size <= 0) {
-            $form->addButton($language->generalMessage(Language::NONE));
-            return $form;
-        }
+				$playerVsString = TextFormat::BLUE . '%player%' . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . '%opponent%';
 
-        $end = $size - 20 >= 0 ? $size - 20 : 0;
+				$queue = $language->getRankedStr($winnerInfo->isRanked()) . ' ' . $winnerInfo->getQueue();
 
-        for ($index = $size - 1; $index >= $end; $index--) {
+				$resultStr = TextFormat::DARK_GRAY . 'D';
 
-            $resultingDuel = $duelHistory[$index];
-            $winnerInfo = $resultingDuel['winner'];
-            $loserInfo = $resultingDuel['loser'];
-            $drawBool = (bool)$resultingDuel['draw'];
+				if($drawBool){
+					$playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
+				}else{
 
-            if ($winnerInfo instanceof DuelInfo and $loserInfo instanceof DuelInfo) {
+					if($winnerInfo->getPlayerName() === $player->getName()){
+						$playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
+						$resultStr = TextFormat::GREEN . 'W';
+					}elseif($loserInfo->getPlayerName() === $player->getName()){
+						$playerVsString = str_replace('%player%', $loserDisplayName, str_replace('%opponent%', $winnerDisplayName, $playerVsString));
+						$resultStr = TextFormat::RED . 'L';
+					}
+				}
 
-                $winnerDisplayName = $winnerInfo->getDisplayName();
-                $loserDisplayName = $loserInfo->getDisplayName();
+				$queueStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_QUEUE);
 
-                $playerVsString = TextFormat::BLUE . '%player%' . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . '%opponent%';
+				$theQueueStr = TextFormat::BLUE . $queueStr . TextFormat::GRAY . ': ' . TextFormat::GOLD . $queue;
 
-                $queue = $language->getRankedStr($winnerInfo->isRanked()) . ' ' . $winnerInfo->getQueue();
+				if($language->getLocale() === Language::ARABIC){
+					$theQueueStr = TextFormat::GOLD . $queue . TextFormat::GRAY . ' :' . TextFormat::BLUE . $queueStr;
+				}
 
-                $resultStr = TextFormat::DARK_GRAY . 'D';
+				$form->addButton(
+					$playerVsString . "\n" . $resultStr . TextFormat::DARK_GRAY . ' | ' . $theQueueStr,
+					0,
+					$winnerInfo->getTexture()
+				);
+			}
+		}
 
-                if ($drawBool) {
-                    $playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
-                } else {
+		return $form;
+	}
 
-                    if ($winnerInfo->getPlayerName() === $player->getName()) {
-                        $playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
-                        $resultStr = TextFormat::GREEN . 'W';
-                    } elseif ($loserInfo->getPlayerName() === $player->getName()) {
-                        $playerVsString = str_replace('%player%', $loserDisplayName, str_replace('%opponent%', $winnerDisplayName, $playerVsString));
-                        $resultStr = TextFormat::RED . 'L';
-                    }
-                }
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array          $info
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getDuelInfoForm(MineceitPlayer $player, $info = []) : SimpleForm{
 
-                $queueStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_QUEUE);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-                $theQueueStr = TextFormat::BLUE . $queueStr . TextFormat::GRAY . ': ' . TextFormat::GOLD . $queue;
+			if($event instanceof MineceitPlayer){
 
-                if ($language->getLocale() === Language::ARABIC) {
-                    $theQueueStr = TextFormat::GOLD . $queue . TextFormat::GRAY . ' :' . TextFormat::BLUE . $queueStr;
-                }
+				$formData = $event->removeFormData();
 
-                $form->addButton(
-                    $playerVsString . "\n" . $resultStr . TextFormat::DARK_GRAY . ' | ' . $theQueueStr,
-                    0,
-                    $winnerInfo->getTexture()
-                );
-            }
-        }
+				if($data !== null){
 
-        return $form;
-    }
+					$index = (int) $data;
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array $info
-     * @return SimpleForm
-     */
-    public static function getDuelInfoForm(MineceitPlayer $player, $info = []): SimpleForm
-    {
+					$size = (int) $formData['size'];
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$inventoryInfoIndex = (int) $formData['info-index'];
 
-            if($event instanceof MineceitPlayer) {
+					$info = $event->getDuelInfo($inventoryInfoIndex);
 
-                $formData = $event->removeFormData();
+					$goBackIndex = $size - 1;
 
-                if ($data !== null) {
+					if($info !== null and $index !== $goBackIndex){
 
-                    $index = (int)$data;
+						$language = $event->getLanguage();
 
-                    $size = (int)$formData['size'];
+						$i = $index === 0 ? 'winner' : 'loser';
 
-                    $inventoryInfoIndex = (int)$formData['info-index'];
+						if($size === 4){
 
-                    $info = $event->getDuelInfo($inventoryInfoIndex);
+							if($index != 2){
 
-                    $goBackIndex = $size - 1;
+								$inventory = new PostMatchInv($info[$i], $language);
 
-                    if ($info !== null and $index !== $goBackIndex) {
+								$inventory->sendTo($event);
 
-                        $language = $event->getLanguage();
+							}else{
 
-                        $i = $index === 0 ? 'winner' : 'loser';
+								/** @var DuelReplayInfo $duelReplayInfo */
+								$duelReplayInfo = $info['replay'];
 
-                        if ($size === 4) {
+								$replayManager = MineceitCore::getReplayManager();
 
-                            if ($index != 2) {
+								$replayManager->startReplay($event, $duelReplayInfo);
+							}
 
-                                $inventory = new PostMatchInv($info[$i], $language);
+						}else{
 
-                                $inventory->sendTo($event);
+							$inventory = new PostMatchInv($info[$i], $language);
 
-                            } else {
+							$inventory->sendTo($event);
+						}
+					}else{
 
-                                /** @var DuelReplayInfo $duelReplayInfo */
-                                $duelReplayInfo = $info['replay'];
+						if($index === $goBackIndex){
+							$form = self::getDuelHistoryForm($event);
+							$event->sendFormWindow($form);
+						}
+					}
+				}
+			}
+		});
 
-                                $replayManager = MineceitCore::getReplayManager();
+		/* @var DuelInfo $winnerInfo */
+		$winnerInfo = $info['winner'];
+		/* @var DuelInfo $loserInfo */
+		$loserInfo = $info['loser'];
 
-                                $replayManager->startReplay($event, $duelReplayInfo);
-                            }
+		$draw = (bool) $info['draw'];
 
-                        } else {
+		$language = $player->getLanguage();
 
-                            $inventory = new PostMatchInv($info[$i], $language);
+		$winnerDisplayName = $winnerInfo->getDisplayName();
+		$loserDisplayName = $loserInfo->getDisplayName();
 
-                            $inventory->sendTo($event);
-                        }
-                    } else {
+		$playerVsString = TextFormat::BLUE . '%player%' . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . '%opponent%';
 
-                        if ($index === $goBackIndex) {
-                            $form = self::getDuelHistoryForm($event);
-                            $event->sendFormWindow($form);
-                        }
-                    }
-                }
-            }
-        });
+		$isWinner = !$draw and $winnerInfo->getPlayerName() === $player->getName();
 
-        /* @var DuelInfo $winnerInfo */
-        $winnerInfo = $info['winner'];
-        /* @var DuelInfo $loserInfo */
-        $loserInfo = $info['loser'];
+		if($isWinner or $draw){
+			$playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
+		}elseif($loserInfo->getPlayerName() === $player->getName()){
+			$playerVsString = str_replace('%player%', $loserDisplayName, str_replace('%opponent%', $winnerDisplayName, $playerVsString));
+		}
 
-        $draw = (bool)$info['draw'];
+		$form->setTitle(TextFormat::YELLOW . TextFormat::BOLD . '» ' . $playerVsString . TextFormat::YELLOW . ' «');
 
-        $language = $player->getLanguage();
+		$winnerColor = ($draw) ? TextFormat::GOLD : TextFormat::GREEN;
+		$loserColor = ($draw) ? TextFormat::GOLD : TextFormat::RED;
 
-        $winnerDisplayName = $winnerInfo->getDisplayName();
-        $loserDisplayName = $loserInfo->getDisplayName();
+		$winnerDesc = $language->formWindow(Language::DUEL_INVENTORY_FORM_VIEW, [
+				"name" => TextFormat::BOLD . $winnerColor . $winnerDisplayName . TextFormat::DARK_GRAY]
+		);
 
-        $playerVsString = TextFormat::BLUE . '%player%' . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . '%opponent%';
+		$loserDesc = $language->formWindow(Language::DUEL_INVENTORY_FORM_VIEW, [
+			"name" => TextFormat::BOLD . $loserColor . $loserDisplayName . TextFormat::DARK_GRAY
+		]);
 
-        $isWinner = !$draw and $winnerInfo->getPlayerName() === $player->getName();
+		$form->addButton(
+			$winnerDesc,
+			0,
+			'textures/blocks/trapped_chest_front.png'
+		);
 
-        if ($isWinner or $draw) {
-            $playerVsString = str_replace('%player%', $winnerDisplayName, str_replace('%opponent%', $loserDisplayName, $playerVsString));
-        } elseif ($loserInfo->getPlayerName() === $player->getName()) {
-            $playerVsString = str_replace('%player%', $loserDisplayName, str_replace('%opponent%', $winnerDisplayName, $playerVsString));
-        }
+		$form->addButton(
+			$loserDesc,
+			0,
+			'textures/blocks/trapped_chest_front.png'
+		);
 
-        $form->setTitle(TextFormat::YELLOW . TextFormat::BOLD . '» ' . $playerVsString . TextFormat::YELLOW . ' «');
+		if(isset($info['replay'])){
+			$form->addButton(TextFormat::BOLD . $language->formWindow(Language::FORM_VIEW_REPLAY), 0, 'textures/items/compass_item.png');
+		}
 
-        $winnerColor = ($draw) ? TextFormat::GOLD : TextFormat::GREEN;
-        $loserColor = ($draw) ? TextFormat::GOLD : TextFormat::RED;
+		$form->addButton($language->formWindow(Language::GO_BACK), 0, 'textures/gui/newgui/XPress.png');
 
-        $winnerDesc = $language->formWindow(Language::DUEL_INVENTORY_FORM_VIEW, [
-                "name" => TextFormat::BOLD . $winnerColor . $winnerDisplayName . TextFormat::DARK_GRAY]
-        );
+		return $form;
+	}
 
-        $loserDesc = $language->formWindow(Language::DUEL_INVENTORY_FORM_VIEW, [
-            "name" => TextFormat::BOLD . $loserColor . $loserDisplayName . TextFormat::DARK_GRAY
-        ]);
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|string[] $onlinePlayers
+	 *
+	 * @return CustomForm
+	 */
+	public static function getGamemodeForm(MineceitPlayer $player, $onlinePlayers = []) : CustomForm{
 
-        $form->addButton(
-            $winnerDesc,
-            0,
-            'textures/blocks/trapped_chest_front.png'
-        );
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form->addButton(
-            $loserDesc,
-            0,
-            'textures/blocks/trapped_chest_front.png'
-        );
+			if($event instanceof MineceitPlayer){
 
-        if (isset($info['replay'])) {
-            $form->addButton(TextFormat::BOLD . $language->formWindow(Language::FORM_VIEW_REPLAY), 0, 'textures/items/compass_item.png');
-        }
+				$formData = $event->removeFormData();
 
-        $form->addButton($language->formWindow(Language::GO_BACK), 0, 'textures/gui/newgui/XPress.png');
+				if($data !== null){
 
-        return $form;
-    }
+					$senderLang = $event->getLanguage();
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|string[] $onlinePlayers
-     * @return CustomForm
-     */
-    public static function getGamemodeForm(MineceitPlayer $player, $onlinePlayers = []): CustomForm
-    {
+					$playerNameIndex = (int) $data[0];
+					$gamemodeIndex = (int) $data[1];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$name = $formData['online-players'][$playerNameIndex];
 
-            if($event instanceof MineceitPlayer) {
+					if(($player = MineceitUtil::getPlayer($name)) !== null and $player instanceof MineceitPlayer){
 
-                $formData = $event->removeFormData();
+						$lang = $player->getLanguage();
 
-                if ($data !== null) {
+						$gamemodes = [
+							0 => $lang->getMessage(Language::GAMEMODE_SURVIVAL) ?? "Survival",
+							1 => $lang->getMessage(Language::GAMEMODE_CREATIVE) ?? "Creative",
+							2 => $lang->getMessage(Language::GAMEMODE_ADVENTURE) ?? "Adventure",
+							3 => $lang->getMessage(Language::GAMEMODE_SPECTATOR) ?? "Spectator"
+						];
 
-                    $senderLang = $event->getLanguage();
+						$msg = $lang->generalMessage(Language::GAMEMODE_CHANGE, [
+							"gamemode" => $gamemodes[$gamemodeIndex]
+						]);
 
-                    $playerNameIndex = (int)$data[0];
-                    $gamemodeIndex = (int)$data[1];
+						if($player->getGamemode() !== $gamemodeIndex){
+							$player->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $msg);
+						}
 
-                    $name = $formData['online-players'][$playerNameIndex];
+						$player->setGamemode($gamemodeIndex);
 
-                    if (($player = MineceitUtil::getPlayer($name)) !== null and $player instanceof MineceitPlayer) {
+					}else{
+						$event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RED . $senderLang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $name]));
+					}
+				}
+			}
+		});
 
-                        $lang = $player->getLanguage();
+		$language = $player->getLanguage();
 
-                        $gamemodes = [
-                            0 => $lang->getMessage(Language::GAMEMODE_SURVIVAL) ?? "Survival",
-                            1 => $lang->getMessage(Language::GAMEMODE_CREATIVE) ?? "Creative",
-                            2 => $lang->getMessage(Language::GAMEMODE_ADVENTURE) ?? "Adventure",
-                            3 => $lang->getMessage(Language::GAMEMODE_SPECTATOR) ?? "Spectator"
-                        ];
+		$form->setTitle(TextFormat::BOLD . TextFormat::GOLD . '» ' . TextFormat::DARK_PURPLE . 'GamemodeUI' . TextFormat::GOLD . ' «');
 
-                        $msg = $lang->generalMessage(Language::GAMEMODE_CHANGE, [
-                            "gamemode" => $gamemodes[$gamemodeIndex]
-                        ]);
+		$playerLabel = TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-                        if ($player->getGamemode() !== $gamemodeIndex) {
-                            $player->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $msg);
-                        }
+		if($language->getLocale() === Language::ARABIC){
+			$playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL);
+		}
 
-                        $player->setGamemode($gamemodeIndex);
+		$form->addDropdown($playerLabel, $onlinePlayers, array_search($player->getName(), $onlinePlayers));
 
-                    } else {
-                        $event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RED . $senderLang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $name]));
-                    }
-                }
-            }
-        });
+		$menuLabel = TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL) . TextFormat::GRAY . ':';
 
-        $language = $player->getLanguage();
+		if($language->getLocale() === Language::ARABIC)
+			$menuLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL);
 
-        $form->setTitle(TextFormat::BOLD . TextFormat::GOLD . '» ' . TextFormat::DARK_PURPLE . 'GamemodeUI' . TextFormat::GOLD . ' «');
+		$gray = TextFormat::DARK_GRAY;
 
-        $playerLabel = TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
+		$survival = $language->getMessage(Language::GAMEMODE_SURVIVAL) ?? "Survival";
+		$creative = $language->getMessage(Language::GAMEMODE_CREATIVE) ?? "Creative";
+		$adventure = $language->getMessage(Language::GAMEMODE_ADVENTURE) ?? "Adventure";
+		$spectator = $language->getMessage(Language::GAMEMODE_SPECTATOR) ?? "Spectator";
 
-        if ($language->getLocale() === Language::ARABIC) {
-            $playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL);
-        }
+		$form->addDropdown($menuLabel, [$gray . "{$survival} [Gm = 0]", $gray . "{$creative} [Gm = 1]", $gray . "{$adventure} [Gm = 2]", $gray . "{$spectator} [Gm = 3]"], $player->getGamemode());
 
-        $form->addDropdown($playerLabel, $onlinePlayers, array_search($player->getName(), $onlinePlayers));
+		return $form;
+	}
 
-        $menuLabel = TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL) . TextFormat::GRAY . ':';
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|string[] $onlinePlayers
+	 *
+	 * @return CustomForm
+	 */
+	public static function getFreezeForm(MineceitPlayer $player, $onlinePlayers = []) : CustomForm{
 
-        if ($language->getLocale() === Language::ARABIC)
-            $menuLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL);
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $gray = TextFormat::DARK_GRAY;
+			if($event instanceof MineceitPlayer){
 
-        $survival = $language->getMessage(Language::GAMEMODE_SURVIVAL) ?? "Survival";
-        $creative = $language->getMessage(Language::GAMEMODE_CREATIVE) ?? "Creative";
-        $adventure = $language->getMessage(Language::GAMEMODE_ADVENTURE) ?? "Adventure";
-        $spectator = $language->getMessage(Language::GAMEMODE_SPECTATOR) ?? "Spectator";
+				$formData = $event->removeFormData();
 
-        $form->addDropdown($menuLabel, [$gray . "{$survival} [Gm = 0]", $gray . "{$creative} [Gm = 1]", $gray . "{$adventure} [Gm = 2]", $gray . "{$spectator} [Gm = 3]"], $player->getGamemode());
+				if($data !== null){
 
-        return $form;
-    }
+					$frozenIndex = (int) $data[1];
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|string[] $onlinePlayers
-     * @return CustomForm
-     */
-    public static function getFreezeForm(MineceitPlayer $player, $onlinePlayers = []): CustomForm
-    {
+					$name = $formData['online-players'][(int) $data[0]];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					if(($player = MineceitUtil::getPlayer($name)) !== null and $player instanceof MineceitPlayer){
 
-            if($event instanceof MineceitPlayer) {
+						$frozenVal = $frozenIndex === 0;
 
-                $formData = $event->removeFormData();
+						if($frozenVal !== $player->isFrozen()){
 
-                if ($data !== null) {
+							$language = $player->getLanguage();
 
-                    $frozenIndex = (int)$data[1];
+							switch($frozenIndex){
 
-                    $name = $formData['online-players'][(int)$data[0]];
+								case 0:
+									$title = $language->generalMessage(Language::FREEZE_TITLE);
+									$subtitle = $language->generalMessage(Language::FREEZE_SUBTITLE);
+									$player->setFrozenNameTag();
+									$player->addTitle(TextFormat::GOLD . $title, TextFormat::BLUE . $subtitle, 5, 20, 5);
+									break;
+								case 1:
+									$title = $language->generalMessage(Language::UNFREEZE_TITLE);
+									$subtitle = $language->generalMessage(Language::UNFREEZE_SUBTITLE);
+									$player->setSpawnNameTag();
+									$player->addTitle(TextFormat::GOLD . $title, TextFormat::BLUE . $subtitle, 5, 20, 5);
+									break;
+							}
+						}
 
-                    if (($player = MineceitUtil::getPlayer($name)) !== null and $player instanceof MineceitPlayer) {
+						$player->setFrozen($frozenVal);
 
-                        $frozenVal = $frozenIndex === 0;
+					}else{
+						$event->sendMessage(MineceitUtil::getPrefix() . " " . $event->getLanguage()->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $name]));
+					}
+				}
+			}
 
-                        if ($frozenVal !== $player->isFrozen()) {
+		});
 
-                            $language = $player->getLanguage();
+		$language = $player->getLanguage();
 
-                            switch ($frozenIndex) {
+		$form->setTitle(TextFormat::BOLD . TextFormat::GOLD . '» ' . TextFormat::DARK_PURPLE . 'FreezeUI' . TextFormat::GOLD . ' «');
 
-                                case 0:
-                                    $title = $language->generalMessage(Language::FREEZE_TITLE);
-                                    $subtitle = $language->generalMessage(Language::FREEZE_SUBTITLE);
-                                    $player->setFrozenNameTag();
-                                    $player->addTitle(TextFormat::GOLD . $title, TextFormat::BLUE . $subtitle, 5, 20, 5);
-                                    break;
-                                case 1:
-                                    $title = $language->generalMessage(Language::UNFREEZE_TITLE);
-                                    $subtitle = $language->generalMessage(Language::UNFREEZE_SUBTITLE);
-                                    $player->setSpawnNameTag();
-                                    $player->addTitle(TextFormat::GOLD . $title, TextFormat::BLUE . $subtitle, 5, 20, 5);
-                                    break;
-                            }
-                        }
+		$playerLabel = TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-                        $player->setFrozen($frozenVal);
+		if($language->getLocale() === Language::ARABIC){
+			$playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL);
+		}
 
-                    } else {
-                        $event->sendMessage(MineceitUtil::getPrefix() . " " . $event->getLanguage()->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $name]));
-                    }
-                }
-            }
+		$form->addDropdown($playerLabel, $onlinePlayers, array_search($player->getName(), $onlinePlayers));
 
-        });
+		$menuLabel = TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL) . TextFormat::GRAY . ':';
 
-        $language = $player->getLanguage();
+		if($language->getLocale() === Language::ARABIC){
+			$menuLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL);
+		}
 
-        $form->setTitle(TextFormat::BOLD . TextFormat::GOLD . '» ' . TextFormat::DARK_PURPLE . 'FreezeUI' . TextFormat::GOLD . ' «');
+		$form->addDropdown($menuLabel, [
+			TextFormat::DARK_GRAY . $language->formWindow(Language::FREEZE_FORM_ENABLE),
+			TextFormat::DARK_GRAY . $language->formWindow(Language::FREEZE_FORM_DISABLE)
+		]);
 
-        $playerLabel = TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
+		return $form;
+	}
 
-        if ($language->getLocale() === Language::ARABIC) {
-            $playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::PLAYERS_LABEL);
-        }
+	/**
+	 * @param MineceitPlayer      $player
+	 * @param string              $name
+	 * @param DuelRequest[]|array $requestInbox
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getDuelInbox(MineceitPlayer $player, string $name, $requestInbox = []) : SimpleForm{
 
-        $form->addDropdown($playerLabel, $onlinePlayers, array_search($player->getName(), $onlinePlayers));
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $menuLabel = TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL) . TextFormat::GRAY . ':';
+			if($event instanceof MineceitPlayer){
 
-        if ($language->getLocale() === Language::ARABIC) {
-            $menuLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $language->formWindow(Language::GAMEMODE_FORM_MENU_LABEL);
-        }
+				$formData = $event->removeFormData();
 
-        $form->addDropdown($menuLabel, [
-            TextFormat::DARK_GRAY . $language->formWindow(Language::FREEZE_FORM_ENABLE),
-            TextFormat::DARK_GRAY . $language->formWindow(Language::FREEZE_FORM_DISABLE)
-        ]);
+				$language = $event->getLanguage();
 
-        return $form;
-    }
+				$duelHandler = MineceitCore::getDuelHandler();
 
-    /**
-     * @param MineceitPlayer $player
-     * @param string $name
-     * @param DuelRequest[]|array $requestInbox
-     * @return SimpleForm
-     */
-    public static function getDuelInbox(MineceitPlayer $player, string $name, $requestInbox = []): SimpleForm
-    {
+				if($data !== null){
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$index = (int) $data;
+					$text = (string) $formData[$index]['text'];
 
-            if($event instanceof MineceitPlayer) {
+					if($text !== $language->generalMessage(Language::NONE)){
 
-                $formData = $event->removeFormData();
+						$requests = $formData['requests'];
+						$keys = array_keys($requests);
+						$name = $keys[$index];
+						$request = $requests[$name];
 
-                $language = $event->getLanguage();
+						if($request instanceof DuelRequest){
 
-                $duelHandler = MineceitCore::getDuelHandler();
+							$pName = $event->getName();
 
-                if ($data !== null) {
+							$opponentName = ($pName === $request->getToName()) ? $request->getFromName() : $request->getToName();
 
-                    $index = (int)$data;
-                    $text = (string)$formData[$index]['text'];
+							if(($opponent = MineceitUtil::getPlayer($opponentName)) !== null && $opponent instanceof MineceitPlayer && $opponent->isOnline()
+								&& ($opponent->isInHub() || $opponent->isADuelSpec()) && !$opponent->isInParty() && !$opponent->isWatchingReplay() && !$opponent->isInEvent()){
 
-                    if ($text !== $language->generalMessage(Language::NONE)) {
+								if($event->isInHub()){
 
-                        $requests = $formData['requests'];
-                        $keys = array_keys($requests);
-                        $name = $keys[$index];
-                        $request = $requests[$name];
+									if($opponent->isADuelSpec()){
+										$duel = $duelHandler->getDuelFromSpec($opponent);
+										$duel->removeSpectator($opponent, false, false);
+									}elseif($opponent->isWatchingReplay()){
+										$replay = MineceitCore::getReplayManager()->getReplayFrom($opponent);
+										$replay->endReplay(false);
+									}
 
-                        if ($request instanceof DuelRequest) {
+									$duelHandler->getRequestHandler()->acceptRequest($request);
+									$duelHandler->placeInDuel($event, $opponent, $request->getQueue(), $request->isRanked(), false, $request->getGeneratorName());
 
-                            $pName = $event->getName();
+								}else $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $language->generalMessage(Language::ACCEPT_FAIL_NOT_IN_LOBBY));
 
-                            $opponentName = ($pName === $request->getToName()) ? $request->getFromName() : $request->getToName();
+							}else{
 
-                            if (($opponent = MineceitUtil::getPlayer($opponentName)) !== null && $opponent instanceof MineceitPlayer && $opponent->isOnline()
-                                && ($opponent->isInHub() || $opponent->isADuelSpec()) && !$opponent->isInParty() && !$opponent->isWatchingReplay() && !$opponent->isInEvent()) {
+								$message = null;
 
-                                if ($event->isInHub()) {
+								if($opponent === null || !$opponent->isOnline())
+									$message = $language->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $opponentName]);
+								elseif($opponent->isInDuel())
+									$message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_DUEL, ["name" => $opponentName]);
+								elseif($opponent->isInArena())
+									$message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_ARENA, ["name" => $opponentName]);
+								elseif($opponent->isInParty()) ;
+								// TODO ADD A MESSAGE SAYING OPPONENT IS IN A PARTY
+								elseif($opponent->isWatchingReplay())
+									$message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_WATCH_REPLAY, ["name" => $opponentName]);
+								elseif($opponent->isInEvent()){
+									// TODO LANGUAGE
+									$message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_EVENT, ["name" => $opponentName]);
+								}
 
-                                    if ($opponent->isADuelSpec()) {
-                                        $duel = $duelHandler->getDuelFromSpec($opponent);
-                                        $duel->removeSpectator($opponent, false, false);
-                                    } elseif ($opponent->isWatchingReplay()) {
-                                        $replay = MineceitCore::getReplayManager()->getReplayFrom($opponent);
-                                        $replay->endReplay(false);
-                                    }
 
-                                    $duelHandler->getRequestHandler()->acceptRequest($request);
-                                    $duelHandler->placeInDuel($event, $opponent, $request->getQueue(), $request->isRanked(), false, $request->getGeneratorName());
+								if($message !== null) $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+							}
+						}
+					}
+				}
+			}
+		});
 
-                                } else $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $language->generalMessage(Language::ACCEPT_FAIL_NOT_IN_LOBBY));
+		$language = $player->getLanguage();
 
-                            } else {
+		$count = count($requestInbox);
 
-                                $message = null;
+		$desc = $language->formWindow(Language::FORM_CLICK_REQUEST_ACCEPT);
 
-                                if ($opponent === null || !$opponent->isOnline())
-                                    $message = $language->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $opponentName]);
-                                elseif ($opponent->isInDuel())
-                                    $message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_DUEL, ["name" => $opponentName]);
-                                elseif ($opponent->isInArena())
-                                    $message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_ARENA, ["name" => $opponentName]);
-                                elseif ($opponent->isInParty()) ;
-                                // TODO ADD A MESSAGE SAYING OPPONENT IS IN A PARTY
-                                elseif ($opponent->isWatchingReplay())
-                                    $message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_WATCH_REPLAY, ["name" => $opponentName]);
-                                elseif ($opponent->isInEvent()) {
-                                    // TODO LANGUAGE
-                                    $message = $language->generalMessage(Language::ACCEPT_FAIL_PLAYER_IN_EVENT, ["name" => $opponentName]);
-                                }
+		$clean = trim(TextFormat::clean(str_replace("»", "", str_replace("«", "", $name))));
 
+		$len = strlen($clean);
+		if($len > 30 and $language->shortenString()){
+			$clean = substr($clean, 0, 25) . "...";
+		}
 
-                                if ($message !== null) $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                            }
-                        }
-                    }
-                }
-            }
-        });
+		$name = TextFormat::BOLD . TextFormat::YELLOW . '» ' . TextFormat::DARK_PURPLE . $clean . TextFormat::YELLOW . ' «';
 
-        $language = $player->getLanguage();
+		$form->setTitle($name);
+		$form->setContent($desc);
 
-        $count = count($requestInbox);
+		if($count <= 0){
+			$form->addButton($language->generalMessage(Language::NONE));
+			return $form;
+		}
 
-        $desc = $language->formWindow(Language::FORM_CLICK_REQUEST_ACCEPT);
+		$keys = array_keys($requestInbox);
 
-        $clean = trim(TextFormat::clean(str_replace("»", "", str_replace("«", "", $name))));
+		$queueStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_QUEUE);
 
-        $len = strlen($clean);
-        if ($len > 30 and $language->shortenString()) {
-            $clean = substr($clean, 0, 25) . "...";
-        }
+		foreach($keys as $name){
 
-        $name = TextFormat::BOLD . TextFormat::YELLOW . '» ' . TextFormat::DARK_PURPLE . $clean . TextFormat::YELLOW . ' «';
+			$name = (string) $name;
 
-        $form->setTitle($name);
-        $form->setContent($desc);
+			$request = $requestInbox[$name];
 
-        if ($count <= 0) {
-            $form->addButton($language->generalMessage(Language::NONE));
-            return $form;
-        }
+			$ranked = $language->getRankedStr($request->isRanked());
+			$queue = $ranked . ' ' . $request->getQueue();
 
-        $keys = array_keys($requestInbox);
+			$theQueueStr = TextFormat::BLUE . $queueStr . TextFormat::GRAY . ': ' . TextFormat::GOLD . $queue;
 
-        $queueStr = $language->scoreboard(Language::SPAWN_SCOREBOARD_QUEUE);
+			$sentBy = $language->formWindow(Language::FORM_SENT_BY, [
+				"name" => $name
+			]);
 
-        foreach ($keys as $name) {
+			$text = $sentBy . "\n" . $theQueueStr;
 
-            $name = (string)$name;
+			$form->addButton($text, 0, $request->getTexture());
+		}
 
-            $request = $requestInbox[$name];
+		return $form;
+	}
 
-            $ranked = $language->getRankedStr($request->isRanked());
-            $queue = $ranked . ' ' . $request->getQueue();
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 */
+	public static function getRequestForm(MineceitPlayer $player) : CustomForm{
 
-            $theQueueStr = TextFormat::BLUE . $queueStr . TextFormat::GRAY . ': ' . TextFormat::GOLD . $queue;
+		$form = new CustomForm(function(Player $event, $data = null){
 
-            $sentBy = $language->formWindow(Language::FORM_SENT_BY, [
-                "name" => $name
-            ]);
 
-            $text = $sentBy . "\n" . $theQueueStr;
+			if($event instanceof MineceitPlayer){
 
-            $form->addButton($text, 0, $request->getTexture());
-        }
+				$formData = $event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null){
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     */
-    public static function getRequestForm(MineceitPlayer $player): CustomForm
-    {
+					$firstIndex = $formData[0];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					if($firstIndex['type'] !== 'label'){
 
+						$senderLang = $event->getLanguage();
 
-            if($event instanceof MineceitPlayer) {
+						$playerName = $firstIndex['options'][(int) $data[0]];
 
-                $formData = $event->removeFormData();
+						$queue = $formData[1]['options'][(int) $data[1]];
 
-                if ($data !== null) {
+						$ranked = (int) $data[2] !== 0;
 
-                    $firstIndex = $formData[0];
+						$requestHandler = MineceitCore::getDuelHandler()->getRequestHandler();
 
-                    if ($firstIndex['type'] !== 'label') {
+						if(($to = $event->getServer()->getPlayer($playerName)) !== null and $to instanceof MineceitPlayer){
 
-                        $senderLang = $event->getLanguage();
+							// TODO IMPLEMENT GENERATOR
 
-                        $playerName = $firstIndex['options'][(int)$data[0]];
+							$requestHandler->sendRequest($event, $to, $queue, $ranked);
 
-                        $queue = $formData[1]['options'][(int)$data[1]];
+						}else{
 
-                        $ranked = (int)$data[2] !== 0;
+							$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RED . $senderLang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $playerName]));
+						}
+					}
+				}
+			}
+		});
 
-                        $requestHandler = MineceitCore::getDuelHandler()->getRequestHandler();
+		$onlinePlayers = $player->getServer()->getOnlinePlayers();
 
-                        if (($to = $event->getServer()->getPlayer($playerName)) !== null and $to instanceof MineceitPlayer) {
+		$language = $player->getLanguage();
 
-                            // TODO IMPLEMENT GENERATOR
+		$requestADuel = $language->formWindow(Language::REQUEST_FORM_TITLE);
 
-                            $requestHandler->sendRequest($event, $to, $queue, $ranked);
+		$form->setTitle(TextFormat::GOLD . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $requestADuel . TextFormat::GOLD . ' «');
 
-                        } else {
+		$ranked = $language->getRankedStr(true);
+		$unranked = $language->getRankedStr(false);
 
-                            $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RED . $senderLang->generalMessage(Language::PLAYER_NOT_ONLINE, ["name" => $playerName]));
-                        }
-                    }
-                }
-            }
-        });
+		$dropdownArr = [];
 
-        $onlinePlayers = $player->getServer()->getOnlinePlayers();
+		$name = $player->getName();
 
-        $language = $player->getLanguage();
+		$size = count($onlinePlayers);
 
-        $requestADuel = $language->formWindow(Language::REQUEST_FORM_TITLE);
+		foreach($onlinePlayers as $p){
+			$pName = $p->getName();
+			if($pName !== $name)
+				$dropdownArr[] = $pName;
+		}
 
-        $form->setTitle(TextFormat::GOLD . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $requestADuel . TextFormat::GOLD . ' «');
+		$sendRequest = $language->formWindow(Language::REQUEST_FORM_SEND_TO);
+		$selectQueue = $language->formWindow(Language::REQUEST_FORM_SELECT_QUEUE);
+		$setDuelRankedOrUnranked = $language->formWindow(Language::REQUEST_FORM_RANKED_OR_UNRANKED);
 
-        $ranked = $language->getRankedStr(true);
-        $unranked = $language->getRankedStr(false);
+		if(($size - 1) > 0){
+			$form->addDropdown($sendRequest, $dropdownArr);
+			$form->addDropdown($selectQueue, MineceitCore::getKits()->getKits(true));
+			$form->addDropdown($setDuelRankedOrUnranked, [$unranked, $ranked]);
+		}else
+			$form->addLabel($language->formWindow(Language::REQUEST_FORM_NOBODY_ONLINE));
 
-        $dropdownArr = [];
+		return $form;
+	}
 
-        $name = $player->getName();
+	/**
+	 * @param MineceitPlayer     $player
+	 * @param MineceitDuel|array $duels
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getSpectateForm(MineceitPlayer $player, $duels = []) : SimpleForm{
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $size = count($onlinePlayers);
+			if($event instanceof MineceitPlayer){
 
-        foreach ($onlinePlayers as $p) {
-            $pName = $p->getName();
-            if ($pName !== $name)
-                $dropdownArr[] = $pName;
-        }
+				$formData = $event->removeFormData();
 
-        $sendRequest = $language->formWindow(Language::REQUEST_FORM_SEND_TO);
-        $selectQueue = $language->formWindow(Language::REQUEST_FORM_SELECT_QUEUE);
-        $setDuelRankedOrUnranked = $language->formWindow(Language::REQUEST_FORM_RANKED_OR_UNRANKED);
+				$lang = $event->getLanguage();
 
-        if (($size - 1) > 0) {
-            $form->addDropdown($sendRequest, $dropdownArr);
-            $form->addDropdown($selectQueue, MineceitCore::getKits()->getKits(true));
-            $form->addDropdown($setDuelRankedOrUnranked, [$unranked, $ranked]);
-        } else
-            $form->addLabel($language->formWindow(Language::REQUEST_FORM_NOBODY_ONLINE));
+				if($data !== null){
 
-        return $form;
-    }
+					$index = (int) $data;
+					$firstText = $formData[$index]['text'];
 
-    /**
-     * @param MineceitPlayer $player
-     * @param MineceitDuel|array $duels
-     * @return SimpleForm
-     */
-    public static function getSpectateForm(MineceitPlayer $player, $duels = []): SimpleForm
-    {
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					if($lang->generalMessage(Language::NONE) !== $firstText){
 
-            if($event instanceof MineceitPlayer) {
+						$duel = $formData['duels'][$index];
 
-                $formData = $event->removeFormData();
+						if($duel instanceof MineceitDuel){
 
-                $lang = $event->getLanguage();
+							$duelHandler = MineceitCore::getDuelHandler();
 
-                if ($data !== null) {
+							$worldId = $duel->getWorldId();
 
-                    $index = (int)$data;
-                    $firstText = $formData[$index]['text'];
+							$currentDuels = $duelHandler->getDuels();
 
-                    if ($lang->generalMessage(Language::NONE) !== $firstText) {
+							if(isset($currentDuels[$worldId]) && $currentDuels[$worldId]->equals($duel)){
 
-                        $duel = $formData['duels'][$index];
+								$duel = $currentDuels[$worldId];
+								$duelHandler->addSpectatorTo($event, $duel);
 
-                        if ($duel instanceof MineceitDuel) {
+							}else{
 
-                            $duelHandler = MineceitCore::getDuelHandler();
+								$msg = $lang->generalMessage(Language::DUEL_ALREADY_ENDED);
+								$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $msg);
+							}
+						}
+					}
+				}
+			}
+		});
 
-                            $worldId = $duel->getWorldId();
+		$lang = $player->getLanguage();
 
-                            $currentDuels = $duelHandler->getDuels();
+		$title = TextFormat::BOLD . TextFormat::LIGHT_PURPLE . '» ' . $lang->formWindow(Language::SPECTATE_FORM_TITLE) . TextFormat::LIGHT_PURPLE . ' «';
 
-                            if (isset($currentDuels[$worldId]) && $currentDuels[$worldId]->equals($duel)) {
+		$form->setTitle($title);
 
-                                $duel = $currentDuels[$worldId];
-                                $duelHandler->addSpectatorTo($event, $duel);
+		$form->setContent(TextFormat::GOLD . TextFormat::BOLD . $lang->formWindow(Language::SPECTATE_FORM_DESC));
 
-                            } else {
+		$size = count($duels);
 
-                                $msg = $lang->generalMessage(Language::DUEL_ALREADY_ENDED);
-                                $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . $msg);
-                            }
-                        }
-                    }
-                }
-            }
-        });
+		if($size <= 0){
+			$form->addButton($lang->generalMessage(Language::NONE));
+			return $form;
+		}
 
-        $lang = $player->getLanguage();
+		foreach($duels as $duel){
 
-        $title = TextFormat::BOLD . TextFormat::LIGHT_PURPLE . '» ' . $lang->formWindow(Language::SPECTATE_FORM_TITLE) . TextFormat::LIGHT_PURPLE . ' «';
+			$texture = $duel->getTexture();
 
-        $form->setTitle($title);
+			$name = TextFormat::BLUE . $duel->getP1Name() . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . $duel->getP2Name();
 
-        $form->setContent(TextFormat::GOLD . TextFormat::BOLD . $lang->formWindow(Language::SPECTATE_FORM_DESC));
+			$form->addButton($name, 0, $texture);
+		}
 
-        $size = count($duels);
+		return $form;
+	}
 
-        if ($size <= 0) {
-            $form->addButton($lang->generalMessage(Language::NONE));
-            return $form;
-        }
+	/** ---------------------------------- PARTY FORMS ---------------------------------------- */
 
-        foreach ($duels as $duel) {
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getDefaultPartyForm(MineceitPlayer $player) : SimpleForm{
 
-            $texture = $duel->getTexture();
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            $name = TextFormat::BLUE . $duel->getP1Name() . TextFormat::DARK_GRAY . ' vs ' . TextFormat::BLUE . $duel->getP2Name();
+			if($event instanceof MineceitPlayer){
 
-            $form->addButton($name, 0, $texture);
-        }
+				$formData = $event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null and $event->isInHub()){
 
-    /** ---------------------------------- PARTY FORMS ---------------------------------------- */
+					$partyManager = MineceitCore::getPartyManager();
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getDefaultPartyForm(MineceitPlayer $player): SimpleForm
-    {
+					$option = $formData['party-option'];
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$index = (int) $data;
 
-            if ($event instanceof MineceitPlayer) {
+					if($index === 0){
 
-                $formData = $event->removeFormData();
+						if($option === 'join'){
 
-                if ($data !== null and $event->isInHub()) {
+							$form = FormUtil::getJoinPartyForm($event);
+							$event->sendFormWindow($form, ['parties' => $partyManager->getParties()]);
 
-                    $partyManager = MineceitCore::getPartyManager();
+						}else{
+							$party = $partyManager->getPartyFromPlayer($event);
+							if($party !== null)
+								$party->removePlayer($event);
+							else;
+						}
+					}elseif($index === 1){
+						// TODO CHECK FOR PERMISSION TO CREATE A NEW PARTY
+						if(!$event->isInParty()){
+							$form = FormUtil::getCreatePartyForm($event);
+							$event->sendFormWindow($form);
+						}
+					}
+				}
+			}
+		});
 
-                    $option = $formData['party-option'];
+		$lang = $player->getLanguage();
 
-                    $index = (int)$data;
+		$title = $lang->formWindow(Language::FORM_PARTIES_DEFAULT_TITLE);
 
-                    if ($index === 0) {
+		$form->setTitle($title);
 
-                        if ($option === 'join') {
+		$content = $lang->formWindow(Language::FORM_PARTIES_DEFAULT_CONTENT);
 
-                            $form = FormUtil::getJoinPartyForm($event);
-                            $event->sendFormWindow($form, ['parties' => $partyManager->getParties()]);
+		$form->setContent($content);
 
-                        } else {
-                            $party = $partyManager->getPartyFromPlayer($event);
-                            if ($party !== null)
-                                $party->removePlayer($event);
-                            else;
-                        }
-                    } elseif ($index === 1) {
-                        // TODO CHECK FOR PERMISSION TO CREATE A NEW PARTY
-                        if (!$event->isInParty()) {
-                            $form = FormUtil::getCreatePartyForm($event);
-                            $event->sendFormWindow($form);
-                        }
-                    }
-                }
-            }
-        });
+		$partyManager = MineceitCore::getPartyManager();
 
-        $lang = $player->getLanguage();
+		$p = $partyManager->getPartyFromPlayer($player);
 
-        $title = $lang->formWindow(Language::FORM_PARTIES_DEFAULT_TITLE);
+		$leave = TextFormat::BOLD . TextFormat::RED . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_LEAVE);
+		$join = TextFormat::BOLD . TextFormat::GREEN . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_JOIN);
+		$create = TextFormat::BLUE . TextFormat::BOLD . $lang->formWindow(Language::FORM_PARTIES_CREATE);
 
-        $form->setTitle($title);
+		$text = ($p !== null) ? $leave : $join;
 
-        $content = $lang->formWindow(Language::FORM_PARTIES_DEFAULT_CONTENT);
+		$form->addButton($text);
 
-        $form->setContent($content);
+		// TODO SET A PERMISSION TO CREATE A NEW PARTY
+		if(!$player->isInParty())
+			$form->addButton($create);
 
-        $partyManager = MineceitCore::getPartyManager();
+		return $form;
 
-        $p = $partyManager->getPartyFromPlayer($player);
+	}
 
-        $leave = TextFormat::BOLD . TextFormat::RED . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_LEAVE);
-        $join = TextFormat::BOLD . TextFormat::GREEN . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_JOIN);
-        $create = TextFormat::BLUE . TextFormat::BOLD . $lang->formWindow(Language::FORM_PARTIES_CREATE);
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 */
+	public static function getCreatePartyForm(MineceitPlayer $player) : CustomForm{
 
-        $text = ($p !== null) ? $leave : $join;
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form->addButton($text);
+			if($event instanceof MineceitPlayer){
 
-        // TODO SET A PERMISSION TO CREATE A NEW PARTY
-        if (!$player->isInParty())
-            $form->addButton($create);
+				$event->removeFormData();
 
-        return $form;
+				if($data !== null and $event->isInHub()){
 
-    }
+					$partyManager = MineceitCore::getPartyManager();
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     */
-    public static function getCreatePartyForm(MineceitPlayer $player): CustomForm
-    {
+					$partyName = (string) $data[0];
+					$maxPlayers = (int) $data[1];
+					$inviteOnly = (bool) $data[2];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$partyManager->createParty($event, $partyName, $maxPlayers, !$inviteOnly);
+				}
+			}
+		});
 
-            if ($event instanceof MineceitPlayer) {
+		$lang = $player->getLanguage();
 
-                $event->removeFormData();
+		$name = $player->getName();
 
-                if ($data !== null and $event->isInHub()) {
+		$title = TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_CREATE) . TextFormat::BLUE . ' «';
 
-                    $partyManager = MineceitCore::getPartyManager();
+		$form->setTitle($title);
 
-                    $partyName = (string)$data[0];
-                    $maxPlayers = (int)$data[1];
-                    $inviteOnly = (bool)$data[2];
+		$default = "$name's Party";
 
-                    $partyManager->createParty($event, $partyName, $maxPlayers, !$inviteOnly);
-                }
-            }
-        });
+		$partyName = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_PARTYNAME) . TextFormat::RESET . ':';
 
-        $lang = $player->getLanguage();
+		$maxPlayers = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_MAX_PLAYERS) . TextFormat::RESET;
 
-        $name = $player->getName();
+		$inviteOnly = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_INVITE_ONLY);
 
-        $title = TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_CREATE) . TextFormat::BLUE . ' «';
+		$form->addInput($partyName, $default, $default);
 
-        $form->setTitle($title);
+		$form->addSlider($maxPlayers, 5, MineceitParty::MAX_PLAYERS, 1, 5);
 
-        $default = "$name's Party";
+		$form->addToggle($inviteOnly, false);
 
-        $partyName = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_PARTYNAME) . TextFormat::RESET . ':';
+		return $form;
+	}
 
-        $maxPlayers = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_MAX_PLAYERS) . TextFormat::RESET;
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getJoinPartyForm(MineceitPlayer $player) : SimpleForm{
 
-        $inviteOnly = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_INVITE_ONLY);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form->addInput($partyName, $default, $default);
+			if($event instanceof MineceitPlayer){
 
-        $form->addSlider($maxPlayers, 5, MineceitParty::MAX_PLAYERS, 1, 5);
+				$formData = $event->removeFormData();
 
-        $form->addToggle($inviteOnly, false);
+				if($data !== null and $event->isInHub()){
 
-        return $form;
-    }
+					$index = (int) $data;
 
-    /**
-     * @param MineceitPlayer $player
-     * @return SimpleForm
-     */
-    public static function getJoinPartyForm(MineceitPlayer $player): SimpleForm
-    {
+					$text = (string) $formData[$index]['text'];
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$lang = $event->getLanguage();
 
-            if ($event instanceof MineceitPlayer) {
+					if($text !== $lang->generalMessage(Language::NONE)){
 
-                $formData = $event->removeFormData();
+						/* @var MineceitParty[] $parties */
+						$parties = array_values($formData['parties']);
 
-                if ($data !== null and $event->isInHub()) {
+						if(!isset($parties[$index]))
+							return;
 
-                    $index = (int)$data;
+						$partyManager = MineceitCore::getPartyManager();
 
-                    $text = (string)$formData[$index]['text'];
 
-                    $lang = $event->getLanguage();
+						$party = $parties[$index];
+						$name = $party->getName();
 
-                    if ($text !== $lang->generalMessage(Language::NONE)) {
+						$party = $partyManager->getPartyFromName($name);
 
-                        /* @var MineceitParty[] $parties */
-                        $parties = array_values($formData['parties']);
+						if($party === null){
+							// TODO SEND MESSAGE THAT PARTY NO LONGER EXISTS
+							return;
+						}
 
-                        if (!isset($parties[$index]))
-                            return;
+						$maxPlayers = $party->getMaxPlayers();
 
-                        $partyManager = MineceitCore::getPartyManager();
+						$currentPlayers = (int) $party->getPlayers(true);
 
+						$blacklisted = $party->isBlackListed($event);
 
-                        $party = $parties[$index];
-                        $name = $party->getName();
+						if($party->isOpen() and $currentPlayers < $maxPlayers and !$blacklisted)
+							$party->addPlayer($event);
+						else{
+							// TODO MESSAGES
+							if($currentPlayers >= $maxPlayers){
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is full!';
+								$event->sendMessage($msg);
+							}elseif(!$party->isOpen()){
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is now invite only.';
+								$event->sendMessage($msg);
+							}elseif($blacklisted){
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'You are blacklisted from that party.';
+								$event->sendMessage($msg);
+							}
+						}
 
-                        $party = $partyManager->getPartyFromName($name);
 
-                        if ($party === null) {
-                            // TODO SEND MESSAGE THAT PARTY NO LONGER EXISTS
-                            return;
-                        }
+						/*$firstLine = TextFormat::clean((string)explode("\n", $text)[0]);
 
-                        $maxPlayers = $party->getMaxPlayers();
+						$name = $firstLine;
 
-                        $currentPlayers = (int)$party->getPlayers(true);
+						$blackListedStr = '[' . $lang->formWindow(Language::BLACKLISTED) . ']';
 
-                        $blacklisted = $party->isBlackListed($event);
+						if (strpos($firstLine, $blackListedStr) !== false) {
 
-                        if ($party->isOpen() and $currentPlayers < $maxPlayers and !$blacklisted)
-                            $party->addPlayer($event);
-                        else {
-                            // TODO MESSAGES
-                            if ($currentPlayers >= $maxPlayers) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is full!';
-                                $event->sendMessage($msg);
-                            } elseif (!$party->isOpen()) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is now invite only.';
-                                $event->sendMessage($msg);
-                            } elseif ($blacklisted) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'You are blacklisted from that party.';
-                                $event->sendMessage($msg);
-                            }
-                        }
+							$arr = explode(' ', $firstLine);
+							$name = '';
+							$size = count($arr) - 1;
 
+							for ($i = 1; $i <= $size; $i++) {
 
-                        /*$firstLine = TextFormat::clean((string)explode("\n", $text)[0]);
+								$string = (string)$arr[$i];
 
-                        $name = $firstLine;
+								$space = $i !== $size ? ' ' : '';
 
-                        $blackListedStr = '[' . $lang->formWindow(Language::BLACKLISTED) . ']';
+								$name .= $string . $space;
+							}
+						}
 
-                        if (strpos($firstLine, $blackListedStr) !== false) {
+						$partyManager = MineceitCore::getPartyManager();
 
-                            $arr = explode(' ', $firstLine);
-                            $name = '';
-                            $size = count($arr) - 1;
+						$party = $partyManager->getPartyFromName($name);
 
-                            for ($i = 1; $i <= $size; $i++) {
+						if ($party === null) return;
 
-                                $string = (string)$arr[$i];
+						$maxPlayers = $party->getMaxPlayers();
 
-                                $space = $i !== $size ? ' ' : '';
+						$currentPlayers = (int)$party->getPlayers(true);
 
-                                $name .= $string . $space;
-                            }
-                        }
+						$blackListed = $party->isBlackListed($event);
 
-                        $partyManager = MineceitCore::getPartyManager();
+						if ($party->isOpen() and $currentPlayers < $maxPlayers and !$blackListed)
+							$party->addPlayer($event);
 
-                        $party = $partyManager->getPartyFromName($name);
+						else {
+							// TODO MESSAGES
+							if ($currentPlayers >= $maxPlayers) {
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is full!';
+								$event->sendMessage($msg);
+							} elseif (!$party->isOpen()) {
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is now invite only.';
+								$event->sendMessage($msg);
+							} elseif ($blackListed) {
+								$msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'You are blacklisted from that party.';
+								$event->sendMessage($msg);
+							}
+						} */
+					}
+				}
+			}
 
-                        if ($party === null) return;
+		});
 
-                        $maxPlayers = $party->getMaxPlayers();
+		$lang = $player->getLanguage();
 
-                        $currentPlayers = (int)$party->getPlayers(true);
+		$joinParty = TextFormat::GREEN . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_JOIN) . TextFormat::GREEN . ' «';
 
-                        $blackListed = $party->isBlackListed($event);
+		$form->setTitle($joinParty);
 
-                        if ($party->isOpen() and $currentPlayers < $maxPlayers and !$blackListed)
-                            $party->addPlayer($event);
+		$listOfParties = $lang->formWindow(Language::FORM_PARTIES_JOIN_LIST);
 
-                        else {
-                            // TODO MESSAGES
-                            if ($currentPlayers >= $maxPlayers) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is full!';
-                                $event->sendMessage($msg);
-                            } elseif (!$party->isOpen()) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'That party is now invite only.';
-                                $event->sendMessage($msg);
-                            } elseif ($blackListed) {
-                                $msg = MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . TextFormat::RED . 'You are blacklisted from that party.';
-                                $event->sendMessage($msg);
-                            }
-                        } */
-                    }
-                }
-            }
+		$form->setContent(TextFormat::BOLD . TextFormat::GOLD . $listOfParties);
 
-        });
+		$partyManager = MineceitCore::getPartyManager();
 
-        $lang = $player->getLanguage();
+		$parties = $partyManager->getParties();
 
-        $joinParty = TextFormat::GREEN . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_JOIN) . TextFormat::GREEN . ' «';
+		$size = count($parties);
 
-        $form->setTitle($joinParty);
+		if($size <= 0){
+			$none = $lang->generalMessage(Language::NONE);
+			$form->addButton($none);
+			return $form;
+		}
 
-        $listOfParties = $lang->formWindow(Language::FORM_PARTIES_JOIN_LIST);
+		$openStr = $lang->formWindow(Language::OPEN);
+		$closedStr = $lang->formWindow(Language::CLOSED);
+		$blacklistedStr = $lang->formWindow(Language::BLACKLISTED);
 
-        $form->setContent(TextFormat::BOLD . TextFormat::GOLD . $listOfParties);
+		foreach($parties as $party){
+			$name = TextFormat::BOLD . TextFormat::GOLD . $party->getName();
+			$numPlayers = $party->getPlayers(true);
+			$maxPlayers = $party->getMaxPlayers();
+			$isBlacklisted = $party->isBlackListed($player);
+			$blacklisted = ($isBlacklisted) ? TextFormat::DARK_GRAY . '[' . TextFormat::RED . $blacklistedStr . TextFormat::DARK_GRAY . '] ' : '';
+			$open = $party->isOpen() ? TextFormat::GREEN . $openStr : TextFormat::RED . $closedStr;
+			$text = $blacklisted . $name . "\n" . TextFormat::RESET . TextFormat::BLUE . $numPlayers . '/' . $maxPlayers . TextFormat::DARK_GRAY . ' | ' . $open;
+			$form->addButton($text);
+		}
 
-        $partyManager = MineceitCore::getPartyManager();
+		return $form;
+	}
 
-        $parties = $partyManager->getParties();
+	/**
+	 * @param MineceitPlayer $player
+	 * @param bool           $isOwner
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getLeavePartyForm(MineceitPlayer $player, bool $isOwner) : SimpleForm{
 
-        $size = count($parties);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        if ($size <= 0) {
-            $none = $lang->generalMessage(Language::NONE);
-            $form->addButton($none);
-            return $form;
-        }
+			if($event instanceof MineceitPlayer){
 
-        $openStr = $lang->formWindow(Language::OPEN);
-        $closedStr = $lang->formWindow(Language::CLOSED);
-        $blacklistedStr = $lang->formWindow(Language::BLACKLISTED);
+				$event->removeFormData();
 
-        foreach ($parties as $party) {
-            $name = TextFormat::BOLD . TextFormat::GOLD . $party->getName();
-            $numPlayers = $party->getPlayers(true);
-            $maxPlayers = $party->getMaxPlayers();
-            $isBlacklisted = $party->isBlackListed($player);
-            $blacklisted = ($isBlacklisted) ? TextFormat::DARK_GRAY . '[' . TextFormat::RED . $blacklistedStr . TextFormat::DARK_GRAY . '] ' : '';
-            $open = $party->isOpen() ? TextFormat::GREEN . $openStr : TextFormat::RED . $closedStr;
-            $text = $blacklisted . $name . "\n" . TextFormat::RESET . TextFormat::BLUE . $numPlayers . '/' . $maxPlayers . TextFormat::DARK_GRAY . ' | ' . $open;
-            $form->addButton($text);
-        }
+				if($data !== null){
 
-        return $form;
-    }
+					$partyManager = MineceitCore::getPartyManager();
 
-    /**
-     * @param MineceitPlayer $player
-     * @param bool $isOwner
-     * @return SimpleForm
-     */
-    public static function getLeavePartyForm(MineceitPlayer $player, bool $isOwner): SimpleForm
-    {
+					$party = $partyManager->getPartyFromPlayer($event);
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$index = (int) $data;
 
-            if ($event instanceof MineceitPlayer) {
+					if($index === 0)
+						$party->removePlayer($event);
+				}
+			}
 
-                $event->removeFormData();
+		});
 
-                if ($data !== null) {
+		$lang = $player->getLanguage();
 
-                    $partyManager = MineceitCore::getPartyManager();
+		$title = TextFormat::BOLD . TextFormat::RED . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_LEAVE) . TextFormat::RED . ' «';
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+		$content = ($isOwner ? $lang->formWindow(Language::FORM_QUESTION_LEAVE_OWNER) : $lang->formWindow(Language::FORM_QUESTION_LEAVE));
 
-                    $index = (int)$data;
+		$form->setTitle($title);
+		$form->setContent($content);
 
-                    if ($index === 0)
-                        $party->removePlayer($event);
-                }
-            }
+		$form->addButton($lang->formWindow(Language::YES));
+		$form->addButton($lang->formWindow(Language::NO));
 
-        });
+		return $form;
+	}
 
-        $lang = $player->getLanguage();
+	/**
+	 * @param MineceitParty $party
+	 *
+	 * @return CustomForm
+	 */
+	public static function getPartySettingsForm(MineceitParty $party) : CustomForm{
 
-        $title = TextFormat::BOLD . TextFormat::RED . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTIES_DEFAULT_LEAVE) . TextFormat::RED . ' «';
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $content = ($isOwner ? $lang->formWindow(Language::FORM_QUESTION_LEAVE_OWNER) : $lang->formWindow(Language::FORM_QUESTION_LEAVE));
+			if($event instanceof MineceitPlayer){
 
-        $form->setTitle($title);
-        $form->setContent($content);
+				$event->removeFormData();
 
-        $form->addButton($lang->formWindow(Language::YES));
-        $form->addButton($lang->formWindow(Language::NO));
+				if($data !== null){
 
-        return $form;
-    }
+					$inviteOnly = (bool) $data[1];
 
-    /**
-     * @param MineceitParty $party
-     * @return CustomForm
-     */
-    public static function getPartySettingsForm(MineceitParty $party): CustomForm
-    {
+					$maxPlayers = (int) $data[2];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$partyManager = MineceitCore::getPartyManager();
 
-            if ($event instanceof MineceitPlayer) {
+					$party = $partyManager->getPartyFromPlayer($event);
 
-                $event->removeFormData();
+					$party->setOpen(!$inviteOnly);
 
-                if ($data !== null) {
+					$party->setMaxPlayers($maxPlayers);
 
-                    $inviteOnly = (bool)$data[1];
+					// TODO SEND MESSAGE
+				}
+			}
+		});
 
-                    $maxPlayers = (int)$data[2];
+		$owner = $party->getOwner();
 
-                    $partyManager = MineceitCore::getPartyManager();
+		$lang = $owner->getLanguage();
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+		$inviteOnly = !$party->isOpen();
 
-                    $party->setOpen(!$inviteOnly);
+		$partySettings = TextFormat::GOLD . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTY_SETTINGS) . TextFormat::GOLD . ' «';
 
-                    $party->setMaxPlayers($maxPlayers);
+		$partyName = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_PARTYNAME) . TextFormat::RESET . ":\n";
 
-                    // TODO SEND MESSAGE
-                }
-            }
-        });
+		$inviteOnlyStr = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_INVITE_ONLY);
 
-        $owner = $party->getOwner();
+		$maxPlayersStr = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_MAX_PLAYERS) . TextFormat::RESET;
 
-        $lang = $owner->getLanguage();
+		$form->setTitle($partySettings);
 
-        $inviteOnly = !$party->isOpen();
+		$form->addLabel($partyName . TextFormat::RESET . " " . $party->getName());
 
-        $partySettings = TextFormat::GOLD . TextFormat::BOLD . '» ' . TextFormat::DARK_PURPLE . $lang->formWindow(Language::FORM_PARTY_SETTINGS) . TextFormat::GOLD . ' «';
+		$form->addToggle($inviteOnlyStr, $inviteOnly);
 
-        $partyName = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_PARTYNAME) . TextFormat::RESET . ":\n";
+		$form->addSlider($maxPlayersStr, 5, MineceitParty::MAX_PLAYERS, 1, $party->getMaxPlayers());
 
-        $inviteOnlyStr = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_INVITE_ONLY);
+		return $form;
+	}
 
-        $maxPlayersStr = TextFormat::GOLD . $lang->formWindow(Language::FORM_PARTIES_MAX_PLAYERS) . TextFormat::RESET;
+	/**
+	 * @param MineceitParty  $party
+	 * @param string[]|array $players
+	 *
+	 * @return CustomForm
+	 */
+	public static function getKickPlayerForm(MineceitParty $party, $players = []) : CustomForm{
 
-        $form->setTitle($partySettings);
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form->addLabel($partyName . TextFormat::RESET . " " . $party->getName());
+			if($event instanceof MineceitPlayer){
 
-        $form->addToggle($inviteOnlyStr, $inviteOnly);
+				$formData = $event->removeFormData();
 
-        $form->addSlider($maxPlayersStr, 5, MineceitParty::MAX_PLAYERS, 1, $party->getMaxPlayers());
+				if($data !== null and isset($data[0], $data[1], $data[2])){
 
-        return $form;
-    }
+					$index = (int) $data[0];
 
-    /**
-     * @param MineceitParty $party
-     * @param string[]|array $players
-     * @return CustomForm
-     */
-    public static function getKickPlayerForm(MineceitParty $party, $players = []): CustomForm
-    {
+					$player = $formData['players'][$index];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$blackList = (bool) $data[2];
 
-            if ($event instanceof MineceitPlayer) {
+					$partyManager = MineceitCore::getPartyManager();
 
-                $formData = $event->removeFormData();
+					$party = $partyManager->getPartyFromPlayer($event);
 
-                if ($data !== null and isset($data[0], $data[1], $data[2])) {
+					$lang = $event->getLanguage();
 
-                    $index = (int)$data[0];
+					if($party->isPlayer($player)){
 
-                    $player = $formData['players'][$index];
+						$reason = (string) $data[1];
 
-                    $blackList = (bool)$data[2];
+						$p = $party->getPlayer($player);
 
-                    $partyManager = MineceitCore::getPartyManager();
+						$party->removePlayer($p, $reason, $blackList);
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+					}else{
 
-                    $lang = $event->getLanguage();
+						// TODO SEND MESSAGE SAYING PLAYER IS NO LONGER IN YOUR PARTY
 
-                    if ($party->isPlayer($player)) {
+					}
+				}
+			}
+		});
 
-                        $reason = (string)$data[1];
+		$owner = $party->getOwner();
 
-                        $p = $party->getPlayer($player);
+		$lang = $owner->getLanguage();
 
-                        $party->removePlayer($p, $reason, $blackList);
+		//$title = $lang->formWindow(Language::Ki)
 
-                    } else {
+		$form->setTitle('Kick a Player');
 
-                        // TODO SEND MESSAGE SAYING PLAYER IS NO LONGER IN YOUR PARTY
+		$size = count($players);
 
-                    }
-                }
-            }
-        });
+		// TODO ADD MESSAGES
 
-        $owner = $party->getOwner();
+		if($size <= 0){
+			$form->addLabel("You don't have any players in your party.");
+			return $form;
+		}
 
-        $lang = $owner->getLanguage();
+		$playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-        //$title = $lang->formWindow(Language::Ki)
+		if($lang->getLocale() === Language::ARABIC)
+			$playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
 
-        $form->setTitle('Kick a Player');
+		$form->addDropdown($playerLabel, $players);
 
-        $size = count($players);
+		$form->addInput('Reason:');
 
-        // TODO ADD MESSAGES
+		$form->addToggle('Add to Blacklist:', false);
 
-        if ($size <= 0) {
-            $form->addLabel("You don't have any players in your party.");
-            return $form;
-        }
+		return $form;
+	}
 
-        $playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
+	/**
+	 * @param MineceitParty $party
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getPartyOptionsForm(MineceitParty $party) : SimpleForm{
 
-        if ($lang->getLocale() === Language::ARABIC)
-            $playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form->addDropdown($playerLabel, $players);
+			if($event instanceof MineceitPlayer){
 
-        $form->addInput('Reason:');
+				$event->removeFormData();
 
-        $form->addToggle('Add to Blacklist:', false);
+				if($data !== null){
 
-        return $form;
-    }
+					$index = (int) $data;
 
-    /**
-     * @param MineceitParty $party
-     * @return SimpleForm
-     */
-    public static function getPartyOptionsForm(MineceitParty $party): SimpleForm
-    {
+					$partyManager = MineceitCore::getPartyManager();
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$party = $partyManager->getPartyFromPlayer($event);
 
-            if ($event instanceof MineceitPlayer) {
+					$name = $event->getName();
 
-                $event->removeFormData();
+					switch($index){
 
-                if ($data !== null) {
+						case 0:
 
-                    $index = (int)$data;
+							$form = FormUtil::getPartySettingsForm($party);
+							$event->sendFormWindow($form);
+							break;
 
-                    $partyManager = MineceitCore::getPartyManager();
+						case 1:
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+							$players = $party->getPlayers();
+							$listPlayers = [];
 
-                    $name = $event->getName();
+							foreach($players as $p){
+								$pName = $p->getName();
+								if($pName !== $name)
+									$listPlayers[] = $pName;
+							}
 
-                    switch ($index) {
+							$form = FormUtil::getKickPlayerForm($party, $listPlayers);
+							$event->sendFormWindow($form, ['players' => $listPlayers]);
+							break;
 
-                        case 0:
+						case 2:
 
-                            $form = FormUtil::getPartySettingsForm($party);
-                            $event->sendFormWindow($form);
-                            break;
+							$blacklisted = $party->getBlacklisted();
 
-                        case 1:
+							$form = FormUtil::getBlackListedForm($event, $blacklisted);
+							$event->sendFormWindow($form);
+							break;
 
-                            $players = $party->getPlayers();
-                            $listPlayers = [];
+						case 3:
 
-                            foreach ($players as $p) {
-                                $pName = $p->getName();
-                                if ($pName !== $name)
-                                    $listPlayers[] = $pName;
-                            }
+							$players = $party->getPlayers();
 
-                            $form = FormUtil::getKickPlayerForm($party, $listPlayers);
-                            $event->sendFormWindow($form, ['players' => $listPlayers]);
-                            break;
+							$possiblePromotions = [];
 
-                        case 2:
+							$ownerName = $event->getName();
 
-                            $blacklisted = $party->getBlacklisted();
+							foreach($players as $p){
+								$name = $p->getName();
+								if($ownerName !== $name)
+									$possiblePromotions[] = $name;
+							}
 
-                            $form = FormUtil::getBlackListedForm($event, $blacklisted);
-                            $event->sendFormWindow($form);
-                            break;
+							$form = FormUtil::getPartyPromotePlayerForm($event, $possiblePromotions);
+							$event->sendFormWindow($form, ['players' => $possiblePromotions]);
+							break;
 
-                        case 3:
+					}
+				}
 
-                            $players = $party->getPlayers();
+			}
 
-                            $possiblePromotions = [];
+		});
 
-                            $ownerName = $event->getName();
+		// TODO ADD MESSAGES
 
-                            foreach ($players as $p) {
-                                $name = $p->getName();
-                                if ($ownerName !== $name)
-                                    $possiblePromotions[] = $name;
-                            }
+		$owner = $party->getOwner();
 
-                            $form = FormUtil::getPartyPromotePlayerForm($event, $possiblePromotions);
-                            $event->sendFormWindow($form, ['players' => $possiblePromotions]);
-                            break;
+		$lang = $owner->getLanguage();
 
-                    }
-                }
+		$form->setTitle('Party Options');
 
-            }
+		$form->setContent("Edit the party's settings or kick a player.");
 
-        });
+		$form->addButton('Edit Party Settings');
 
-        // TODO ADD MESSAGES
+		$form->addButton('Kick a Player');
 
-        $owner = $party->getOwner();
+		$form->addButton('Edit Blacklisted Players');
 
-        $lang = $owner->getLanguage();
+		$form->addButton('Promote player to Owner');
 
-        $form->setTitle('Party Options');
+		return $form;
+	}
 
-        $form->setContent("Edit the party's settings or kick a player.");
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|string[] $blacklisted
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getBlackListedForm(MineceitPlayer $player, $blacklisted = []) : SimpleForm{
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form->addButton('Edit Party Settings');
+			if($event instanceof MineceitPlayer){
 
-        $form->addButton('Kick a Player');
+				$event->removeFormData();
 
-        $form->addButton('Edit Blacklisted Players');
+				if($data !== null){
 
-        $form->addButton('Promote player to Owner');
+					$partyManager = MineceitCore::getPartyManager();
+					$party = $partyManager->getPartyFromPlayer($event);
 
-        return $form;
-    }
+					$server = $event->getServer();
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|string[] $blacklisted
-     * @return SimpleForm
-     */
-    public static function getBlackListedForm(MineceitPlayer $player, $blacklisted = []): SimpleForm
-    {
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$index = (int) $data;
 
-            if ($event instanceof MineceitPlayer) {
+					switch($index){
 
-                $event->removeFormData();
+						case 0:
 
-                if ($data !== null) {
+							$players = [];
 
-                    $partyManager = MineceitCore::getPartyManager();
-                    $party = $partyManager->getPartyFromPlayer($event);
+							$onlinePlayers = $server->getOnlinePlayers();
 
-                    $server = $event->getServer();
+							foreach($onlinePlayers as $p){
+								$name = $p->getName();
+								if(!$party->isBlackListed($name) and !$party->isPlayer($name))
+									$players[] = $name;
+							}
 
-                    $index = (int)$data;
+							$form = FormUtil::getEditBlackListForm($event, 'add', $players);
+							$event->sendFormWindow($form, ['option' => 'add', 'players' => $players]);
+							break;
 
-                    switch ($index) {
+						case 1:
 
-                        case 0:
+							$players = $party->getBlacklisted();
 
-                            $players = [];
+							$form = FormUtil::getEditBlackListForm($event, 'remove', $players);
+							$event->sendFormWindow($form, ['option' => 'remove', 'players' => $players]);
 
-                            $onlinePlayers = $server->getOnlinePlayers();
+							break;
+					}
+				}
+			}
 
-                            foreach ($onlinePlayers as $p) {
-                                $name = $p->getName();
-                                if (!$party->isBlackListed($name) and !$party->isPlayer($name))
-                                    $players[] = $name;
-                            }
+		});
 
-                            $form = FormUtil::getEditBlackListForm($event, 'add', $players);
-                            $event->sendFormWindow($form, ['option' => 'add', 'players' => $players]);
-                            break;
+		// TODO ADD MESSAGE
 
-                        case 1:
+		$lang = $player->getLanguage();
 
-                            $players = $party->getBlacklisted();
+		$form->setTitle('List of Blacklisted Players');
 
-                            $form = FormUtil::getEditBlackListForm($event, 'remove', $players);
-                            $event->sendFormWindow($form, ['option' => 'remove', 'players' => $players]);
+		$blacklistedStr = $lang->formWindow(Language::BLACKLISTED);
 
-                            break;
-                    }
-                }
-            }
+		$content = "$blacklistedStr: ";
 
-        });
+		$size = count($blacklisted);
 
-        // TODO ADD MESSAGE
+		if($size <= 0){
 
-        $lang = $player->getLanguage();
+			$none = $lang->generalMessage(Language::NONE);
+			$content .= $none;
 
-        $form->setTitle('List of Blacklisted Players');
+		}else{
 
-        $blacklistedStr = $lang->formWindow(Language::BLACKLISTED);
+			$size = count($blacklisted) - 1;
+			$count = 0;
 
-        $content = "$blacklistedStr: ";
+			foreach($blacklisted as $player){
+				$comma = $count === $size ? '' : ', ';
+				$content .= $player . $comma;
+				$count++;
+			}
+		}
 
-        $size = count($blacklisted);
+		$form->setContent($content);
 
-        if ($size <= 0) {
+		$form->addButton('Add to Blacklist');
+		$form->addButton('Remove from Blacklist');
 
-            $none = $lang->generalMessage(Language::NONE);
-            $content .= $none;
+		return $form;
+	}
 
-        } else {
+	/**
+	 * @param MineceitPlayer $player
+	 * @param string         $type
+	 * @param array|string[] $players
+	 *
+	 * @return CustomForm
+	 */
+	public static function getEditBlackListForm(MineceitPlayer $player, string $type, array $players) : CustomForm{
 
-            $size = count($blacklisted) - 1;
-            $count = 0;
+		$form = new CustomForm(function(Player $event, $data = null){
 
-            foreach ($blacklisted as $player) {
-                $comma = $count === $size ? '' : ', ';
-                $content .= $player . $comma;
-                $count++;
-            }
-        }
+			if($event instanceof MineceitPlayer){
 
-        $form->setContent($content);
+				$formData = $event->removeFormData();
 
-        $form->addButton('Add to Blacklist');
-        $form->addButton('Remove from Blacklist');
+				if($data !== null and isset($data[0])){
 
-        return $form;
-    }
+					$index = (int) $data[0];
 
-    /**
-     * @param MineceitPlayer $player
-     * @param string $type
-     * @param array|string[] $players
-     * @return CustomForm
-     */
-    public static function getEditBlackListForm(MineceitPlayer $player, string $type, array $players): CustomForm
-    {
+					$name = (string) $formData['players'][$index];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$option = (string) $formData['option'];
 
-            if ($event instanceof MineceitPlayer) {
+					$partyManager = MineceitCore::getPartyManager();
 
-                $formData = $event->removeFormData();
+					$party = $partyManager->getPartyFromPlayer($event);
 
-                if ($data !== null and isset($data[0])) {
+					$lang = $event->getLanguage();
 
-                    $index = (int)$data[0];
+					// TODO ADD MESSAGES
 
-                    $name = (string)$formData['players'][$index];
+					if($option === 'add'){
+						$party->addToBlacklist($name);
+					}elseif($option === 'remove'){
+						$party->removeFromBlacklist($name);
+					}
+				}
+			}
+		});
 
-                    $option = (string)$formData['option'];
+		// TODO ADD MESSAGES
 
-                    $partyManager = MineceitCore::getPartyManager();
+		$lang = $player->getLanguage();
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+		$size = count($players);
 
-                    $lang = $event->getLanguage();
+		$title = ($type === 'add') ? 'Add to Blacklist' : 'Remove From Blacklist';
 
-                    // TODO ADD MESSAGES
+		$form->setTitle($title);
 
-                    if ($option === 'add') {
-                        $party->addToBlacklist($name);
-                    } elseif ($option === 'remove') {
-                        $party->removeFromBlacklist($name);
-                    }
-                }
-            }
-        });
+		$playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-        // TODO ADD MESSAGES
+		if($lang->getLocale() === Language::ARABIC)
+			$playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
 
-        $lang = $player->getLanguage();
+		if($size <= 0){
+			$label = ($type === 'add') ? "There aren't any players to add to the blacklist." : "There isn't anyone blacklisted to your party.";
+			$form->addLabel($label);
+			return $form;
+		}
 
-        $size = count($players);
+		$form->addDropdown($playerLabel, $players);
 
-        $title = ($type === 'add') ? 'Add to Blacklist' : 'Remove From Blacklist';
+		return $form;
+	}
 
-        $form->setTitle($title);
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|string[] $possiblePromotions
+	 *
+	 * @return CustomForm
+	 */
+	public static function getPartyPromotePlayerForm(MineceitPlayer $player, $possiblePromotions = []) : CustomForm{
 
-        $playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        if ($lang->getLocale() === Language::ARABIC)
-            $playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
+			if($event instanceof MineceitPlayer){
 
-        if ($size <= 0) {
-            $label = ($type === 'add') ? "There aren't any players to add to the blacklist." : "There isn't anyone blacklisted to your party.";
-            $form->addLabel($label);
-            return $form;
-        }
+				$formData = $event->removeFormData();
 
-        $form->addDropdown($playerLabel, $players);
+				if($data !== null and isset($data[0])){
 
-        return $form;
-    }
+					$index = $data[0];
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|string[] $possiblePromotions
-     * @return CustomForm
-     */
-    public static function getPartyPromotePlayerForm(MineceitPlayer $player, $possiblePromotions = []): CustomForm
-    {
+					$name = (string) $formData['players'][$index];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$partyManager = MineceitCore::getPartyManager();
 
-            if ($event instanceof MineceitPlayer) {
+					$party = $partyManager->getPartyFromPlayer($event);
 
-                $formData = $event->removeFormData();
+					if($party->isPlayer($name)){
 
-                if ($data !== null and isset($data[0])) {
+						$player = $party->getPlayer($name);
 
-                    $index = $data[0];
+						$party->promoteToOwner($player);
 
-                    $name = (string)$formData['players'][$index];
+						// TODO SEND MESSAGE
 
-                    $partyManager = MineceitCore::getPartyManager();
+					}else{
 
-                    $party = $partyManager->getPartyFromPlayer($event);
+						// TODO SEND MESSAGE SAYING PLAYER IS NO LONGER IN YOUR PARTY
 
-                    if ($party->isPlayer($name)) {
+					}
+				}
+			}
 
-                        $player = $party->getPlayer($name);
+		});
 
-                        $party->promoteToOwner($player);
+		// TODO ADD MESSAGES
 
-                        // TODO SEND MESSAGE
+		$form->setTitle('Promote to Owner');
 
-                    } else {
+		$lang = $player->getLanguage();
 
-                        // TODO SEND MESSAGE SAYING PLAYER IS NO LONGER IN YOUR PARTY
+		$playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-                    }
-                }
-            }
+		if($lang->getLocale() === Language::ARABIC)
+			$playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
 
-        });
+		$size = count($possiblePromotions);
 
-        // TODO ADD MESSAGES
+		if($size <= 0){
+			$form->addLabel("There aren't any players in your party.");
+			return $form;
+		}
 
-        $form->setTitle('Promote to Owner');
+		$form->addDropdown($playerLabel, $possiblePromotions);
 
-        $lang = $player->getLanguage();
+		return $form;
+	}
 
-        $playerLabel = TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL) . TextFormat::GRAY . ':';
 
-        if ($lang->getLocale() === Language::ARABIC)
-            $playerLabel = TextFormat::GRAY . ' :' . TextFormat::GOLD . $lang->formWindow(Language::PLAYERS_LABEL);
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 *
+	 * Gets the form for creating ranks.
+	 *
+	 * TODO: UPDATE WITH NEW PERMISSIONS -> LATER
+	 */
+	public static function getCreateRankForm(MineceitPlayer $player) : CustomForm{
 
-        $size = count($possiblePromotions);
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        if ($size <= 0) {
-            $form->addLabel("There aren't any players in your party.");
-            return $form;
-        }
+			if($event instanceof MineceitPlayer){
 
-        $form->addDropdown($playerLabel, $possiblePromotions);
+				$event->removeFormData();
 
-        return $form;
-    }
+				$language = $event->getLanguage();
 
+				if($data !== null){
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     *
-     * Gets the form for creating ranks.
-     *
-     * TODO: UPDATE WITH NEW PERMISSIONS -> LATER
-     */
-    public static function getCreateRankForm(MineceitPlayer $player): CustomForm
-    {
+					$name = $data[1];
+					$localName = strtolower($name);
+					$format = $data[2];
+					$fly = (bool) $data[3];
+					$edit = (bool) $data[4];
+					$permissionIndex = (int) $data[5];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$permission = Rank::PERMISSION_INDEXES[$permissionIndex];
 
-            if ($event instanceof MineceitPlayer) {
+					$rankHandler = MineceitCore::getRankHandler();
 
-                $event->removeFormData();
+					$rank = $rankHandler->getRank($localName);
+					if($rank === null){
+						$rank = $rankHandler->getRank($name);
+					}
 
-                $language = $event->getLanguage();
+					if($rank !== null){
+						$msg = MineceitUtil::getPrefix() . " " . TextFormat::RESET . $language->rankMessage($rank->getName(), Language::RANK_EXISTS);
+						$event->sendMessage($msg);
+						return;
+					}
 
-                if ($data !== null) {
+					$created = $rankHandler->createRank($name, $format, $fly, $edit, $permission);
 
-                    $name = $data[1];
-                    $localName = strtolower($name);
-                    $format = $data[2];
-                    $fly = (bool)$data[3];
-                    $edit = (bool)$data[4];
-                    $permissionIndex = (int)$data[5];
+					if($created){
+						$msg = $language->rankMessage($name, Language::RANK_CREATE_SUCCESS);
+					}else{
+						$msg = $language->rankMessage($name, Language::RANK_CREATE_FAIL);
+					}
 
-                    $permission = Rank::PERMISSION_INDEXES[$permissionIndex];
+					$event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $msg);
+				}
+			}
+		});
 
-                    $rankHandler = MineceitCore::getRankHandler();
+		$language = $player->getLanguage();
 
-                    $rank = $rankHandler->getRank($localName);
-                    if ($rank === null) {
-                        $rank = $rankHandler->getRank($name);
-                    }
+		$form->setTitle(TextFormat::BOLD . $language->getMessage(Language::CREATE_RANK_TITLE));
 
-                    if ($rank !== null) {
-                        $msg = MineceitUtil::getPrefix() . " " . TextFormat::RESET . $language->rankMessage($rank->getName(), Language::RANK_EXISTS);
-                        $event->sendMessage($msg);
-                        return;
-                    }
+		$form->addLabel($language->getMessage(Language::CREATE_RANK_DESC));
 
-                    $created = $rankHandler->createRank($name, $format, $fly, $edit, $permission);
+		$form->addInput($language->getMessage(Language::CREATE_RANK_NAME));
 
-                    if ($created) {
-                        $msg = $language->rankMessage($name, Language::RANK_CREATE_SUCCESS);
-                    } else {
-                        $msg = $language->rankMessage($name, Language::RANK_CREATE_FAIL);
-                    }
+		$form->addInput($language->getMessage(Language::CREATE_RANK_FORMAT));
 
-                    $event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $msg);
-                }
-            }
-        });
+		$form->addToggle($language->getMessage(Language::CREATE_RANK_FLY), false);
 
-        $language = $player->getLanguage();
+		$form->addToggle($language->getMessage(Language::CREATE_RANK_BUILDER_MODE), false);
 
-        $form->setTitle(TextFormat::BOLD . $language->getMessage(Language::CREATE_RANK_TITLE));
+		$form->addDropdown($language->getMessage(Language::CREATE_RANK_PERMS), [
+			"Owner",
+			"Admin",
+			"Mod",
+			"Trial-Mod",
+			"Content Creator",
+			"VIP+",
+			"VIP",
+			"Normal"
+		], 4);
 
-        $form->addLabel($language->getMessage(Language::CREATE_RANK_DESC));
+		return $form;
+	}
 
-        $form->addInput($language->getMessage(Language::CREATE_RANK_NAME));
+	/**
+	 * @param MineceitPlayer $player
+	 * @param int            $perms
+	 *
+	 * @return SimpleForm
+	 *
+	 * The general report menu form.
+	 */
+	public static function getReportMenuForm(MineceitPlayer $player, int $perms = 0) : SimpleForm{
 
-        $form->addInput($language->getMessage(Language::CREATE_RANK_FORMAT));
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form->addToggle($language->getMessage(Language::CREATE_RANK_FLY), false);
+			if($event instanceof MineceitPlayer){
 
-        $form->addToggle($language->getMessage(Language::CREATE_RANK_BUILDER_MODE), false);
+				$formData = $event->removeFormData();
 
-        $form->addDropdown($language->getMessage(Language::CREATE_RANK_PERMS), [
-            "Owner",
-            "Admin",
-            "Mod",
-            "Trial-Mod",
-            "Content Creator",
-            "VIP+",
-            "VIP",
-            "Normal"
-        ], 4);
+				if($data !== null){
 
-        return $form;
-    }
+					$perms = (int) $formData["perms"];
+					$index = (int) $data;
 
-    /**
-     * @param MineceitPlayer $player
-     * @param int $perms
-     * @return SimpleForm
-     *
-     * The general report menu form.
-     */
-    public static function getReportMenuForm(MineceitPlayer $player, int $perms = 0): SimpleForm
-    {
+					switch($index){
+						case 0:
+							$staffMembers = MineceitCore::getPlayerHandler()->getStaffOnline(true, $event);
+							$form = self::getReportStaffForm($event, $staffMembers);
+							if($form !== null){
+								$event->sendFormWindow($form, ['staff' => $staffMembers]);
+							}
+							break;
+						case 1:
+							$form = self::getReportBugForm($event);
+							$event->sendFormWindow($form);
+							break;
+						case 2:
+							$playerManager = MineceitCore::getPlayerHandler();
+							$languages = array_values($playerManager->getLanguages());
+							$form = self::getReportMisTranslationForm($event, $languages);
+							$outputLanguages = array_map(function(Language $lang){
+								return $lang->getLocale();
+							}, $languages);
+							$event->sendFormWindow($form, ["languages" => $outputLanguages]);
+							break;
+						case 3:
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+							$onlinePlayers = $event->getServer()->getOnlinePlayers();
+							$players = array_diff(array_map(function(Player $player){
+								return $player->getName();
+							}, $onlinePlayers), [$event->getName()]);
+							$players = array_values($players);
 
-            if ($event instanceof MineceitPlayer) {
+							$form = self::getReportHackerForm($event, $players);
+							if($form !== null){
+								$event->sendFormWindow($form, ["players" => $players]);
+							}
+							break;
 
-                $formData = $event->removeFormData();
+						case 4:
 
-                if ($data !== null) {
+							$reports = array_values($event->getReportHistory());
+							$form = self::getListOfReports($event, $reports);
 
-                    $perms = (int)$formData["perms"];
-                    $index = (int)$data;
+							if($perms !== ReportInfo::PERMISSION_NORMAL){
+								$form = self::getViewReportsSearchForm($event);
+							}
 
-                    switch ($index) {
-                        case 0:
-                            $staffMembers = MineceitCore::getPlayerHandler()->getStaffOnline(true, $event);
-                            $form = self::getReportStaffForm($event, $staffMembers);
-                            if ($form !== null) {
-                                $event->sendFormWindow($form, ['staff' => $staffMembers]);
-                            }
-                            break;
-                        case 1:
-                            $form = self::getReportBugForm($event);
-                            $event->sendFormWindow($form);
-                            break;
-                        case 2:
-                            $playerManager = MineceitCore::getPlayerHandler();
-                            $languages = array_values($playerManager->getLanguages());
-                            $form = self::getReportMisTranslationForm($event, $languages);
-                            $outputLanguages = array_map(function (Language $lang) {
-                                return $lang->getLocale();
-                            }, $languages);
-                            $event->sendFormWindow($form, ["languages" => $outputLanguages]);
-                            break;
-                        case 3:
+							if($form !== null){
+								$event->sendFormWindow($form, ['reports' => $reports, 'history' => true, 'perm' => $event->getReportPermissions()]);
+							}
 
-                            $onlinePlayers = $event->getServer()->getOnlinePlayers();
-                            $players = array_diff(array_map(function (Player $player) {
-                                return $player->getName();
-                            }, $onlinePlayers), [$event->getName()]);
-                            $players = array_values($players);
+							break;
+					}
+				}
+			}
 
-                            $form = self::getReportHackerForm($event, $players);
-                            if ($form !== null) {
-                                $event->sendFormWindow($form, ["players" => $players]);
-                            }
-                            break;
+		});
 
-                        case 4:
+		$lang = $player->getLanguage();
 
-                            $reports = array_values($event->getReportHistory());
-                            $form = self::getListOfReports($event, $reports);
+		$title = $lang->getMessage(Language::REPORTS_MENU_FORM_TITLE);
+		$form->setTitle($title);
 
-                            if ($perms !== ReportInfo::PERMISSION_NORMAL) {
-                                $form = self::getViewReportsSearchForm($event);
-                            }
+		$desc = $lang->getMessage(Language::REPORTS_MENU_FORM_DESC);
+		$form->setContent($desc);
 
-                            if ($form !== null) {
-                                $event->sendFormWindow($form, ['reports' => $reports, 'history' => true, 'perm' => $event->getReportPermissions()]);
-                            }
+		$types = [
+			$lang->getMessage(Language::REPORTS_MENU_FORM_STAFF) => "textures/blocks/glass_red.png",
+			$lang->getMessage(Language::REPORTS_MENU_FORM_BUG) => "textures/blocks/glass_magenta.png",
+			$lang->getMessage(Language::REPORTS_MENU_FORM_TRANSLATION) => "textures/blocks/glass_purple.png",
+			$lang->getMessage(Language::REPORTS_MENU_FORM_HACKER) => "textures/blocks/glass_blue.png"
+		];
 
-                            break;
-                    }
-                }
-            }
+		foreach($types as $type => $texture){
+			$form->addButton($type, 0, $texture);
+		}
 
-        });
+		$text = $lang->getMessage(Language::REPORTS_MENU_FORM_YOUR_HISTORY);
 
-        $lang = $player->getLanguage();
+		switch($perms){
+			case ReportInfo::PERMISSION_VIEW_ALL_REPORTS:
+				$text = $lang->getMessage(Language::REPORTS_MENU_FORM_VIEW_REPORTS);
+				break;
+			case ReportInfo::PERMISSION_MANAGE_REPORTS:
+				$text = $lang->getMessage(Language::REPORTS_MENU_FORM_MANAGE_REPORTS);
+				break;
+		}
 
-        $title = $lang->getMessage(Language::REPORTS_MENU_FORM_TITLE);
-        $form->setTitle($title);
+		$form->addButton($text, 0, "textures/items/book_written.png");
 
-        $desc = $lang->getMessage(Language::REPORTS_MENU_FORM_DESC);
-        $form->setContent($desc);
+		return $form;
+	}
 
-        $types = [
-            $lang->getMessage(Language::REPORTS_MENU_FORM_STAFF) => "textures/blocks/glass_red.png",
-            $lang->getMessage(Language::REPORTS_MENU_FORM_BUG) => "textures/blocks/glass_magenta.png",
-            $lang->getMessage(Language::REPORTS_MENU_FORM_TRANSLATION) => "textures/blocks/glass_purple.png",
-            $lang->getMessage(Language::REPORTS_MENU_FORM_HACKER) => "textures/blocks/glass_blue.png"
-        ];
 
-        foreach ($types as $type => $texture) {
-            $form->addButton($type, 0, $texture);
-        }
+	/**
+	 * @param array|null     $staffMembers
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm|null
+	 *
+	 * Gets the report staff form.
+	 */
+	public static function getReportStaffForm(MineceitPlayer $player, array $staffMembers = null){
 
-        $text = $lang->getMessage(Language::REPORTS_MENU_FORM_YOUR_HISTORY);
+		/** @var string[] $onlineStaff */
+		$onlineStaff = $staffMembers ?? MineceitCore::getPlayerHandler()->getStaffOnline(true, $player);
 
-        switch ($perms) {
-            case ReportInfo::PERMISSION_VIEW_ALL_REPORTS:
-                $text = $lang->getMessage(Language::REPORTS_MENU_FORM_VIEW_REPORTS);
-                break;
-            case ReportInfo::PERMISSION_MANAGE_REPORTS:
-                $text = $lang->getMessage(Language::REPORTS_MENU_FORM_MANAGE_REPORTS);
-                break;
-        }
+		$lang = $player->getLanguage();
 
-        $form->addButton($text, 0, "textures/items/book_written.png");
+		if(count($onlineStaff) <= 0){
+			$message = $lang->getMessage(Language::NO_STAFF_MEMBERS_ONLINE);
+			$player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+			return null;
+		}
 
-        return $form;
-    }
+		$form = new CustomForm(function(Player $event, $data = null){
 
+			if($event instanceof MineceitPlayer){
 
-    /**
-     * @param array|null $staffMembers
-     * @param MineceitPlayer $player
-     * @return CustomForm|null
-     *
-     * Gets the report staff form.
-     */
-    public static function getReportStaffForm(MineceitPlayer $player, array $staffMembers = null)
-    {
+				$formData = $event->removeFormData();
 
-        /** @var string[] $onlineStaff */
-        $onlineStaff = $staffMembers ?? MineceitCore::getPlayerHandler()->getStaffOnline(true, $player);
+				$staffMembers = array_values($formData['staff']);
 
-        $lang = $player->getLanguage();
+				if($data !== null){
 
-        if (count($onlineStaff) <= 0) {
-            $message = $lang->getMessage(Language::NO_STAFF_MEMBERS_ONLINE);
-            $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-            return null;
-        }
+					$lang = $event->getLanguage();
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$dropdownResultIndex = (int) $data[1];
+					$reason = (string) $data[2];
 
-            if ($event instanceof MineceitPlayer) {
+					if($reason === ""){
+						$message = $lang->getMessage(Language::REPORT_NO_REASON);
+						$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+						return;
+					}
 
-                $formData = $event->removeFormData();
+					$resultingStaff = $staffMembers[$dropdownResultIndex];
+					$server = $event->getServer();
 
-                $staffMembers = array_values($formData['staff']);
+					$name = (string) $resultingStaff;
+					$report = new StaffReport($event, $name, $reason);
+					$reportType = $report->getReportType();
 
-                if ($data !== null) {
+					if(($player = $server->getPlayer($name)) !== null and $player instanceof MineceitPlayer){
 
-                    $lang = $event->getLanguage();
+						if($player->hasReport($event, $reportType)){
+							$message = $lang->getMessage(Language::REPORT_PLAYER_ALREADY);
+							$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+							return;
+						}
 
-                    $dropdownResultIndex = (int)$data[1];
-                    $reason = (string)$data[2];
+						$player->addReport($report);
 
-                    if ($reason === "") {
-                        $message = $lang->getMessage(Language::REPORT_NO_REASON);
-                        $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                        return;
-                    }
+						if($player->getOnlineReportsCount($reportType) > ReportInfo::MAX_REPORT_NUM){
+							// TODO SUSPEND THE PLAYER'S PERMISSIONS
+						}
+					}
 
-                    $resultingStaff = $staffMembers[$dropdownResultIndex];
-                    $server = $event->getServer();
+					$reportManager = MineceitCore::getReportManager();
+					$result = $reportManager->createReport($report);
 
-                    $name = (string)$resultingStaff;
-                    $report = new StaffReport($event, $name, $reason);
-                    $reportType = $report->getReportType();
+					if($result){
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
+					}else{
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
+					}
 
-                    if (($player = $server->getPlayer($name)) !== null and $player instanceof MineceitPlayer) {
+					$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+				}
+			}
 
-                        if ($player->hasReport($event, $reportType)) {
-                            $message = $lang->getMessage(Language::REPORT_PLAYER_ALREADY);
-                            $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                            return;
-                        }
+		});
 
-                        $player->addReport($report);
+		$title = $lang->getMessage(Language::STAFF_REPORT_FORM_TITLE);
+		$desc = $lang->getMessage(Language::STAFF_REPORT_FORM_DESC);
 
-                        if ($player->getOnlineReportsCount($reportType) > ReportInfo::MAX_REPORT_NUM) {
-                            // TODO SUSPEND THE PLAYER'S PERMISSIONS
-                        }
-                    }
+		$form->setTitle($title);
+		$form->addLabel($desc);
 
-                    $reportManager = MineceitCore::getReportManager();
-                    $result = $reportManager->createReport($report);
+		$form->addDropdown($lang->getMessage(Language::STAFF_REPORT_FORM_MEMBERS), $onlineStaff);
 
-                    if ($result) {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
-                    } else {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
-                    }
+		$form->addInput($lang->getMessage(Language::FORM_LABEL_REASON_FOR_REPORTING), "");
 
-                    $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                }
-            }
+		return $form;
+	}
 
-        });
 
-        $title = $lang->getMessage(Language::STAFF_REPORT_FORM_TITLE);
-        $desc = $lang->getMessage(Language::STAFF_REPORT_FORM_DESC);
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 *
+	 * The bug reports form.
+	 */
+	public static function getReportBugForm(MineceitPlayer $player) : CustomForm{
 
-        $form->setTitle($title);
-        $form->addLabel($desc);
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form->addDropdown($lang->getMessage(Language::STAFF_REPORT_FORM_MEMBERS), $onlineStaff);
+			if($event instanceof MineceitPlayer){
 
-        $form->addInput($lang->getMessage(Language::FORM_LABEL_REASON_FOR_REPORTING), "");
+				$event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null){
 
+					$lang = $event->getLanguage();
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     *
-     * The bug reports form.
-     */
-    public static function getReportBugForm(MineceitPlayer $player): CustomForm
-    {
+					$description = (string) $data[2];
+					$reproduce = (string) $data[4];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$descWordCount = MineceitUtil::getWordCount($description);
 
-            if ($event instanceof MineceitPlayer) {
+					if($descWordCount < 5){
+						$message = $lang->getMessage(Language::REPORT_FIVE_WORDS);
+						$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+						return;
+					}
 
-                $event->removeFormData();
+					$report = new BugReport($event, $description, $reproduce);
+					$reportManager = MineceitCore::getReportManager();
+					$result = $reportManager->createReport($report);
 
-                if ($data !== null) {
+					if($result){
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
+					}else{
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
+					}
 
-                    $lang = $event->getLanguage();
+					$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+				}
+			}
+		});
 
-                    $description = (string)$data[2];
-                    $reproduce = (string)$data[4];
+		$lang = $player->getLanguage();
 
-                    $descWordCount = MineceitUtil::getWordCount($description);
+		$title = $lang->getMessage(Language::BUG_REPORT_FORM_TITLE);
+		$desc = $lang->getMessage(Language::BUG_REPORT_FORM_DESC);
 
-                    if ($descWordCount < 5) {
-                        $message = $lang->getMessage(Language::REPORT_FIVE_WORDS);
-                        $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                        return;
-                    }
+		$form->setTitle($title);
+		$form->addLabel($desc . "\n");
 
-                    $report = new BugReport($event, $description, $reproduce);
-                    $reportManager = MineceitCore::getReportManager();
-                    $result = $reportManager->createReport($report);
+		$descriptionLabel = TextFormat::BOLD . $lang->getMessage(Language::BUG_REPORT_FORM_DESC_LABEL_HEADER);
+		$form->addLabel($descriptionLabel);
 
-                    if ($result) {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
-                    } else {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
-                    }
+		$description = $lang->getMessage(Language::BUG_REPORT_FORM_DESC_LABEL_FOOTER);
+		$form->addInput($description, "");
 
-                    $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                }
-            }
-        });
+		$reproduceLabel = TextFormat::BOLD . $lang->getMessage(Language::BUG_REPORT_FORM_REPROD_LABEL_HEADER);
+		$form->addLabel($reproduceLabel);
 
-        $lang = $player->getLanguage();
+		$reproduce = $lang->getMessage(Language::BUG_REPORT_FORM_REPROD_LABEL_FOOTER);
+		$form->addInput($reproduce, "");
 
-        $title = $lang->getMessage(Language::BUG_REPORT_FORM_TITLE);
-        $desc = $lang->getMessage(Language::BUG_REPORT_FORM_DESC);
+		return $form;
+	}
 
-        $form->setTitle($title);
-        $form->addLabel($desc . "\n");
 
-        $descriptionLabel = TextFormat::BOLD . $lang->getMessage(Language::BUG_REPORT_FORM_DESC_LABEL_HEADER);
-        $form->addLabel($descriptionLabel);
+	/**
+	 * @param MineceitPlayer   $player
+	 * @param Language[]|array $languages
+	 *
+	 * @return CustomForm
+	 */
+	public static function getReportMisTranslationForm(MineceitPlayer $player, array $languages) : CustomForm{
 
-        $description = $lang->getMessage(Language::BUG_REPORT_FORM_DESC_LABEL_FOOTER);
-        $form->addInput($description, "");
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $reproduceLabel = TextFormat::BOLD . $lang->getMessage(Language::BUG_REPORT_FORM_REPROD_LABEL_HEADER);
-        $form->addLabel($reproduceLabel);
 
-        $reproduce = $lang->getMessage(Language::BUG_REPORT_FORM_REPROD_LABEL_FOOTER);
-        $form->addInput($reproduce, "");
+			if($event instanceof MineceitPlayer){
 
-        return $form;
-    }
+				$formData = $event->removeFormData();
+				$languages = (array) $formData["languages"];
 
+				if($data !== null){
 
-    /**
-     * @param MineceitPlayer $player
-     * @param Language[]|array $languages
-     * @return CustomForm
-     */
-    public static function getReportMisTranslationForm(MineceitPlayer $player, array $languages): CustomForm
-    {
+					$lang = $event->getLanguage();
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$index = (int) $data[1];
+					$language = $languages[$index];
 
+					$originalPhrase = (string) $data[2];
+					$newPhrase = (string) $data[3];
 
-            if($event instanceof MineceitPlayer) {
+					if($originalPhrase === ""){
+						$message = $lang->getMessage(Language::REPORT_TRANSLATE_ORIG_PHRASE);
+						$event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $message);
+						return;
+					}
 
-                $formData = $event->removeFormData();
-                $languages = (array)$formData["languages"];
+					if($newPhrase === ""){
+						$message = $lang->getMessage(Language::REPORT_TRANSLATE_NEW_PHRASE);
+						$event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $message);
+						return;
+					}
 
-                if ($data !== null) {
+					$reportManager = MineceitCore::getReportManager();
+					$report = new TranslateReport($event, $language, $originalPhrase, $newPhrase);
+					$result = $reportManager->createReport($report);
 
-                    $lang = $event->getLanguage();
+					if($result){
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
+					}else{
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
+					}
 
-                    $index = (int)$data[1];
-                    $language = $languages[$index];
+					$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+				}
+			}
 
-                    $originalPhrase = (string)$data[2];
-                    $newPhrase = (string)$data[3];
+		});
 
-                    if ($originalPhrase === "") {
-                        $message = $lang->getMessage(Language::REPORT_TRANSLATE_ORIG_PHRASE);
-                        $event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $message);
-                        return;
-                    }
+		$lang = $player->getLanguage();
 
-                    if ($newPhrase === "") {
-                        $message = $lang->getMessage(Language::REPORT_TRANSLATE_NEW_PHRASE);
-                        $event->sendMessage(MineceitUtil::getPrefix() . " " . TextFormat::RESET . $message);
-                        return;
-                    }
+		$title = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_TITLE);
+		$desc = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_DESC);
 
-                    $reportManager = MineceitCore::getReportManager();
-                    $report = new TranslateReport($event, $language, $originalPhrase, $newPhrase);
-                    $result = $reportManager->createReport($report);
+		$form->setTitle($title);
+		$form->addLabel($desc);
 
-                    if ($result) {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
-                    } else {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
-                    }
+		$languages = array_values($languages);
 
-                    $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                }
-            }
+		$dropdownArray = [];
 
-        });
+		$defaultIndex = null;
 
-        $lang = $player->getLanguage();
+		foreach($languages as $key => $language){
 
-        $title = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_TITLE);
-        $desc = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_DESC);
+			$name = $language->getNameFromLocale($lang->getLocale());
 
-        $form->setTitle($title);
-        $form->addLabel($desc);
+			if($language->getLocale() === $lang->getLocale()){
+				$defaultIndex = $name;
+			}
 
-        $languages = array_values($languages);
+			$dropdownArray[] = $name;
+		}
 
-        $dropdownArray = [];
+		$form->addDropdown($lang->getMessage(Language::TRANSLATION_REPORT_FORM_DROPDOWN), $dropdownArray, array_search($defaultIndex, $dropdownArray));
 
-        $defaultIndex = null;
+		$original = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_ORIGINAL);
+		$form->addInput($original, "");
 
-        foreach ($languages as $key => $language) {
+		$new = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_NEW_TOP) . "\n\n" . $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_NEW_BOTTOM);
+		$form->addInput($new, "");
 
-            $name = $language->getNameFromLocale($lang->getLocale());
+		return $form;
+	}
 
-            if ($language->getLocale() === $lang->getLocale()) {
-                $defaultIndex = $name;
-            }
 
-            $dropdownArray[] = $name;
-        }
+	/**
+	 * @param MineceitPlayer $player
+	 * @param array|null     $players
+	 *
+	 * @return null
+	 *
+	 * Gets the hacker report form.
+	 */
+	public static function getReportHackerForm(MineceitPlayer $player, array $players = null){
 
-        $form->addDropdown($lang->getMessage(Language::TRANSLATION_REPORT_FORM_DROPDOWN), $dropdownArray, array_search($defaultIndex, $dropdownArray));
+		$server = $player->getServer();
 
-        $original = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_ORIGINAL);
-        $form->addInput($original, "");
+		$onlinePlayers = $server->getOnlinePlayers();
 
-        $new = $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_NEW_TOP) . "\n\n" . $lang->getMessage(Language::TRANSLATION_REPORT_FORM_LABEL_NEW_BOTTOM);
-        $form->addInput($new, "");
+		$players = $players ?? array_diff(array_map(function(Player $player){
+			return $player->getName();
+		}, $onlinePlayers), [$player->getName()]);
 
-        return $form;
-    }
+		$lang = $player->getLanguage();
 
+		if(count($players) <= 0){
+			$message = $lang->getMessage(Language::NO_OTHER_PLAYERS_ONLINE);
+			$player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+			return null;
+		}
 
-    /**
-     * @param MineceitPlayer $player
-     * @param array|null $players
-     * @return null
-     *
-     * Gets the hacker report form.
-     */
-    public static function getReportHackerForm(MineceitPlayer $player, array $players = null)
-    {
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $server = $player->getServer();
 
-        $onlinePlayers = $server->getOnlinePlayers();
+			if($event instanceof MineceitPlayer){
+				$formData = $event->removeFormData();
+				$players = $formData['players'];
 
-        $players = $players ?? array_diff(array_map(function (Player $player) {
-                return $player->getName();
-            }, $onlinePlayers), [$player->getName()]);
+				if($data !== null){
 
-        $lang = $player->getLanguage();
+					$lang = $event->getLanguage();
 
-        if (count($players) <= 0) {
-            $message = $lang->getMessage(Language::NO_OTHER_PLAYERS_ONLINE);
-            $player->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-            return null;
-        }
+					$playerIndex = (int) $data[1];
+					$reason = (string) $data[2];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					if($reason === ""){
+						$message = $lang->getMessage(Language::REPORT_NO_REASON);
+						$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+						return;
+					}
 
+					$resultingStaff = $players[$playerIndex];
+					$server = $event->getServer();
 
-            if($event instanceof MineceitPlayer) {
-                $formData = $event->removeFormData();
-                $players = $formData['players'];
+					$name = (string) $resultingStaff;
+					$report = new HackReport($event, $name, $reason);
+					$reportType = $report->getReportType();
 
-                if ($data !== null) {
+					if(($player = $server->getPlayer($name)) !== null and $player instanceof MineceitPlayer){
 
-                    $lang = $event->getLanguage();
+						if($player->hasReport($event, $reportType)){
+							$message = $lang->getMessage(Language::REPORT_PLAYER_ALREADY);
+							$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+							return;
+						}
 
-                    $playerIndex = (int)$data[1];
-                    $reason = (string)$data[2];
+						$player->addReport($report);
 
-                    if ($reason === "") {
-                        $message = $lang->getMessage(Language::REPORT_NO_REASON);
-                        $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                        return;
-                    }
+						if($player->getOnlineReportsCount($reportType) > ReportInfo::MAX_REPORT_NUM){
+							// TODO BAN THE PLAYER FOR HACKING
+							// $player->kick("Hacking...");
+						}
+					}
 
-                    $resultingStaff = $players[$playerIndex];
-                    $server = $event->getServer();
+					$reportManager = MineceitCore::getReportManager();
+					$result = $reportManager->createReport($report);
 
-                    $name = (string)$resultingStaff;
-                    $report = new HackReport($event, $name, $reason);
-                    $reportType = $report->getReportType();
+					if($result){
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
+					}else{
+						$message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
+					}
 
-                    if (($player = $server->getPlayer($name)) !== null and $player instanceof MineceitPlayer) {
+					$event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
+				}
+			}
+		});
 
-                        if ($player->hasReport($event, $reportType)) {
-                            $message = $lang->getMessage(Language::REPORT_PLAYER_ALREADY);
-                            $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                            return;
-                        }
+		$lang = $player->getLanguage();
 
-                        $player->addReport($report);
+		$title = $lang->getMessage(Language::HACK_REPORT_FORM_TITLE);
+		$desc = $lang->getMessage(Language::HACK_REPORT_FORM_DESC);
 
-                        if ($player->getOnlineReportsCount($reportType) > ReportInfo::MAX_REPORT_NUM) {
-                            // TODO BAN THE PLAYER FOR HACKING
-                            // $player->kick("Hacking...");
-                        }
-                    }
+		$form->setTitle($title);
+		$form->addLabel($desc);
 
-                    $reportManager = MineceitCore::getReportManager();
-                    $result = $reportManager->createReport($report);
+		$playersDropdownTitle = $lang->getMessage(Language::PLAYERS_LABEL) . ":";
+		if($lang->getLocale() === Language::ARABIC){
+			$playersDropdownTitle = ":" . $lang->getMessage(Language::PLAYERS_LABEL);
+		}
 
-                    if ($result) {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_SUCCESS);
-                    } else {
-                        $message = $lang->getMessage(Language::REPORT_SUBMIT_FAILED);
-                    }
+		$form->addDropdown($playersDropdownTitle, $players);
 
-                    $event->sendMessage(MineceitUtil::getPrefix() . ' ' . TextFormat::RESET . $message);
-                }
-            }
-        });
+		$form->addInput($lang->getMessage(Language::FORM_LABEL_REASON_FOR_REPORTING), "");
 
-        $lang = $player->getLanguage();
+		return $form;
+	}
 
-        $title = $lang->getMessage(Language::HACK_REPORT_FORM_TITLE);
-        $desc = $lang->getMessage(Language::HACK_REPORT_FORM_DESC);
 
-        $form->setTitle($title);
-        $form->addLabel($desc);
+	/**
+	 * @param MineceitPlayer $player
+	 * @param                $reports
+	 *
+	 * @return SimpleForm
+	 */
+	public
+	static function getListOfReports(MineceitPlayer $player, $reports = null) : SimpleForm{
 
-        $playersDropdownTitle = $lang->getMessage(Language::PLAYERS_LABEL) . ":";
-        if ($lang->getLocale() === Language::ARABIC) {
-            $playersDropdownTitle = ":" . $lang->getMessage(Language::PLAYERS_LABEL);
-        }
+		$thehistory = $player->getReportPermissions() === 0;
 
-        $form->addDropdown($playersDropdownTitle, $players);
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-        $form->addInput($lang->getMessage(Language::FORM_LABEL_REASON_FOR_REPORTING), "");
+			if($event instanceof MineceitPlayer){
 
-        return $form;
-    }
+				$formData = $event->removeFormData();
+				/** @var ReportInfo[]|array $reports */
+				$reports = $formData['reports'];
 
+				$history = (bool) $formData['history'];
 
-    /**
-     * @param MineceitPlayer $player
-     * @param $reports
-     *
-     * @return SimpleForm
-     */
-    public
-    static function getListOfReports(MineceitPlayer $player, $reports = null): SimpleForm
-    {
+				$perm = (int) $formData['perm'];
 
-        $thehistory = $player->getReportPermissions() === 0;
+				if($data !== null){
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+					$index = (int) $data;
 
-            if($event instanceof MineceitPlayer) {
+					if(count($reports) > 0){
 
-                $formData = $event->removeFormData();
-                /** @var ReportInfo[]|array $reports */
-                $reports = $formData['reports'];
+						/** @var ReportInfo $report */
+						$report = $reports[$index];
 
-                $history = (bool)$formData['history'];
+						$type = $report->getReportType();
 
-                $perm = (int)$formData['perm'];
+						if($type === ReportInfo::TYPE_TRANSLATE){
 
-                if ($data !== null) {
+							$form = self::getInfoOfReportForm($report, $event);
 
-                    $index = (int)$data;
+							$event->sendFormWindow($form, ['history' => $history, 'perm' => $perm, 'report' => $report]);
 
-                    if (count($reports) > 0) {
+						}else{
 
-                        /** @var ReportInfo $report */
-                        $report = $reports[$index];
+							MineceitCore::getReportManager()->sendTranslatedReport($event, $report, $history);
 
-                        $type = $report->getReportType();
+						}
+					}
+				}
+			}
 
-                        if ($type === ReportInfo::TYPE_TRANSLATE) {
+		});
 
-                            $form = self::getInfoOfReportForm($report, $event);
+		$lang = $player->getLanguage();
 
-                            $event->sendFormWindow($form, ['history' => $history, 'perm' => $perm, 'report' => $report]);
+		$history = $reports ?? $player->getReportHistory();
 
-                        } else {
+		$timezone = $player->getTimeZone();
 
-                            MineceitCore::getReportManager()->sendTranslatedReport($event, $report, $history);
+		$title = $thehistory ? $lang->getMessage(Language::REPORT_HISTORY_FORM_TITLE) : $lang->getMessage(Language::SEARCH_RESULTS_REPORTS_FORM_TITLE);
+		$desc = $thehistory ? $lang->getMessage(Language::REPORT_HISTORY_FORM_DESC) : $lang->getMessage(Language::SEARCH_RESULTS_REPORTS_FORM_DESC);
 
-                        }
-                    }
-                }
-            }
+		$form->setTitle($title);
+		$form->setContent($desc);
 
-        });
+		if(count($history) <= 0){
+			$none = $lang->getMessage(Language::NONE);
+			$form->addButton($none);
+			return $form;
+		}
 
-        $lang = $player->getLanguage();
+		$langFormat = Language::REPORT_HISTORY_FORM_FORMAT;
+		$dateFormat = "";
+		if(!$thehistory){
+			$langFormat = Language::SEARCH_RESULTS_REPORTS_FORM_FORMAT;
+			$dateFormat = '%m%/%d%';
+		}
 
-        $history = $reports ?? $player->getReportHistory();
+		$author = $lang->getMessage(Language::FORM_LABEL_AUTHOR);
 
-        $timezone = $player->getTimeZone();
+		foreach($history as $reportInfo){
 
-        $title = $thehistory ? $lang->getMessage(Language::REPORT_HISTORY_FORM_TITLE) : $lang->getMessage(Language::SEARCH_RESULTS_REPORTS_FORM_TITLE);
-        $desc = $thehistory ? $lang->getMessage(Language::REPORT_HISTORY_FORM_DESC) : $lang->getMessage(Language::SEARCH_RESULTS_REPORTS_FORM_DESC);
+			$time = $reportInfo->getTime($timezone, $lang, "", false);
+			$date = $reportInfo->getDate($timezone, $lang, $dateFormat);
+			$reporter = $reportInfo->getReporter();
 
-        $form->setTitle($title);
-        $form->setContent($desc);
+			if(strlen($reporter) > 8){
+				$reporter = substr($reporter, 0, 5) . '...';
+				if($lang->getLocale() === Language::ARABIC){
+					$reporter = '...' . substr($reporter, 0, 5);
+				}
+			}
 
-        if (count($history) <= 0) {
-            $none = $lang->getMessage(Language::NONE);
-            $form->addButton($none);
-            return $form;
-        }
+			$type = $reportInfo->getReportType(true, $lang);
 
-        $langFormat = Language::REPORT_HISTORY_FORM_FORMAT;
-        $dateFormat = "";
-        if (!$thehistory) {
-            $langFormat = Language::SEARCH_RESULTS_REPORTS_FORM_FORMAT;
-            $dateFormat = '%m%/%d%';
-        }
+			$result = $lang->getMessage($langFormat, [
+				'type' => $type,
+				'name' => $reporter,
+				'time' => $time,
+				'date' => $date,
+				'author' => $author
+			]);
 
-        $author = $lang->getMessage(Language::FORM_LABEL_AUTHOR);
+			$form->addButton($result);
+		}
 
-        foreach ($history as $reportInfo) {
+		return $form;
+	}
 
-            $time = $reportInfo->getTime($timezone, $lang, "", false);
-            $date = $reportInfo->getDate($timezone, $lang, $dateFormat);
-            $reporter = $reportInfo->getReporter();
 
-            if (strlen($reporter) > 8) {
-                $reporter = substr($reporter, 0, 5) . '...';
-                if ($lang->getLocale() === Language::ARABIC) {
-                    $reporter = '...' . substr($reporter, 0, 5);
-                }
-            }
+	/**
+	 * @param ReportInfo     $info
+	 * @param MineceitPlayer $player
+	 * @param array          $translatedValues
+	 *
+	 * @return CustomForm
+	 */
+	public
+	static function getInfoOfReportForm(ReportInfo $info, MineceitPlayer $player, $translatedValues = []) : CustomForm{
 
-            $type = $reportInfo->getReportType(true, $lang);
+		$form = new CustomForm(function(Player $event, $data = null){
 
-            $result = $lang->getMessage($langFormat, [
-                'type' => $type,
-                'name' => $reporter,
-                'time' => $time,
-                'date' => $date,
-                'author' => $author
-            ]);
+			if($event instanceof MineceitPlayer){
 
-            $form->addButton($result);
-        }
+				$formData = $event->removeFormData();
 
-        return $form;
-    }
+				$history = (bool) $formData['history'];
 
+				/** @var ReportInfo $report */
+				$report = $formData['report'];
 
-    /**
-     * @param ReportInfo $info
-     * @param MineceitPlayer $player
-     * @param array $translatedValues
-     * @return CustomForm
-     */
-    public
-    static function getInfoOfReportForm(ReportInfo $info, MineceitPlayer $player, $translatedValues = []): CustomForm
-    {
+				$reports = $history ? array_values($event->getReportHistory()) : null;
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+				if($reports !== null){
 
-            if($event instanceof MineceitPlayer) {
+					$form = self::getListOfReports($event, $reports);
 
-                $formData = $event->removeFormData();
+					$event->sendFormWindow($form, ['reports' => $reports, 'history' => $history, 'perm' => $event->getReportPermissions()]);
 
-                $history = (bool)$formData['history'];
+				}else{
 
-                /** @var ReportInfo $report */
-                $report = $formData['report'];
+					$saved = $event->getLastSearchReportHistory();
 
-                $reports = $history ? array_values($event->getReportHistory()) : null;
+					MineceitCore::getReportManager()->searchReports($event, $saved['searched'], $saved['timespan'], $saved['report-data'], $saved['resolved']);
+				}
 
-                if ($reports !== null) {
+				if($data !== null){
 
-                    $form = self::getListOfReports($event, $reports);
+					$resolved = $data[0];
 
-                    $event->sendFormWindow($form, ['reports' => $reports, 'history' => $history, 'perm' => $event->getReportPermissions()]);
+					if($resolved !== null){
+						$report->setResolved(boolval($resolved));
+					}
+				}
+			}
+		});
 
-                } else {
+		$perm = $player->getReportPermissions();
 
-                    $saved = $event->getLastSearchReportHistory();
+		$lang = $player->getLanguage();
 
-                    MineceitCore::getReportManager()->searchReports($event, $saved['searched'], $saved['timespan'], $saved['report-data'], $saved['resolved']);
-                }
+		$title = $info->getReportType(true, $lang);
 
-                if ($data !== null) {
+		$form->setTitle(TextFormat::BOLD . $title);
 
-                    $resolved = $data[0];
+		$tz = $player->getTimeZone();
 
-                    if ($resolved !== null) {
-                        $report->setResolved(boolval($resolved));
-                    }
-                }
-            }
-        });
+		$infoResolved = $info->isResolved();
 
-        $perm = $player->getReportPermissions();
+		$r = $lang->getMessage(Language::FORM_LABEL_RESOLVED);
+		$ur = $lang->getMessage(Language::FORM_LABEL_UNRESOLVED);
 
-        $lang = $player->getLanguage();
+		$resolved = $infoResolved ? $r : $ur;
 
-        $title = $info->getReportType(true, $lang);
+		$information = [
+			$lang->getMessage(Language::FORM_LABEL_STATUS) => TextFormat::BOLD . $resolved,
+			"",
+			$lang->getMessage(Language::FORM_LABEL_AUTHOR) => $info->getReporter(),
+			"",
+			$lang->getMessage(Language::FORM_LABEL_DATE) => $info->getDate($tz, $lang),
+			$lang->getMessage(Language::FORM_LABEL_TIME) => $info->getTime($tz, $lang),
+			""
+		];
 
-        $form->setTitle(TextFormat::BOLD . $title);
+		if($perm === ReportInfo::PERMISSION_MANAGE_REPORTS){
 
-        $tz = $player->getTimeZone();
+			$information = [
+				$lang->getMessage(Language::FORM_LABEL_AUTHOR) => $info->getReporter(),
+				"",
+				$lang->getMessage(Language::FORM_LABEL_DATE) => $info->getDate($tz, $lang),
+				$lang->getMessage(Language::FORM_LABEL_TIME) => $info->getTime($tz, $lang),
+				""
+			];
 
-        $infoResolved = $info->isResolved();
+			// Change the report's status:
+			$form->addDropdown($lang->getMessage(Language::REPORT_INFO_FORM_CHANGE_STATUS), [TextFormat::BOLD . $ur, TextFormat::BOLD . $r], intval($infoResolved));
+		}
 
-        $r = $lang->getMessage(Language::FORM_LABEL_RESOLVED);
-        $ur = $lang->getMessage(Language::FORM_LABEL_UNRESOLVED);
+		if($info instanceof BugReport){
 
-        $resolved = $infoResolved ? $r : $ur;
+			$description = $info->getDescription();
 
-        $information = [
-            $lang->getMessage(Language::FORM_LABEL_STATUS) => TextFormat::BOLD . $resolved,
-            "",
-            $lang->getMessage(Language::FORM_LABEL_AUTHOR) => $info->getReporter(),
-            "",
-            $lang->getMessage(Language::FORM_LABEL_DATE) => $info->getDate($tz, $lang),
-            $lang->getMessage(Language::FORM_LABEL_TIME) => $info->getTime($tz, $lang),
-            ""
-        ];
+			if(isset($translatedValues['desc'])){
+				$description = (string) $translatedValues['desc'];
+			}
 
-        if ($perm === ReportInfo::PERMISSION_MANAGE_REPORTS) {
+			$reproduce = $info->getReproduceInfo();
+			if(isset($translatedValues['reproduce'])){
+				$reproduce = (string) $translatedValues['reproduce'];
+			}
 
-            $information = [
-                $lang->getMessage(Language::FORM_LABEL_AUTHOR) => $info->getReporter(),
-                "",
-                $lang->getMessage(Language::FORM_LABEL_DATE) => $info->getDate($tz, $lang),
-                $lang->getMessage(Language::FORM_LABEL_TIME) => $info->getTime($tz, $lang),
-                ""
-            ];
+			$information = array_merge($information, [
+				$lang->getMessage(Language::FORM_LABEL_BUG) => $description,
+				"",
+				$lang->getMessage(Language::FORM_LABEL_REPRODUCED) => $reproduce,
+				""
+			]);
 
-            // Change the report's status:
-            $form->addDropdown($lang->getMessage(Language::REPORT_INFO_FORM_CHANGE_STATUS), [TextFormat::BOLD . $ur, TextFormat::BOLD . $r], intval($infoResolved));
-        }
+		}elseif($info instanceof HackReport){
 
-        if ($info instanceof BugReport) {
+			$reason = $info->getReason();
+			if(isset($translatedValues['reason'])){
+				$reason = (string) $translatedValues['reason'];
+			}
 
-            $description = $info->getDescription();
+			$information = array_merge($information, [
+				$lang->getMessage(Language::FORM_LABEL_PLAYER) => $info->getReported(),
+				"",
+				$lang->getMessage(Language::FORM_LABEL_REASON) => $reason,
+				""
+			]);
 
-            if (isset($translatedValues['desc'])) {
-                $description = (string)$translatedValues['desc'];
-            }
+		}elseif($info instanceof StaffReport){
 
-            $reproduce = $info->getReproduceInfo();
-            if (isset($translatedValues['reproduce'])) {
-                $reproduce = (string)$translatedValues['reproduce'];
-            }
+			$reason = $info->getReason();
+			if(isset($translatedValues['reason'])){
+				$reason = (string) $translatedValues['reason'];
+			}
 
-            $information = array_merge($information, [
-                $lang->getMessage(Language::FORM_LABEL_BUG) => $description,
-                "",
-                $lang->getMessage(Language::FORM_LABEL_REPRODUCED) => $reproduce,
-                ""
-            ]);
+			$information = array_merge($information, [
 
-        } elseif ($info instanceof HackReport) {
+				$lang->getMessage(Language::FORM_LABEL_STAFF_MEMBER) => $info->getReported(),
+				"",
+				$lang->getMessage(Language::FORM_LABEL_REASON) => $reason,
+				""
+			]);
 
-            $reason = $info->getReason();
-            if (isset($translatedValues['reason'])) {
-                $reason = (string)$translatedValues['reason'];
-            }
+		}elseif($info instanceof TranslateReport){
+			$information = array_merge($information, [
+				$lang->getMessage(Language::FORM_LABEL_LANGUAGE) => $info->getLang(true, $lang),
+				"",
+				$lang->getMessage(Language::FORM_LABEL_ORIGINAL_MESSAGE) => "",
+				$info->getOriginalMessage(),
+				"",
+				$lang->getMessage(Language::FORM_LABEL_NEW_MESSAGE) => "",
+				$info->getNewMessage(),
+				""
+			]);
+		}
 
-            $information = array_merge($information, [
-                $lang->getMessage(Language::FORM_LABEL_PLAYER) => $info->getReported(),
-                "",
-                $lang->getMessage(Language::FORM_LABEL_REASON) => $reason,
-                ""
-            ]);
+		$array = [];
 
-        } elseif ($info instanceof StaffReport) {
+		foreach($information as $key => $value){
 
-            $reason = $info->getReason();
-            if (isset($translatedValues['reason'])) {
-                $reason = (string)$translatedValues['reason'];
-            }
+			$resultString = strval($key) . ': ' . strval($value);
 
-            $information = array_merge($information, [
+			if($lang->getLocale() === Language::ARABIC){
+				$resultString = strval($value) . ' :' . strval($key);
+			}
 
-                $lang->getMessage(Language::FORM_LABEL_STAFF_MEMBER) => $info->getReported(),
-                "",
-                $lang->getMessage(Language::FORM_LABEL_REASON) => $reason,
-                ""
-            ]);
+			if(is_numeric($key)){
+				$resultString = strval($value);
+			}
 
-        } elseif ($info instanceof TranslateReport) {
-            $information = array_merge($information, [
-                $lang->getMessage(Language::FORM_LABEL_LANGUAGE) => $info->getLang(true, $lang),
-                "",
-                $lang->getMessage(Language::FORM_LABEL_ORIGINAL_MESSAGE) => "",
-                $info->getOriginalMessage(),
-                "",
-                $lang->getMessage(Language::FORM_LABEL_NEW_MESSAGE) => "",
-                $info->getNewMessage(),
-                ""
-            ]);
-        }
+			$array[] = TextFormat::RESET . TextFormat::WHITE . $resultString;
+		}
 
-        $array = [];
+		$result = implode($array, "\n");
 
-        foreach ($information as $key => $value) {
+		$form->addLabel($result);
 
-            $resultString = strval($key) . ': ' . strval($value);
+		return $form;
+	}
 
-            if ($lang->getLocale() === Language::ARABIC) {
-                $resultString = strval($value) . ' :' . strval($key);
-            }
 
-            if (is_numeric($key)) {
-                $resultString = strval($value);
-            }
+	/**
+	 * @param MineceitPlayer $player
+	 *
+	 * @return CustomForm
+	 *
+	 * The form that allows the players to toggle the reports.
+	 */
+	public
+	static function getViewReportsSearchForm(MineceitPlayer $player) : CustomForm{
 
-            $array[] = TextFormat::RESET . TextFormat::WHITE . $resultString;
-        }
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $result = implode($array, "\n");
+			if($event instanceof MineceitPlayer){
 
-        $form->addLabel($result);
+				$event->removeFormData();
 
-        return $form;
-    }
+				if($data !== null){
 
+					$reportManager = MineceitCore::getReportManager();
 
-    /**
-     * @param MineceitPlayer $player
-     * @return CustomForm
-     *
-     * The form that allows the players to toggle the reports.
-     */
-    public
-    static function getViewReportsSearchForm(MineceitPlayer $player): CustomForm
-    {
+					$nameToSearch = $data[1];
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+					$reportTypes = ReportInfo::REPORT_TYPES;
 
-            if ($event instanceof MineceitPlayer) {
+					$reportData = [];
 
-                $event->removeFormData();
+					foreach($reportTypes as $typeInt){
+						$outputType = $typeInt + 3;
+						$reportData[$typeInt] = $data[$outputType];
+					}
 
-                if ($data !== null) {
+					$length = count($reportTypes) + 3;
 
-                    $reportManager = MineceitCore::getReportManager();
+					$timeSpanOutput = $data[$length];
 
-                    $nameToSearch = $data[1];
+					$resolvedOutput = $data[$length + 1];
 
-                    $reportTypes = ReportInfo::REPORT_TYPES;
+					$saved = [
+						"searched" => (string) $nameToSearch,
+						"timespan" => (int) $timeSpanOutput,
+						"report-data" => (array) $reportData,
+						'resolved' => (int) $resolvedOutput
+					];
 
-                    $reportData = [];
+					$event->setReportSearchHistory($saved);
 
-                    foreach ($reportTypes as $typeInt) {
-                        $outputType = $typeInt + 3;
-                        $reportData[$typeInt] = $data[$outputType];
-                    }
+					// Searches the reports.
+					$reportManager->searchReports($event, $saved['searched'], $saved['timespan'], $saved['report-data'], $saved['resolved']);
+				}
+			}
+		});
 
-                    $length = count($reportTypes) + 3;
+		$reportHistory = $player->getLastSearchReportHistory()
+			?? ['searched' => "", "timespan" => 0, 'report-data' => [true, true, true, true], 'resolved' => 0];
 
-                    $timeSpanOutput = $data[$length];
+		$lang = $player->getLanguage();
 
-                    $resolvedOutput = $data[$length + 1];
+		$title = TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_REPORTS);
 
-                    $saved = [
-                        "searched" => (string)$nameToSearch,
-                        "timespan" => (int)$timeSpanOutput,
-                        "report-data" => (array)$reportData,
-                        'resolved' => (int)$resolvedOutput
-                    ];
+		$desc = $lang->getMessage(Language::SEARCH_REPORTS_FORM_DESC);
 
-                    $event->setReportSearchHistory($saved);
+		$form->setTitle($title);
 
-                    // Searches the reports.
-                    $reportManager->searchReports($event, $saved['searched'], $saved['timespan'], $saved['report-data'], $saved['resolved']);
-                }
-            }
-        });
+		$form->addLabel($desc);
 
-        $reportHistory = $player->getLastSearchReportHistory()
-            ?? ['searched' => "", "timespan" => 0, 'report-data' => [true, true, true, true], 'resolved' => 0];
+		$searchByName = $lang->getMessage(Language::FORM_LABEL_SEARCH) . ":";
+		if($lang->getLocale() === Language::ARABIC){
+			$searchByName = ":" . $lang->getMessage(Language::FORM_LABEL_SEARCH);
+		}
 
-        $lang = $player->getLanguage();
+		$searchedDefault = (string) $reportHistory['searched'];
+		$form->addInput($searchByName, $searchedDefault);
 
-        $title = TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_REPORTS);
+		$reportType = $lang->getMessage(Language::FORM_LABEL_REPORT_TYPES);
+		$searchReportsByType = "{$reportType}:";
+		if($lang->getLocale() === Language::ARABIC){
+			$searchReportsByType = ":{$reportType}";
+		}
 
-        $desc = $lang->getMessage(Language::SEARCH_REPORTS_FORM_DESC);
+		$reportTypes = ReportInfo::REPORT_TYPES;
 
-        $form->setTitle($title);
+		$form->addLabel($searchReportsByType);
 
-        $form->addLabel($desc);
+		$defaultType = $reportHistory['report-data'];
+		foreach($reportTypes as $typeInt){
+			$type = ReportInfo::getReportsType($typeInt, $lang);
+			$form->addToggle($type, $defaultType[$typeInt]);
+		}
 
-        $searchByName = $lang->getMessage(Language::FORM_LABEL_SEARCH) . ":";
-        if ($lang->getLocale() === Language::ARABIC) {
-            $searchByName = ":" . $lang->getMessage(Language::FORM_LABEL_SEARCH);
-        }
+		$timespan = $lang->getMessage(Language::FORM_LABEL_TIMESPAN);
+		$searchReportsTime = "{$timespan}:";
+		if($lang->getLocale() === Language::ARABIC){
+			$searchReportsTime = ":{$timespan}";
+		}
 
-        $searchedDefault = (string)$reportHistory['searched'];
-        $form->addInput($searchByName, $searchedDefault);
+		$options = [
+			$lang->getMessage(Language::NONE),
+			$lang->getMessage(Language::FORM_LABEL_LAST_HOUR),
+			$lang->getMessage(Language::FORM_LABEL_LAST_12_HOURS),
+			$lang->getMessage(Language::FORM_LABEL_LAST_24_HOURS),
+			$lang->getMessage(Language::FORM_LABEL_LAST_WEEK),
+			$lang->getMessage(Language::FORM_LABEL_LAST_MONTH)
+		];
 
-        $reportType = $lang->getMessage(Language::FORM_LABEL_REPORT_TYPES);
-        $searchReportsByType = "{$reportType}:";
-        if ($lang->getLocale() === Language::ARABIC) {
-            $searchReportsByType = ":{$reportType}";
-        }
+		$timeSpanDefault = (int) $reportHistory['timespan'];
+		$form->addDropdown($searchReportsTime, $options, $timeSpanDefault);
 
-        $reportTypes = ReportInfo::REPORT_TYPES;
+		$status = $lang->getMessage(Language::FORM_LABEL_STATUS);
+		$statusReports = $lang->getLocale() === Language::ARABIC ? ":{$status}" : "{$status}:";
 
-        $form->addLabel($searchReportsByType);
+		$options = [$lang->getMessage(Language::NONE), TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_UNRESOLVED), TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_RESOLVED)];
 
-        $defaultType = $reportHistory['report-data'];
-        foreach ($reportTypes as $typeInt) {
-            $type = ReportInfo::getReportsType($typeInt, $lang);
-            $form->addToggle($type, $defaultType[$typeInt]);
-        }
+		$statusDefault = (int) $reportHistory['resolved'];
+		$form->addDropdown($statusReports, $options, $statusDefault);
 
-        $timespan = $lang->getMessage(Language::FORM_LABEL_TIMESPAN);
-        $searchReportsTime = "{$timespan}:";
-        if ($lang->getLocale() === Language::ARABIC) {
-            $searchReportsTime = ":{$timespan}";
-        }
-
-        $options = [
-            $lang->getMessage(Language::NONE),
-            $lang->getMessage(Language::FORM_LABEL_LAST_HOUR),
-            $lang->getMessage(Language::FORM_LABEL_LAST_12_HOURS),
-            $lang->getMessage(Language::FORM_LABEL_LAST_24_HOURS),
-            $lang->getMessage(Language::FORM_LABEL_LAST_WEEK),
-            $lang->getMessage(Language::FORM_LABEL_LAST_MONTH)
-        ];
-
-        $timeSpanDefault = (int)$reportHistory['timespan'];
-        $form->addDropdown($searchReportsTime, $options, $timeSpanDefault);
-
-        $status = $lang->getMessage(Language::FORM_LABEL_STATUS);
-        $statusReports = $lang->getLocale() === Language::ARABIC ? ":{$status}" : "{$status}:";
-
-        $options = [$lang->getMessage(Language::NONE), TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_UNRESOLVED), TextFormat::BOLD . $lang->getMessage(Language::FORM_LABEL_RESOLVED)];
-
-        $statusDefault = (int)$reportHistory['resolved'];
-        $form->addDropdown($statusReports, $options, $statusDefault);
-
-        return $form;
-    }
+		return $form;
+	}
 }

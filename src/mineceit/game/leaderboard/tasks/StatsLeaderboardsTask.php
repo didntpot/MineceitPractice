@@ -14,214 +14,212 @@ namespace mineceit\game\leaderboard\tasks;
 use mineceit\data\mysql\MysqlStream;
 use mineceit\MineceitCore;
 use mineceit\player\MineceitPlayer;
+use mysqli;
+use mysqli_result;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use shoghicp\BigBrother\DesktopPlayer;
 
-class StatsLeaderboardsTask extends AsyncTask
-{
+class StatsLeaderboardsTask extends AsyncTask{
 
-    /** @var string */
-    private $directory;
+	/** @var string */
+	private $directory;
 
-    /** @var array */
-    private $stats;
+	/** @var array */
+	private $stats;
 
-    /** @var bool */
-    private $isMysql = MineceitCore::MYSQL_ENABLED;
+	/** @var bool */
+	private $isMysql = MineceitCore::MYSQL_ENABLED;
 
-    /** @var string */
-    private $username;
+	/** @var string */
+	private $username;
 
-    /** @var string -> The ip of the db */
-    private $host;
+	/** @var string -> The ip of the db */
+	private $host;
 
-    /** @var string */
-    private $password;
+	/** @var string */
+	private $password;
 
-    /** @var int */
-    private $port;
+	/** @var int */
+	private $port;
 
-    /** @var string */
-    private $database;
+	/** @var string */
+	private $database;
 
-    /** @var array */
-    private $mysqlStream;
+	/** @var array */
+	private $mysqlStream;
 
-    /** @var array */
-    private $onlinePlayers;
+	/** @var array */
+	private $onlinePlayers;
 
-    public function __construct(string $directory, array $stats)
-    {
-        $this->directory = $directory;
-        $this->stats = $stats;
+	public function __construct(string $directory, array $stats){
+		$this->directory = $directory;
+		$this->stats = $stats;
 
-        $stream = new MysqlStream();
-        $rows = [];
-        foreach($stats as $stat) {
-            $stream->selectTablesInOrder(["PlayerStats"], [$stat => true, "username" => false]);
-            $rows[$stat] = true;
-        }
+		$stream = new MysqlStream();
+		$rows = [];
+		foreach($stats as $stat){
+			$stream->selectTablesInOrder(["PlayerStats"], [$stat => true, "username" => false]);
+			$rows[$stat] = true;
+		}
 
-        $rows["username"] = false;
+		$rows["username"] = false;
 
-        $stream->selectDividedColumnsOfRows("PlayerStats", "kills", "deaths", true);
+		$stream->selectDividedColumnsOfRows("PlayerStats", "kills", "deaths", true);
 
-        $onlinePlayers = [];
-        $players = Server::getInstance()->getOnlinePlayers();
+		$onlinePlayers = [];
+		$players = Server::getInstance()->getOnlinePlayers();
 
-        foreach($players as $player) {
+		foreach($players as $player){
 
-            if($player instanceof MineceitPlayer) {
-                $kills = $player->getKills();
-                $deaths = $player->getDeaths();
-                $kdr = floatval($kills);
+			if($player instanceof MineceitPlayer){
+				$kills = $player->getKills();
+				$deaths = $player->getDeaths();
+				$kdr = floatval($kills);
 
-                if ($deaths !== 0) {
-                    $kdr = round($kills / $deaths);
-                }
+				if($deaths !== 0){
+					$kdr = round($kills / $deaths);
+				}
 
-                $onlinePlayers[$player->getName()] = [
-                    "kills" => $kills,
-                    "deaths" => $deaths,
-                    "kdr" => $kdr
-                ];
+				$onlinePlayers[$player->getName()] = [
+					"kills" => $kills,
+					"deaths" => $deaths,
+					"kdr" => $kdr
+				];
 
-            } elseif ($player instanceof DesktopPlayer) {
-                // TODO
-            }
-        }
+			}elseif($player instanceof DesktopPlayer){
+				// TODO
+			}
+		}
 
-        $this->onlinePlayers = $onlinePlayers;
+		$this->onlinePlayers = $onlinePlayers;
 
-        $this->username = $stream->username;
+		$this->username = $stream->username;
 
-        $this->database = $stream->database;
+		$this->database = $stream->database;
 
-        $this->password = $stream->password;
+		$this->password = $stream->password;
 
-        $this->port = $stream->port;
+		$this->port = $stream->port;
 
-        $this->host = $stream->host;
+		$this->host = $stream->host;
 
-        $this->mysqlStream = $stream->getStream();
-    }
+		$this->mysqlStream = $stream->getStream();
+	}
 
-    /**
-     * Actions to execute when run
-     *
-     * @return void
-     */
-    public function onRun()
-    {
+	/**
+	 * Actions to execute when run
+	 *
+	 * @return void
+	 */
+	public function onRun(){
 
-        $stats = ['kills' => [], 'deaths' => [], 'kdr' => []];
+		$stats = ['kills' => [], 'deaths' => [], 'kdr' => []];
 
-        $players = (array)$this->onlinePlayers;
+		$players = (array) $this->onlinePlayers;
 
-        if(!$this->isMysql) {
-            if(is_dir($this->directory)) {
-                $files = scandir($this->directory);
-                foreach ($files as $file) {
-                    if(strpos($file, '.yml') !== false) {
+		if(!$this->isMysql){
+			if(is_dir($this->directory)){
+				$files = scandir($this->directory);
+				foreach($files as $file){
+					if(strpos($file, '.yml') !== false){
 
-                        $name = str_replace('.yml', '', $file);
+						$name = str_replace('.yml', '', $file);
 
-                        $file = $this->directory . '/' . $file;
+						$file = $this->directory . '/' . $file;
 
-                        $data = yaml_parse_file($file, 0);
+						$data = yaml_parse_file($file, 0);
 
-                        if(isset($players[$name])) {
-                            $data = $players[$name];
-                        }
+						if(isset($players[$name])){
+							$data = $players[$name];
+						}
 
-                        if(isset($data['kills'], $data['deaths'])) {
-                            $kills = (int)$data['kills'];
-                            $deaths = (int)$data['deaths'];
-                            $kdr = floatval($kills);
+						if(isset($data['kills'], $data['deaths'])){
+							$kills = (int) $data['kills'];
+							$deaths = (int) $data['deaths'];
+							$kdr = floatval($kills);
 
-                            if($deaths !== 0) {
-                                $kdr = floatval(round($kills / $deaths));
-                            }
+							if($deaths !== 0){
+								$kdr = floatval(round($kills / $deaths));
+							}
 
-                            $stats['kills'][$name] = $kills;
-                            $stats['deaths'][$name] = $deaths;
-                            $stats['kdr'][$name] = $kdr;
-                        }
-                    }
-                }
-            }
+							$stats['kills'][$name] = $kills;
+							$stats['deaths'][$name] = $deaths;
+							$stats['kdr'][$name] = $kdr;
+						}
+					}
+				}
+			}
 
-            $keys = array_keys($stats);
-            foreach($keys as $key) {
-                $statLb = $stats[$key];
-                arsort($statLb);
-                $stats[$key] = $statLb;
-            }
+			$keys = array_keys($stats);
+			foreach($keys as $key){
+				$statLb = $stats[$key];
+				arsort($statLb);
+				$stats[$key] = $statLb;
+			}
 
-        } else {
+		}else{
 
-            $stream = (array)$this->mysqlStream;
+			$stream = (array) $this->mysqlStream;
 
-            $mysql = new \mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
+			$mysql = new mysqli($this->host, $this->username, $this->password, $this->database, $this->port);
 
-            if ($mysql->connect_error) {
-                var_dump("Unable to connect");
-                // TODO
-                return;
-            }
+			if($mysql->connect_error){
+				var_dump("Unable to connect");
+				// TODO
+				return;
+			}
 
-            $index = 0;
+			$index = 0;
 
-            $keys = array_keys($stats);
+			$keys = array_keys($stats);
 
-            foreach($stream as $query) {
-                $stat = $keys[$index];
-                $querySuccess = $mysql->query($query);
-                if($querySuccess instanceof \mysqli_result) {
-                    $result = $querySuccess->fetch_all();
-                    $length = count($result);
-                    $count = 0;
-                    $leaderboardSet = [];
-                    $statIndex = 0;
-                    $nameIndex = 1;
-                    while($count < $length) {
-                        $set = $result[$count];
-                        $playerStat = $set[$statIndex];
-                        $playerName = $set[$nameIndex];
+			foreach($stream as $query){
+				$stat = $keys[$index];
+				$querySuccess = $mysql->query($query);
+				if($querySuccess instanceof mysqli_result){
+					$result = $querySuccess->fetch_all();
+					$length = count($result);
+					$count = 0;
+					$leaderboardSet = [];
+					$statIndex = 0;
+					$nameIndex = 1;
+					while($count < $length){
+						$set = $result[$count];
+						$playerStat = $set[$statIndex];
+						$playerName = $set[$nameIndex];
 
-                        if(isset($players[$playerName])) {
-                            $stats = $players[$playerName];
-                            $playerStat = $stats[$stat];
-                        }
+						if(isset($players[$playerName])){
+							$stats = $players[$playerName];
+							$playerStat = $stats[$stat];
+						}
 
-                        $leaderboardSet[$playerName] = $playerStat;
-                        $count++;
-                    }
-                    arsort($leaderboardSet);
-                    $stats[$stat] = $leaderboardSet;
-                }
-                $index++;
-            }
-        }
+						$leaderboardSet[$playerName] = $playerStat;
+						$count++;
+					}
+					arsort($leaderboardSet);
+					$stats[$stat] = $leaderboardSet;
+				}
+				$index++;
+			}
+		}
 
-        $this->setResult($stats);
-    }
+		$this->setResult($stats);
+	}
 
-    public function onCompletion(Server $server)
-    {
-        $core = $server->getPluginManager()->getPlugin('Mineceit');
+	public function onCompletion(Server $server){
+		$core = $server->getPluginManager()->getPlugin('Mineceit');
 
-        if($core instanceof MineceitCore and $core->isEnabled()) {
+		if($core instanceof MineceitCore and $core->isEnabled()){
 
-            $leaderboards = MineceitCore::getLeaderboards();
+			$leaderboards = MineceitCore::getLeaderboards();
 
-            $result = $this->getResult();
+			$result = $this->getResult();
 
-            if($result !== null) {
+			if($result !== null){
 
-                $leaderboards->setStatsLeaderboards($result);
-            }
-        }
-    }
+				$leaderboards->setStatsLeaderboards($result);
+			}
+		}
+	}
 }

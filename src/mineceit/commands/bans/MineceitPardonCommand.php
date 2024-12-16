@@ -15,16 +15,14 @@ use mineceit\player\MineceitPlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\command\defaults\PardonCommand;
 
-class MineceitPardonCommand extends PardonCommand
-{
+class MineceitPardonCommand extends PardonCommand{
 
-    public function testPermission(CommandSender $target): bool
-    {
-        if($target instanceof MineceitPlayer and $target->hasModPermissions()) {
-            return true;
-        }
+	public function testPermission(CommandSender $target) : bool{
+		if($target instanceof MineceitPlayer and $target->hasModPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($target);
-    }
+		return parent::testPermission($target);
+	}
 
 }

@@ -15,17 +15,15 @@ use mineceit\player\MineceitPlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\command\defaults\TeleportCommand;
 
-class MineceitTeleportCommand extends TeleportCommand
-{
+class MineceitTeleportCommand extends TeleportCommand{
 
-    public function testPermission(CommandSender $target): bool
-    {
+	public function testPermission(CommandSender $target) : bool{
 
-        if($target instanceof MineceitPlayer and $target->hasModPermissions()) {
-            return true;
-        }
+		if($target instanceof MineceitPlayer and $target->hasModPermissions()){
+			return true;
+		}
 
-        return parent::testPermission($target);
-    }
+		return parent::testPermission($target);
+	}
 
 }
